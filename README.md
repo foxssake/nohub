@@ -89,7 +89,65 @@ Some common usages for lobby services and how they relate to *mobhub*:
 
 ### Features
 
-TODO: Features to implement based on use cases
+- Track lobbies
+  - Define relevant interfaces ( e.g. Lobby )
+  - Keep a list of lobbies in memory
+  - Implement CRUD operations
+  - No public API to implement at this point
+- Create lobby flow
+  - Create lobby with submitted custom data
+  - Bind lobby ownership to creating client
+  - Respond with lobby ID
+- Lobby update operations
+  - Set custom data keys - support updating multiple values at once
+  - Set flags - is locked, is hidden
+  - Delete lobby
+- Lobby list
+  - Expect a request
+  - Reply with stream of current lobbies
+  - ❓ Client submits list of custom data keys, response includes custom data
+    per lobby
+- Querying lobbies
+  - Client submits a request, with lobby ID and optionally custom data keys
+    needed
+  - Service responds with base lobby data + custom values
+  - Service responds with error if lobby doesn't exist
+  - ❓ Should clients be able to query hidden lobbies if they have the ID
+    already? 
+- Lobby join
+  - Reject if locked
+  - Check if lobby ID valid
+  - Respond with connection string
+- Lobby list subscription
+  - Clients receive list updates in real time
+  - Lives in a separate module
+  - Lobby module emits events - lobby created, deleted, hidden, showed, locked,
+    unlocked
+  - Client submits request for updates
+  - Respond with stream
+  - Client can submit request to stop updates
+  - ❗ May overlap with existing list functionality
+  - Optional: Buffer updates for some time / count before sending them
+    - We could even consolidate the list
+    - e.g. if a lobby is created and destroyed in the same batch, send 0 events
+      instead of 2
+
+Possibilities for the future:
+
+- Store lobbies in DB
+  - Motivation: keep the list of lobbies even if the service restarts
+  - Idea: build a separate module that reads the list on startup, updates DB on
+    lobby module events
+- Ring layout
+  - Motivation: a single instance may not be enough, run multiple and
+    distribute the load
+  - Problem: if an instance creates a lobby, the rest of the instances need to
+    know
+  - Idea: configure a list of other hosts, where we broadcast our lobby events
+    - This allows for arbitrary layouts, e.g. ring, star, p2p, etc.
+  - ❗ Make sure to not overwrite each other's changes when using a shared DB
+  - ❗ Make sure to give each event an ID, so the same event isn't sent back
+    and forth forever between two instances
 
 ### Authentication
 
@@ -97,9 +155,26 @@ TODO
 
 ### High level architecture
 
+Similar to noray, the service will be structured as a thin outer shell ( config
+parsing, app entry point ), wrapping multiple modules. Each module provides
+certain functionality by hooking into the app's lifecycle. Modules may depend
+on each other.
+
 TODO: Some mermaid diagrams of the various components
 
 ### Data model
+
+```mermaid
+classDiagram
+    class Lobby {
+        +string id
+        +bool isLocked
+        +bool isVisible
+        +map~string, string~ customData
+
+        -string connectionString
+    }
+```
 
 TODO: Some mermaid diagrams of what data is stored ( lobbies, participants, etc. )
 
