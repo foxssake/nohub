@@ -183,6 +183,10 @@ TODO: Some mermaid diagrams of what data is stored ( lobbies, participants, etc.
 - TypeScript
 - Bun
 - [Trimsock]
+- [pino] for logging
+- [Prometheus] for metrics
 
 
 [Trimsock]: https://github.com/foxssake/trimsock
+[pino]: https://getpino.io/
+[Prometheus]: https://prometheus.io/
