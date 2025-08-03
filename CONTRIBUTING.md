@@ -5,7 +5,8 @@ So, if you'd like to contribute, you're in the right place!
 
 ## Choosing a task
 
-If you're already working on a smaller change, we're looking forward for your PR!
+If you're already working on a smaller change, we're looking forward to your
+PR!
 
 If you're already working on a bigger change, please take a moment to discuss
 it with us over on [Discord]. This way we can make sure that we are aligned on
@@ -28,6 +29,27 @@ regularly, feel free to ask for write permission.
 Once in the repository, run `bun install`.
 
 That's it, you're now ready to go!
+
+## Running *nohub*
+
+To test your changes, run the following:
+
+```sh
+bun dev
+```
+
+This will start the application with pretty-printed logs. To test your command
+handlers, you can talk to the application either with *netcat* or *telnet*:
+
+```sh
+nc localhost 9980 # netcat
+telnet localhost 9980 # telnet
+```
+
+Simply type your command and press enter to send it.
+
+> [!NOTE]
+> Keep in mind that *telnet* sends a `\r\n` sequence on enter.
 
 ## Before submitting your PR
 
