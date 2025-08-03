@@ -10,20 +10,24 @@ rootLogger.info({ config }, "Starting with config");
 new BunSocketReactor<SessionData>()
   .configure(withLobbyCommands())
   .onError((cmd, exchange, error) => {
-    exchange.failOrSend({ name: 'error', data: '' + error })
-    rootLogger.error(error, 'Failed processing command: %s', Command.serialize(cmd))
+    exchange.failOrSend({ name: "error", data: `${error}` });
+    rootLogger.error(
+      error,
+      "Failed processing command: %s",
+      Command.serialize(cmd),
+    );
   })
   .listen({
     hostname: config.tcp.host,
     port: config.tcp.port,
     socket: {
       open(socket) {
-        openSession(socket)
+        openSession(socket);
       },
 
       close(socket) {
-        closeSession(socket)
-      }
+        closeSession(socket);
+      },
     },
   });
 
