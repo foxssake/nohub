@@ -15,7 +15,7 @@ jobs:
       - name: Install
         run:  bun install
       - name: Lint
-        run: bun check
+        run: bun lint
   test:
     runs-on: ubuntu-latest
     steps:
