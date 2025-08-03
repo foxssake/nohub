@@ -1,10 +1,10 @@
 {
   "name": "@foxssake/nohub",
   "module": "index.ts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
-    "start": "bun . | pino-pretty",
+    "dev": "bun --watch . | pino-pretty",
     "lint": "biome check",
     "format": "biome check --write --unsafe",
     "fmt": "bun format"
@@ -21,6 +21,7 @@
     "@foxssake/trimsock-bun": "^0.13.3",
     "@foxssake/trimsock-js": "^0.13.3",
     "dotenv": "^17.2.1",
+    "nanoid": "^5.1.5",
     "pino": "^9.7.0"
   }
 }

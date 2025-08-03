@@ -1,16 +1,35 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
+import { Command } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
-import { logger } from "@src/logger";
+import { withLobbyCommands } from "@src/lobbies";
+import { rootLogger } from "@src/logger";
+import { closeSession, openSession, type SessionData } from "@src/sessions";
 
-logger.info({ config }, "Starting with config");
+rootLogger.info({ config }, "Starting with config");
 
-new BunSocketReactor()
-  .on("echo", (cmd, exchange) => exchange.replyOrSend(cmd))
+new BunSocketReactor<SessionData>()
+  .configure(withLobbyCommands())
+  .onError((cmd, exchange, error) => {
+    exchange.failOrSend({ name: "error", data: `${error}` });
+    rootLogger.error(
+      error,
+      "Failed processing command: %s",
+      Command.serialize(cmd),
+    );
+  })
   .listen({
     hostname: config.tcp.host,
     port: config.tcp.port,
-    socket: {},
+    socket: {
+      open(socket) {
+        openSession(socket);
+      },
+
+      close(socket) {
+        closeSession(socket);
+      },
+    },
   });
 
-logger.info("Listening on %s:%d", config.tcp.host, config.tcp.port);
-logger.info("Started in %fms", process.uptime() * 1000);
+rootLogger.info("Listening on %s:%d", config.tcp.host, config.tcp.port);
+rootLogger.info("Started in %fms", process.uptime() * 1000);
