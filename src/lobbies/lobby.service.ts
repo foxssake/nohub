@@ -9,10 +9,11 @@ export class LobbyService {
     private logger = rootLogger.child({ name: 'LobbyService' })
   ) {}
 
-  create(data: Map<string, string>): Lobby {
-    this.logger.info({ data, size: data.size }, 'Creating lobby with custom data')
+  create(data: Map<string, string>, sessionId: string): Lobby {
+    this.logger.info({ data: Object.fromEntries(data.entries()) }, 'Creating lobby with custom data')
     const lobby: Lobby = {
       id: this.generateId(),
+      owner: sessionId,
       isVisible: true,
       isLocked: false,
       data
@@ -20,7 +21,7 @@ export class LobbyService {
 
     this.repository.add(lobby)
 
-    this.logger.info('Lobby#%s created!', lobby.id)
+    this.logger.info('Lobby#%s created, bound to session#%s', lobby.id, sessionId)
     return lobby
   }
 

@@ -3,10 +3,11 @@ import { Command } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
+import { closeSession, openSession, type SessionData } from "@src/sessions";
 
 rootLogger.info({ config }, "Starting with config");
 
-new BunSocketReactor()
+new BunSocketReactor<SessionData>()
   .configure(withLobbyCommands())
   .onError((cmd, exchange, error) => {
     exchange.failOrSend({ name: 'error', data: '' + error })
@@ -15,7 +16,15 @@ new BunSocketReactor()
   .listen({
     hostname: config.tcp.host,
     port: config.tcp.port,
-    socket: {},
+    socket: {
+      open(socket) {
+        openSession(socket)
+      },
+
+      close(socket) {
+        closeSession(socket)
+      }
+    },
   });
 
 rootLogger.info("Listening on %s:%d", config.tcp.host, config.tcp.port);

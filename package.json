@@ -1,10 +1,10 @@
 {
   "name": "@foxssake/nohub",
   "module": "index.ts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
-    "start": "bun . | pino-pretty",
+    "dev": "bun --watch . | pino-pretty",
     "lint": "biome check",
     "format": "biome check --write --unsafe",
     "fmt": "bun format"
