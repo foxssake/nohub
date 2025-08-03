@@ -1,15 +1,15 @@
-# mobhub
+# nohub
 
 A lobby manager for multiplayer games.
 
 ## Proposals
 
-This section contains proposals on what *mobhub* should be, and how to
+This section contains proposals on what *nohub* should be, and how to
 implement it.
 
 ### Vision
 
-*Mobhub* should be a simple to manage, self-hosted solution for managing player
+*Nohub* should be a simple to manage, self-hosted solution for managing player
 lobbies and server lists for multiplayer games.
 
 * Should be easy to integrate with Godot, but not exclusive to it
@@ -25,7 +25,7 @@ lobbies and server lists for multiplayer games.
 
 ### Use cases
 
-Some common usages for lobby services and how they relate to *mobhub*:
+Some common usages for lobby services and how they relate to *nohub*:
 
 - Creating a lobby
   - Client connects to the service
