@@ -53,11 +53,12 @@ export function byteSize(value: string | undefined): number | undefined {
   const postfixes = ["b", "kb", "mb", "gb", "tb", "pb", "eb", "zb", "yb"];
 
   const [nominator, unit] = extractUnit(value);
+  const nominated = number(nominator);
 
   const idx = postfixes.findIndex((pf) => pf === (unit || "b").toLowerCase());
   assert(idx >= 0, `Unknown byte postfix "${unit}"!`);
 
-  return number(nominator)! * 1024 ** idx;
+  return nominated !== undefined ? nominated * 1024 ** idx : undefined;
 }
 
 /**
@@ -83,9 +84,10 @@ export function duration(value: string | undefined): number | undefined {
   };
 
   const [nominator, unit] = extractUnit(value.toLowerCase());
+  const nominated = number(nominator);
   assert(units[unit], `Unknown duration unit "${unit}"!`);
 
-  return number(nominator)! * units[unit];
+  return nominated !== undefined ? nominated * units[unit] : undefined;
 }
 
 /**
@@ -112,13 +114,14 @@ export function ports(value: string | undefined): number[] | undefined {
   const literals = ranges
     .filter((p) => /^\d+$/.test(p))
     .map(integer)
-    .filter((p) => !!p)
+    .filter((p) => p !== undefined)
     .map((p) => [p, p]);
 
-  const absolutes = ranges
+  const absolutes: Array<[number, number]> = ranges
     .filter((r) => r.includes("-"))
-    .map((r) => r.split("-").map(integer))
-    .filter((r) => !r.includes(undefined));
+    .map((r) => r.split("-"))
+    .map(([from, to]) => [integer(from), integer(to)] as [number, number])
+    .filter(([from, to]) => from !== undefined && to !== undefined);
 
   const relatives = ranges
     .filter((r) => r.includes("+"))
@@ -132,7 +135,7 @@ export function ports(value: string | undefined): number[] | undefined {
 
   const result = [...literals, ...absolutes, ...relatives]
     .flatMap(([from, to]) =>
-      [...new Array(to! - from! + 1)].map((_, i) => from! + i),
+      [...new Array(to - from + 1)].map((_, i) => from + i),
     )
     .sort()
     .filter((v, i, a) => i === 0 || v !== a[i - 1]); // ensure every port is unique
