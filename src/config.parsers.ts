@@ -4,7 +4,7 @@ import assert from "node:assert";
  * Parse config value as integer.
  */
 export function integer(value: string | undefined): number | undefined {
-  const result = parseInt(value ?? "");
+  const result = parseInt(value ?? "", 10);
   return Number.isNaN(result) ? undefined : result;
 }
 

@@ -12,19 +12,8 @@ export const withLobbyCommands =
     reactor.on("lobby/create", (cmd, exchange) => {
       assert(cmd.isRequest, "Command must be a request!");
 
-      const data: Map<string, string> = new Map();
-      (cmd.params ?? (cmd.data ? [cmd.data] : undefined))
-        ?.map((p) => parseKeyValueParam(p))
-        ?.forEach(([key, value]) => data.set(key, value));
-
+      const data: Map<string, string> = cmd.kvMap ?? new Map();
       const lobby = lobbyService.create(data, exchange.source.data.id);
-      exchange.reply({ data: lobby.id });
+      exchange.reply({ text: lobby.id });
     });
   };
-
-function parseKeyValueParam(param: string): [string, string] {
-  const spPos = param.indexOf("=");
-  assert(spPos >= 0, `Malformed key-value parameter: ${param}`);
-
-  return [param.slice(0, spPos), param.slice(spPos + 1)];
-}

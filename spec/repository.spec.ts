@@ -136,7 +136,9 @@ describe("Repository", () => {
         { id: 0, value: "foo" },
         { id: 1, value: "bar" },
       ];
-      expected.forEach((item) => repository.add(item));
+      expected.forEach((item) => {
+        repository.add(item);
+      });
 
       // When
       const actual = [...repository.list()];
