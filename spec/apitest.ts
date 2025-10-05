@@ -17,7 +17,7 @@ export class ApiTest {
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureWorker();
 
-    ApiTest.logger.info(
+    this.logger.info(
       "Connecting to host at %s:%d",
       config.tcp.host,
       config.tcp.port,
@@ -28,7 +28,7 @@ export class ApiTest {
       port: config.tcp.port,
       socket: {},
     });
-    ApiTest.logger.info("Connected to host");
+    this.logger.info("Connected to host");
 
     return new ApiTest(clientReactor, clientSocket);
   }
@@ -45,28 +45,28 @@ export class ApiTest {
   }
 
   private static async ensureWorker(): Promise<Worker> {
-    if (ApiTest.sharedWorker) return ApiTest.sharedWorker;
+    if (this.sharedWorker) return this.sharedWorker;
 
-    ApiTest.logger.info("Starting worker thread for host");
+    this.logger.info("Starting worker thread for host");
     const worker = new Worker(`${import.meta.dir}/apitest.worker.ts`);
-    ApiTest.logger.info("Started host thread %d", worker.threadId);
+    this.logger.info("Started host thread %d", worker.threadId);
 
-    ApiTest.logger.info("Waiting for host to start");
+    this.logger.info("Waiting for host to start");
     await sleep(100.0);
 
-    ApiTest.sharedWorker = worker;
+    this.sharedWorker = worker;
 
     process.on("beforeExit", () => {
-      if (ApiTest.sharedWorker) {
-        ApiTest.logger.info(
+      if (this.sharedWorker) {
+        this.logger.info(
           "Shutting down worker thread %d",
-          ApiTest.sharedWorker.threadId,
+          this.sharedWorker.threadId,
         );
-        ApiTest.sharedWorker.terminate();
-        ApiTest.logger.info("Shutdown complete");
+        this.sharedWorker.terminate();
+        this.logger.info("Shutdown complete");
       }
     });
 
-    return ApiTest.sharedWorker;
+    return this.sharedWorker;
   }
 }
