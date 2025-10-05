@@ -57,3 +57,7 @@ export const withLobbyCommands =
         exchange.finishStream();
       });
   };
+
+export function resetLobbies() {
+  lobbyRepository.clear();
+}

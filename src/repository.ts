@@ -92,6 +92,13 @@ export class Repository<T, K = string> {
     return this.items.delete(this.requireId(item));
   }
 
+  /**
+   * Remove all items from the repository
+   */
+  clear() {
+    this.items.clear();
+  }
+
   private requireId(item: Partial<T>): K {
     const id = this.getId(item);
     assert(id !== undefined, "Item has no ID set!");
