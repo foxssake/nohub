@@ -10,13 +10,12 @@ export class ApiTest {
   private static sharedWorker?: Worker
 
   constructor(
-    private worker: Worker,
-    private clientReactor: BunSocketReactor,
-    private clientSocket: Bun.Socket
+    public readonly clientReactor: BunSocketReactor,
+    public readonly clientSocket: Bun.Socket
   ) {}
 
   static async create(): Promise<ApiTest> {
-    const worker = await this.ensureWorker()
+    await this.ensureWorker()
 
     this.logger.info("Connecting to host at %s:%d", config.tcp.host, config.tcp.port)
     const clientReactor = new BunSocketReactor()
@@ -27,10 +26,7 @@ export class ApiTest {
     })
     this.logger.info("Connected to host")
 
-    return new ApiTest(worker, clientReactor, clientSocket)
-  }
-
-  shutdown() {
+    return new ApiTest(clientReactor, clientSocket)
   }
 
   send(command: CommandSpec): Exchange<Bun.Socket> {

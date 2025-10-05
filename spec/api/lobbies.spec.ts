@@ -1,5 +1,5 @@
-import { afterAll, afterEach, beforeAll, describe, expect, test } from "bun:test";
-import { ApiTest } from "./apitest";
+import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import { ApiTest } from "@spec/apitest";
 
 const logger = ApiTest.logger
 let api: ApiTest
