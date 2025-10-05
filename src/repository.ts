@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import assert, { AssertionError } from "node:assert";
 
 export type IdMapper<T, K> = (item: Partial<T>) => K | undefined;
 export type ItemMerger<T> = (a: T, b: Partial<T>) => T;
@@ -55,7 +55,9 @@ export class Repository<T, K = string> {
   */
   require(id: K): T {
     const item = this.find(id)
-    assert(item !== undefined, `No item with ID: ${id}`)
+    if (item === undefined)
+      throw this.notFoundError(id)
+
     return item
   }
 
@@ -106,6 +108,10 @@ export class Repository<T, K = string> {
    */
   clear() {
     this.items.clear();
+  }
+
+  protected notFoundError(id: K): Error {
+    return new AssertionError({ message: `No item with ID: ${id}` })
   }
 
   private requireId(item: Partial<T>): K {

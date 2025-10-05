@@ -32,8 +32,7 @@ export const withLobbyCommands =
           : undefined;
 
         // Find lobby
-        const lobby = lobbyRepository.find(id);
-        assert(lobby, `Unknown lobby #${id}!`);
+        const lobby = lobbyRepository.require(id);
 
         // Serialize keywords for first message
         const params = [
