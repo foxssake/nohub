@@ -1,18 +1,22 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import type { CommandSpec, Exchange } from "@foxssake/trimsock-js";
+import { Reactor, type CommandDataChunk, type CommandSpec, type Exchange } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { rootLogger } from "@src/logger";
 import { sleep } from "bun";
+import { nanoid } from "nanoid";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
-
   private static sharedWorker?: Worker;
+
+  readonly client: TrimsockClient<Bun.Socket>
 
   constructor(
     public readonly clientReactor: BunSocketReactor,
     public readonly clientSocket: Bun.Socket,
-  ) {}
+  ) {
+    this.client = new TrimsockClient(this.clientReactor, this.clientSocket)
+  }
 
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureWorker();
@@ -23,12 +27,26 @@ export class ApiTest {
       config.tcp.port,
     );
     const clientReactor = new BunSocketReactor();
-    const clientSocket = await clientReactor.connect({
-      hostname: config.tcp.host,
-      port: config.tcp.port,
-      socket: {},
-    });
-    this.logger.info("Connected to host");
+    let clientSocket: Bun.Socket | undefined
+
+    // Attempt connection
+    for (let i = 0; i < 5; ++i) {
+      try {
+        clientSocket = await clientReactor.connect({
+          hostname: config.tcp.host,
+          port: config.tcp.port,
+          socket: {},
+        });
+        this.logger.info("Connected to host");
+        break;
+      } catch (err) {
+        this.logger.warn(err, "Failed to connect, waiting")
+        await sleep(50.)
+      }
+    }
+
+    if (!clientSocket)
+      throw new Error("Failed to connect to host!")
 
     return new ApiTest(clientReactor, clientSocket);
   }
@@ -68,5 +86,41 @@ export class ApiTest {
     });
 
     return this.sharedWorker;
+  }
+}
+
+export class TrimsockClient<T> {
+  constructor(
+    private reactor: Reactor<T>,
+    private serverTarget: T
+  ) {}
+
+  async createLobby(data?: Map<string, string>): Promise<string> {
+    const chunks: CommandDataChunk[] = [...(data?.entries() ?? [])]
+    .flatMap(it => [
+      ({ text: it[0], isQuoted: true } as CommandDataChunk),
+      ({ text: "=", isQuoted: false} as CommandDataChunk),
+      ({ text: it[1], isQuoted: true } as CommandDataChunk),
+    ])
+
+    const xchg = this.reactor.send(
+      this.serverTarget, { 
+        name: "lobby/create", 
+        isRequest: true, 
+        requestId: this.exchangeId(),
+        // TODO(trimsock): Serialize kv params
+        chunks
+      })
+
+    const reply = await xchg.onReply()
+
+    if (!reply.isSuccessResponse || !reply.text)
+      throw new Error("Failed to create lobby!")
+
+    return reply.text
+  }
+
+  private exchangeId(): string {
+    return nanoid()
   }
 }
