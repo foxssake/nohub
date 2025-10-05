@@ -57,6 +57,7 @@ export const withLobbyCommands =
         exchange.finishStream();
       })
     .on("lobby/set-data", (cmd, xchg) => {
+      // TODO(trimsock#43): Parse kvMap and params in tandem properly
       assert(cmd.isRequest, "Command must be a request!")
       assert(cmd.text, "No lobby ID specified!")
 
