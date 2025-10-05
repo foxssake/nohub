@@ -27,9 +27,11 @@ export function nohub(
     })
     .onError((cmd, exchange, error) => {
       if (error instanceof Error)
-        exchange.failOrSend({ name: "error", params: [error.name, error.message] })
-      else
-        exchange.failOrSend({ name: "error", text: `${error}` });
+        exchange.failOrSend({
+          name: "error",
+          params: [error.name, error.message],
+        });
+      else exchange.failOrSend({ name: "error", text: `${error}` });
 
       rootLogger.error(
         error,

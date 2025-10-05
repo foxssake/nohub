@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { Lobbies, Sessions } from "@spec/fixtures";
+import { UnauthorizedError } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
-import { UnauthorizedError } from "@src/errors";
 
 let lobbyRepository: LobbyRepository;
 let lobbyService: LobbyService;

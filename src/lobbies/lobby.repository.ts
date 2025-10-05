@@ -1,6 +1,6 @@
+import { DataNotFoundError } from "@src/errors";
 import { Repository } from "@src/repository";
 import type { Lobby } from "./lobby";
-import { DataNotFoundError } from "@src/errors";
 
 export class LobbyRepository extends Repository<Lobby, string> {
   constructor() {

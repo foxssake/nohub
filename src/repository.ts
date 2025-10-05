@@ -1,4 +1,4 @@
-import assert, { AssertionError } from "node:assert";
+import assert from "node:assert";
 
 export type IdMapper<T, K> = (item: Partial<T>) => K | undefined;
 export type ItemMerger<T> = (a: T, b: Partial<T>) => T;
