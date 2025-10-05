@@ -1,5 +1,6 @@
 import { Repository } from "@src/repository";
 import type { Lobby } from "./lobby";
+import { DataNotFoundError } from "@src/errors";
 
 export class LobbyRepository extends Repository<Lobby, string> {
   constructor() {
@@ -7,6 +8,6 @@ export class LobbyRepository extends Repository<Lobby, string> {
   }
 
   protected notFoundError(id: string): Error {
-    return new Error(`Lobby#${id} not found!`);
+    return new DataNotFoundError(`Lobby#${id} not found!`);
   }
 }

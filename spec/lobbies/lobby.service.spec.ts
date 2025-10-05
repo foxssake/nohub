@@ -3,6 +3,7 @@ import { Lobbies, Sessions } from "@spec/fixtures";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
+import { UnauthorizedError } from "@src/errors";
 
 let lobbyRepository: LobbyRepository;
 let lobbyService: LobbyService;
@@ -74,7 +75,7 @@ describe("LobbyService", () => {
     test("should throw if unauthorized", () => {
       expect(() =>
         lobbyService.lock(Lobbies.davesLobby, Sessions.eric),
-      ).toThrow();
+      ).toThrow(UnauthorizedError);
     });
   });
 
@@ -89,7 +90,7 @@ describe("LobbyService", () => {
     test("should throw if unauthorized", () => {
       expect(() =>
         lobbyService.unlock(Lobbies.davesLobby, Sessions.eric),
-      ).toThrow();
+      ).toThrow(UnauthorizedError);
     });
   });
 
@@ -104,7 +105,7 @@ describe("LobbyService", () => {
     test("should throw if unauthorized", () => {
       expect(() =>
         lobbyService.hide(Lobbies.davesLobby, Sessions.eric),
-      ).toThrow();
+      ).toThrow(UnauthorizedError);
     });
   });
 
@@ -119,7 +120,7 @@ describe("LobbyService", () => {
     test("should throw if unauthorized", () => {
       expect(() =>
         lobbyService.publish(Lobbies.davesLobby, Sessions.eric),
-      ).toThrow();
+      ).toThrow(UnauthorizedError);
     });
   });
 });

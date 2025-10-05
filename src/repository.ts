@@ -110,7 +110,7 @@ export class Repository<T, K = string> {
   }
 
   protected notFoundError(id: K): Error {
-    return new AssertionError({ message: `No item with ID: ${id}` });
+    return new Error(`No item with ID: ${id}`);
   }
 
   private requireId(item: Partial<T>): K {
