@@ -1,4 +1,4 @@
+import { config } from "@src/config";
 import { nohub } from "@src/nohub";
-import { config } from "@src/config"
 
-nohub(config, true)
+nohub(config, true);

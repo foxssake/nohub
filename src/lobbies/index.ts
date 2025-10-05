@@ -59,5 +59,5 @@ export const withLobbyCommands =
   };
 
 export function resetLobbies() {
-  lobbyRepository.clear()
+  lobbyRepository.clear();
 }

@@ -93,10 +93,10 @@ export class Repository<T, K = string> {
   }
 
   /**
-  * Remove all items from the repository
-  */
+   * Remove all items from the repository
+   */
   clear() {
-    this.items.clear()
+    this.items.clear();
   }
 
   private requireId(item: Partial<T>): K {
