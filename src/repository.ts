@@ -51,6 +51,15 @@ export class Repository<T, K = string> {
   }
 
   /**
+  * Return item with id or throw
+  */
+  require(id: K): T {
+    const item = this.find(id)
+    assert(item !== undefined, `No item with ID: ${id}`)
+    return item
+  }
+
+  /**
    * Check if item with id exists.
    */
   has(id: K): boolean {
