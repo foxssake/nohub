@@ -54,66 +54,101 @@ describe("Lobbies API", () => {
   describe("get", () => {
     test("should return custom data", async () => {
       // Create lobby
-      const lobbyId = await api.client.createLobby(new Map([
-        ["name", "Cool Lobby"],
-        ["player-count", "0"],
-        ["player-capacity", "16"]
-      ]))
+      const lobbyId = await api.client.createLobby(
+        new Map([
+          ["name", "Cool Lobby"],
+          ["player-count", "0"],
+          ["player-capacity", "16"],
+        ]),
+      );
 
       // Get lobby data
-      const data = await Array.fromAsync(api.send({ name: "lobby/get", text: lobbyId, isRequest: true, requestId: "" }).chunks())
-      const lines = data.map(it => it.text)
+      const data = await Array.fromAsync(
+        api
+          .send({
+            name: "lobby/get",
+            text: lobbyId,
+            isRequest: true,
+            requestId: "",
+          })
+          .chunks(),
+      );
+      const lines = data.map((it) => it.text);
 
       expect(lines).toEqual([
         lobbyId,
         "name=Cool Lobby",
         "player-count=0",
-        "player-capacity=16"
-      ])
-    })
+        "player-capacity=16",
+      ]);
+    });
 
     test("should return only requested fields", async () => {
       // Create lobby
-      const lobbyId = await api.client.createLobby(new Map([
-        ["name", "Cool Lobby"],
-        ["player-count", "0"],
-        ["player-capacity", "16"]
-      ]))
+      const lobbyId = await api.client.createLobby(
+        new Map([
+          ["name", "Cool Lobby"],
+          ["player-count", "0"],
+          ["player-capacity", "16"],
+        ]),
+      );
 
       // Get lobby data
-      const data = await Array.fromAsync(api.send({ name: "lobby/get", params: [lobbyId, "name"], isRequest: true, requestId: "" }).chunks())
-      const lines = data.map(it => it.text)
+      const data = await Array.fromAsync(
+        api
+          .send({
+            name: "lobby/get",
+            params: [lobbyId, "name"],
+            isRequest: true,
+            requestId: "",
+          })
+          .chunks(),
+      );
+      const lines = data.map((it) => it.text);
 
-      expect(lines).toEqual([
-        lobbyId,
-        "name=Cool Lobby"
-      ])
-    })
+      expect(lines).toEqual([lobbyId, "name=Cool Lobby"]);
+    });
 
     test("should return no fields if none match", async () => {
       // Create lobby
-      const lobbyId = await api.client.createLobby(new Map([
-        ["name", "Cool Lobby"],
-        ["player-count", "0"],
-        ["player-capacity", "16"]
-      ]))
+      const lobbyId = await api.client.createLobby(
+        new Map([
+          ["name", "Cool Lobby"],
+          ["player-count", "0"],
+          ["player-capacity", "16"],
+        ]),
+      );
 
       // Get lobby data
-      const data = await Array.fromAsync(api.send({ name: "lobby/get", params: [lobbyId, "gamemode"], isRequest: true, requestId: "" }).chunks())
-      const lines = data.map(it => it.text)
+      const data = await Array.fromAsync(
+        api
+          .send({
+            name: "lobby/get",
+            params: [lobbyId, "gamemode"],
+            isRequest: true,
+            requestId: "",
+          })
+          .chunks(),
+      );
+      const lines = data.map((it) => it.text);
 
-      expect(lines).toEqual([
-        lobbyId
-      ])
-    })
+      expect(lines).toEqual([lobbyId]);
+    });
 
     test("should throw on unknown lobby", async () => {
       expect(async () => {
-        await api.send({ name: "lobby/get", text: "unknown", isRequest: true, requestId: "" }).onReply()
-      }).toThrow()
-    })
+        await api
+          .send({
+            name: "lobby/get",
+            text: "unknown",
+            isRequest: true,
+            requestId: "",
+          })
+          .onReply();
+      }).toThrow();
+    });
 
-    test.todo("should include locked flag", () => {})
-    test.todo("should include hidden flag", () => {})
-  })
+    test.todo("should include locked flag", () => {});
+    test.todo("should include hidden flag", () => {});
+  });
 });

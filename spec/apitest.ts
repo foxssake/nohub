@@ -1,5 +1,10 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import { Reactor, type CommandDataChunk, type CommandSpec, type Exchange } from "@foxssake/trimsock-js";
+import type {
+  CommandDataChunk,
+  CommandSpec,
+  Exchange,
+  Reactor,
+} from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { rootLogger } from "@src/logger";
 import { sleep } from "bun";
@@ -9,25 +14,25 @@ export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
   private static sharedWorker?: Worker;
 
-  readonly client: TrimsockClient<Bun.Socket>
+  readonly client: TrimsockClient<Bun.Socket>;
 
   constructor(
     public readonly clientReactor: BunSocketReactor,
     public readonly clientSocket: Bun.Socket,
   ) {
-    this.client = new TrimsockClient(this.clientReactor, this.clientSocket)
+    this.client = new TrimsockClient(this.clientReactor, this.clientSocket);
   }
 
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureWorker();
 
-    this.logger.info(
+    ApiTest.logger.info(
       "Connecting to host at %s:%d",
       config.tcp.host,
       config.tcp.port,
     );
     const clientReactor = new BunSocketReactor();
-    let clientSocket: Bun.Socket | undefined
+    let clientSocket: Bun.Socket | undefined;
 
     // Attempt connection
     for (let i = 0; i < 5; ++i) {
@@ -37,16 +42,15 @@ export class ApiTest {
           port: config.tcp.port,
           socket: {},
         });
-        this.logger.info("Connected to host");
+        ApiTest.logger.info("Connected to host");
         break;
       } catch (err) {
-        this.logger.warn(err, "Failed to connect, waiting")
-        await sleep(50.)
+        ApiTest.logger.warn(err, "Failed to connect, waiting");
+        await sleep(50);
       }
     }
 
-    if (!clientSocket)
-      throw new Error("Failed to connect to host!")
+    if (!clientSocket) throw new Error("Failed to connect to host!");
 
     return new ApiTest(clientReactor, clientSocket);
   }
@@ -63,64 +67,64 @@ export class ApiTest {
   }
 
   private static async ensureWorker(): Promise<Worker> {
-    if (this.sharedWorker) return this.sharedWorker;
+    if (ApiTest.sharedWorker) return ApiTest.sharedWorker;
 
-    this.logger.info("Starting worker thread for host");
+    ApiTest.logger.info("Starting worker thread for host");
     const worker = new Worker(`${import.meta.dir}/apitest.worker.ts`);
-    this.logger.info("Started host thread %d", worker.threadId);
+    ApiTest.logger.info("Started host thread %d", worker.threadId);
 
-    this.logger.info("Waiting for host to start");
+    ApiTest.logger.info("Waiting for host to start");
     await sleep(100.0);
 
-    this.sharedWorker = worker;
+    ApiTest.sharedWorker = worker;
 
     process.on("beforeExit", () => {
-      if (this.sharedWorker) {
-        this.logger.info(
+      if (ApiTest.sharedWorker) {
+        ApiTest.logger.info(
           "Shutting down worker thread %d",
-          this.sharedWorker.threadId,
+          ApiTest.sharedWorker.threadId,
         );
-        this.sharedWorker.terminate();
-        this.logger.info("Shutdown complete");
+        ApiTest.sharedWorker.terminate();
+        ApiTest.logger.info("Shutdown complete");
       }
     });
 
-    return this.sharedWorker;
+    return ApiTest.sharedWorker;
   }
 }
 
 export class TrimsockClient<T> {
   constructor(
     private reactor: Reactor<T>,
-    private serverTarget: T
+    private serverTarget: T,
   ) {}
 
   async createLobby(data?: Map<string, string>): Promise<string> {
-    const chunks: CommandDataChunk[] = [...(data?.entries() ?? [])]
-    .flatMap(it => [
-      ({ text: it[0], isQuoted: true } as CommandDataChunk),
-      ({ text: "=", isQuoted: false} as CommandDataChunk),
-      ({ text: it[1], isQuoted: true } as CommandDataChunk),
-    ])
+    const chunks: CommandDataChunk[] = [...(data?.entries() ?? [])].flatMap(
+      (it) => [
+        { text: it[0], isQuoted: true } as CommandDataChunk,
+        { text: "=", isQuoted: false } as CommandDataChunk,
+        { text: it[1], isQuoted: true } as CommandDataChunk,
+      ],
+    );
 
-    const xchg = this.reactor.send(
-      this.serverTarget, { 
-        name: "lobby/create", 
-        isRequest: true, 
-        requestId: this.exchangeId(),
-        // TODO(trimsock): Serialize kv params
-        chunks
-      })
+    const xchg = this.reactor.send(this.serverTarget, {
+      name: "lobby/create",
+      isRequest: true,
+      requestId: this.exchangeId(),
+      // TODO(trimsock): Serialize kv params
+      chunks,
+    });
 
-    const reply = await xchg.onReply()
+    const reply = await xchg.onReply();
 
     if (!reply.isSuccessResponse || !reply.text)
-      throw new Error("Failed to create lobby!")
+      throw new Error("Failed to create lobby!");
 
-    return reply.text
+    return reply.text;
   }
 
   private exchangeId(): string {
-    return nanoid()
+    return nanoid();
   }
 }
