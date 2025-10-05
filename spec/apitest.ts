@@ -1,10 +1,5 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import type {
-  CommandDataChunk,
-  CommandSpec,
-  Exchange,
-  Reactor,
-} from "@foxssake/trimsock-js";
+import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { rootLogger } from "@src/logger";
 import { sleep } from "bun";
@@ -100,14 +95,6 @@ export class TrimsockClient<T> {
   ) {}
 
   async createLobby(data?: Map<string, string>): Promise<string> {
-    const _chunks: CommandDataChunk[] = [...(data?.entries() ?? [])].flatMap(
-      (it) => [
-        { text: it[0], isQuoted: true } as CommandDataChunk,
-        { text: "=", isQuoted: false } as CommandDataChunk,
-        { text: it[1], isQuoted: true } as CommandDataChunk,
-      ],
-    );
-
     const xchg = this.reactor.send(this.serverTarget, {
       name: "lobby/create",
       isRequest: true,
