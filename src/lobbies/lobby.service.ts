@@ -1,6 +1,6 @@
 import { rootLogger } from "@src/logger";
 import { nanoid } from "nanoid";
-import type { Lobby } from "./lobby";
+import { type Lobby, requireLobbyModifiableIn } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
 
 export class LobbyService {
@@ -30,6 +30,46 @@ export class LobbyService {
       sessionId,
     );
     return lobby;
+  }
+
+  setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {
+    requireLobbyModifiableIn(lobby, sessionId);
+
+    const updated = { ...lobby, data };
+    this.repository.update(updated);
+    return updated;
+  }
+
+  lock(lobby: Lobby, sessionId: string): Lobby {
+    requireLobbyModifiableIn(lobby, sessionId);
+
+    const result: Lobby = { ...lobby, isLocked: true };
+    this.repository.update(result);
+    return result;
+  }
+
+  unlock(lobby: Lobby, sessionId: string): Lobby {
+    requireLobbyModifiableIn(lobby, sessionId);
+
+    const result: Lobby = { ...lobby, isLocked: false };
+    this.repository.update(result);
+    return result;
+  }
+
+  hide(lobby: Lobby, sessionId: string): Lobby {
+    requireLobbyModifiableIn(lobby, sessionId);
+
+    const result: Lobby = { ...lobby, isVisible: false };
+    this.repository.update(result);
+    return result;
+  }
+
+  publish(lobby: Lobby, sessionId: string): Lobby {
+    requireLobbyModifiableIn(lobby, sessionId);
+
+    const result: Lobby = { ...lobby, isVisible: true };
+    this.repository.update(result);
+    return result;
   }
 
   private generateId(): string {

@@ -1,3 +1,4 @@
+import type { Exchange } from "@foxssake/trimsock-js";
 import { rootLogger } from "@src/logger";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
@@ -22,4 +23,10 @@ export function openSession(socket: Socket<SessionData>) {
 
 export function closeSession(socket: Socket<SessionData>) {
   logger.info("Closed session: %s", socket.data.id);
+}
+
+export function sessionOf(
+  exchange: Exchange<Socket<SessionData>>,
+): SessionData {
+  return exchange.source.data;
 }

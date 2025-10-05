@@ -51,6 +51,16 @@ export class Repository<T, K = string> {
   }
 
   /**
+   * Return item with id or throw
+   */
+  require(id: K): T {
+    const item = this.find(id);
+    if (item === undefined) throw this.notFoundError(id);
+
+    return item;
+  }
+
+  /**
    * Check if item with id exists.
    */
   has(id: K): boolean {
@@ -97,6 +107,10 @@ export class Repository<T, K = string> {
    */
   clear() {
     this.items.clear();
+  }
+
+  protected notFoundError(id: K): Error {
+    return new Error(`No item with ID: ${id}`);
   }
 
   private requireId(item: Partial<T>): K {
