@@ -100,7 +100,7 @@ export class TrimsockClient<T> {
   ) {}
 
   async createLobby(data?: Map<string, string>): Promise<string> {
-    const chunks: CommandDataChunk[] = [...(data?.entries() ?? [])].flatMap(
+    const _chunks: CommandDataChunk[] = [...(data?.entries() ?? [])].flatMap(
       (it) => [
         { text: it[0], isQuoted: true } as CommandDataChunk,
         { text: "=", isQuoted: false } as CommandDataChunk,
@@ -112,8 +112,7 @@ export class TrimsockClient<T> {
       name: "lobby/create",
       isRequest: true,
       requestId: this.exchangeId(),
-      // TODO(trimsock): Serialize kv params
-      chunks,
+      kvParams: [...(data?.entries() ?? [])],
     });
 
     const reply = await xchg.onReply();
