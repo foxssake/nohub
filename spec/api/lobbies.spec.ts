@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { ApiTest } from "@spec/apitest";
+import { Lobbies } from "@spec/fixtures";
 
 const logger = ApiTest.logger;
 let api: ApiTest;
@@ -24,23 +25,12 @@ describe("Lobbies API", () => {
     });
 
     test("should create with custom data", async () => {
-      // TODO(trimsock): Serialize kv params
       const reply = await api
         .send({
           name: "lobby/create",
           isRequest: true,
           requestId: "",
-          chunks: [
-            { text: "name", isQuoted: false },
-            { text: "=", isQuoted: false },
-            { text: "Cool Lobby", isQuoted: true },
-            { text: "player-count", isQuoted: false },
-            { text: "=", isQuoted: false },
-            { text: "0", isQuoted: true },
-            { text: "player-capacity", isQuoted: false },
-            { text: "=", isQuoted: false },
-            { text: "16", isQuoted: true },
-          ],
+          kvMap: Lobbies.coolLobby.data,
         })
         .onReply();
 

@@ -45,19 +45,12 @@ export const withLobbyCommands =
         exchange.stream({ params });
         for (const [key, value] of lobby.data.entries())
           if (properties?.has(key) !== false)
-            // TODO(trimsock): Serialize kv-pairs
             exchange.stream({
               kvParams: [[key, value]],
-              chunks: [
-                { text: key, isQuoted: true },
-                { text: "=", isQuoted: false },
-                { text: value, isQuoted: true },
-              ],
             });
         exchange.finishStream();
       })
       .on("lobby/set-data", (cmd, xchg) => {
-        // TODO(trimsock#43): Parse kvMap and params in tandem properly
         assert(cmd.isRequest, "Command must be a request!");
         assert(cmd.text, "No lobby ID specified!");
 
