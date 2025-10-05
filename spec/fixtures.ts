@@ -1,4 +1,4 @@
-import type { Lobby } from "@src/lobbies/lobby"
+import type { Lobby } from "@src/lobbies/lobby";
 
 export const Sessions = {
   dave: "94kwM3zUaNCn",
@@ -6,9 +6,9 @@ export const Sessions = {
   pam: "DCLyAVxClvO_",
 
   all(): string[] {
-    return Object.values(this).filter(it => typeof it === "string")
-  }
-}
+    return Object.values(this).filter((it) => typeof it === "string");
+  },
+};
 
 export const Lobbies = {
   davesLobby: {
@@ -19,8 +19,8 @@ export const Lobbies = {
     data: new Map([
       ["name", "Dave's Lobby"],
       ["player-count", "8"],
-      ["player-capacity", "12"]
-    ])
+      ["player-capacity", "12"],
+    ]),
   },
 
   coolLobby: {
@@ -31,11 +31,13 @@ export const Lobbies = {
     data: new Map([
       ["name", "Cool Lobby"],
       ["player-count", "9"],
-      ["player-capacity", "16"]
-    ])
+      ["player-capacity", "16"],
+    ]),
   },
 
   all(): Lobby[] {
-    return (Object.values(this).filter(it => typeof it === "object") as Lobby[])
-  }
-}
+    return Object.values(this).filter(
+      (it) => typeof it === "object",
+    ) as Lobby[];
+  },
+};

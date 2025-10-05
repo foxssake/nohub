@@ -51,14 +51,13 @@ export class Repository<T, K = string> {
   }
 
   /**
-  * Return item with id or throw
-  */
+   * Return item with id or throw
+   */
   require(id: K): T {
-    const item = this.find(id)
-    if (item === undefined)
-      throw this.notFoundError(id)
+    const item = this.find(id);
+    if (item === undefined) throw this.notFoundError(id);
 
-    return item
+    return item;
   }
 
   /**
@@ -111,7 +110,7 @@ export class Repository<T, K = string> {
   }
 
   protected notFoundError(id: K): Error {
-    return new AssertionError({ message: `No item with ID: ${id}` })
+    return new AssertionError({ message: `No item with ID: ${id}` });
   }
 
   private requireId(item: Partial<T>): K {

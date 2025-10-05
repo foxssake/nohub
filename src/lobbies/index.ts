@@ -1,9 +1,9 @@
 import assert from "node:assert";
 import type { Reactor } from "@foxssake/trimsock-js";
-import { sessionOf, type SessionData } from "@src/sessions";
+import { rootLogger } from "@src/logger";
+import { type SessionData, sessionOf } from "@src/sessions";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
-import { rootLogger } from "@src/logger";
 
 const lobbyRepository = new LobbyRepository();
 export const lobbyService = new LobbyService(lobbyRepository);
@@ -56,56 +56,56 @@ export const withLobbyCommands =
             });
         exchange.finishStream();
       })
-    .on("lobby/set-data", (cmd, xchg) => {
-      // TODO(trimsock#43): Parse kvMap and params in tandem properly
-      assert(cmd.isRequest, "Command must be a request!")
-      assert(cmd.text, "No lobby ID specified!")
+      .on("lobby/set-data", (cmd, xchg) => {
+        // TODO(trimsock#43): Parse kvMap and params in tandem properly
+        assert(cmd.isRequest, "Command must be a request!");
+        assert(cmd.text, "No lobby ID specified!");
 
-      rootLogger.info(cmd, "Set data request")
+        rootLogger.info(cmd, "Set data request");
 
-      const lobbyId = cmd.params?.at(0) ?? cmd.text
-      const data = cmd.kvMap ?? new Map()
-      const lobby = lobbyRepository.require(lobbyId)
+        const lobbyId = cmd.params?.at(0) ?? cmd.text;
+        const data = cmd.kvMap ?? new Map();
+        const lobby = lobbyRepository.require(lobbyId);
 
-      lobbyService.setData(lobby, data, sessionOf(xchg).id)
-      xchg.reply({ text: "ok" })
-    })
-    .on("lobby/lock", (cmd, xchg) => {
-      assert(cmd.isRequest, "Command must be a request!")
-      assert(cmd.text, "No lobby ID specified!")
+        lobbyService.setData(lobby, data, sessionOf(xchg).id);
+        xchg.reply({ text: "ok" });
+      })
+      .on("lobby/lock", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+        assert(cmd.text, "No lobby ID specified!");
 
-      const lobby = lobbyRepository.require(cmd.text)
-      lobbyService.lock(lobby, sessionOf(xchg).id)
+        const lobby = lobbyRepository.require(cmd.text);
+        lobbyService.lock(lobby, sessionOf(xchg).id);
 
-      xchg.reply({ text: "ok" })
-    })
-    .on("lobby/unlock", (cmd, xchg) => {
-      assert(cmd.isRequest, "Command must be a request!")
-      assert(cmd.text, "No lobby ID specified!")
+        xchg.reply({ text: "ok" });
+      })
+      .on("lobby/unlock", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+        assert(cmd.text, "No lobby ID specified!");
 
-      const lobby = lobbyRepository.require(cmd.text)
-      lobbyService.unlock(lobby, sessionOf(xchg).id)
+        const lobby = lobbyRepository.require(cmd.text);
+        lobbyService.unlock(lobby, sessionOf(xchg).id);
 
-      xchg.reply({ text: "ok" })
-    })
-    .on("lobby/hide", (cmd, xchg) => {
-      assert(cmd.isRequest, "Command must be a request!")
-      assert(cmd.text, "No lobby ID specified!")
+        xchg.reply({ text: "ok" });
+      })
+      .on("lobby/hide", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+        assert(cmd.text, "No lobby ID specified!");
 
-      const lobby = lobbyRepository.require(cmd.text)
-      lobbyService.hide(lobby, sessionOf(xchg).id)
+        const lobby = lobbyRepository.require(cmd.text);
+        lobbyService.hide(lobby, sessionOf(xchg).id);
 
-      xchg.reply({ text: "ok" })
-    })
-    .on("lobby/publish", (cmd, xchg) => {
-      assert(cmd.isRequest, "Command must be a request!")
-      assert(cmd.text, "No lobby ID specified!")
+        xchg.reply({ text: "ok" });
+      })
+      .on("lobby/publish", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+        assert(cmd.text, "No lobby ID specified!");
 
-      const lobby = lobbyRepository.require(cmd.text)
-      lobbyService.publish(lobby, sessionOf(xchg).id)
+        const lobby = lobbyRepository.require(cmd.text);
+        lobbyService.publish(lobby, sessionOf(xchg).id);
 
-      xchg.reply({ text: "ok" })
-    })
+        xchg.reply({ text: "ok" });
+      });
   };
 
 export function resetLobbies() {

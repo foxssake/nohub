@@ -25,6 +25,8 @@ export function closeSession(socket: Socket<SessionData>) {
   logger.info("Closed session: %s", socket.data.id);
 }
 
-export function sessionOf(exchange: Exchange<Socket<SessionData>>): SessionData {
-  return exchange.source.data
+export function sessionOf(
+  exchange: Exchange<Socket<SessionData>>,
+): SessionData {
+  return exchange.source.data;
 }

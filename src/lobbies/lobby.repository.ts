@@ -7,6 +7,6 @@ export class LobbyRepository extends Repository<Lobby, string> {
   }
 
   protected notFoundError(id: string): Error {
-      return new Error(`Lobby#${id} not found!`)
+    return new Error(`Lobby#${id} not found!`);
   }
 }

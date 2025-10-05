@@ -34,43 +34,46 @@ export class LobbyService {
   }
 
   setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {
-    assert(lobby.owner === sessionId, "Trying to lock someone else's lobby!")
+    assert(lobby.owner === sessionId, "Trying to lock someone else's lobby!");
 
-    const updated = { ...lobby, data }
-    this.repository.update(updated)
-    return updated
+    const updated = { ...lobby, data };
+    this.repository.update(updated);
+    return updated;
   }
 
   lock(lobby: Lobby, sessionId: string): Lobby {
-    assert(lobby.owner === sessionId, "Trying to lock someone else's lobby!")
+    assert(lobby.owner === sessionId, "Trying to lock someone else's lobby!");
 
-    const result: Lobby = { ...lobby, isLocked: true }
-    this.repository.update(result)
-    return result
+    const result: Lobby = { ...lobby, isLocked: true };
+    this.repository.update(result);
+    return result;
   }
 
   unlock(lobby: Lobby, sessionId: string): Lobby {
-    assert(lobby.owner === sessionId, "Trying to unlock someone else's lobby!")
+    assert(lobby.owner === sessionId, "Trying to unlock someone else's lobby!");
 
-    const result: Lobby = { ...lobby, isLocked: false }
-    this.repository.update(result)
-    return result
+    const result: Lobby = { ...lobby, isLocked: false };
+    this.repository.update(result);
+    return result;
   }
 
   hide(lobby: Lobby, sessionId: string): Lobby {
-    assert(lobby.owner === sessionId, "Trying to hide someone else's lobby!")
+    assert(lobby.owner === sessionId, "Trying to hide someone else's lobby!");
 
-    const result: Lobby = { ...lobby, isVisible: false }
-    this.repository.update(result)
-    return result
+    const result: Lobby = { ...lobby, isVisible: false };
+    this.repository.update(result);
+    return result;
   }
 
   publish(lobby: Lobby, sessionId: string): Lobby {
-    assert(lobby.owner === sessionId, "Trying to publish someone else's lobby!")
+    assert(
+      lobby.owner === sessionId,
+      "Trying to publish someone else's lobby!",
+    );
 
-    const result: Lobby = { ...lobby, isVisible: true }
-    this.repository.update(result)
-    return result
+    const result: Lobby = { ...lobby, isVisible: true };
+    this.repository.update(result);
+    return result;
   }
 
   private generateId(): string {
