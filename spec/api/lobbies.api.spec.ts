@@ -178,7 +178,7 @@ describe("Lobbies API", () => {
   });
 
   describe("list", () => {
-    test.only("should list with properties", async () => {
+    test("should list with properties", async () => {
       // Create some lobbies
       const _lobbyIds = await Promise.all([
         api.client.createLobby(Lobbies.coolLobby.data),
