@@ -94,7 +94,10 @@ export class TrimsockClient<T> {
     private serverTarget: T,
   ) {}
 
-  async createLobby(address: string, data?: Map<string, string>): Promise<string> {
+  async createLobby(
+    address: string,
+    data?: Map<string, string>,
+  ): Promise<string> {
     const xchg = this.reactor.send(this.serverTarget, {
       name: "lobby/create",
       isRequest: true,

@@ -44,8 +44,8 @@ export class LobbyService {
   }
 
   join(lobby: Lobby, sessionId: string): string {
-    requireLobbyJoinable(lobby, sessionId)
-    return lobby.address
+    requireLobbyJoinable(lobby, sessionId);
+    return lobby.address;
   }
 
   setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {

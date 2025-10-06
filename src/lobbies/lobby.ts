@@ -23,9 +23,9 @@ export function requireLobbyModifiableIn(
 
 export function requireLobbyJoinable(lobby: Lobby, sessionId: string) {
   if (lobby.isLocked)
-    throw new LockedError(`Can't join locked lobby#${lobby.id}!`)
+    throw new LockedError(`Can't join locked lobby#${lobby.id}!`);
   if (lobby.owner === sessionId)
-    throw new LockedError("Can't join your own lobby - you're already there!")
+    throw new LockedError("Can't join your own lobby - you're already there!");
 }
 
 export function isLobbyVisibleTo(lobby: Lobby, sessionId: string): boolean {

@@ -7,5 +7,5 @@ export class UnauthorizedError extends Error {
 }
 
 export class LockedError extends UnauthorizedError {
-  name: string = "LockedError"
+  name: string = "LockedError";
 }

@@ -34,7 +34,11 @@ describe("LobbyService", () => {
         data: lobbyData,
       };
 
-      const lobby = lobbyService.create(Addresses.dave, lobbyData, Sessions.dave);
+      const lobby = lobbyService.create(
+        Addresses.dave,
+        lobbyData,
+        Sessions.dave,
+      );
 
       expected.id = lobby.id; // Ignore for comparison
       expect(lobby).toEqual(expected); // Lobby data matches
@@ -59,17 +63,23 @@ describe("LobbyService", () => {
 
   describe("join", () => {
     test("should respond with address", () => {
-      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(Lobbies.davesLobby.address)
-    })
+      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(
+        Lobbies.davesLobby.address,
+      );
+    });
 
     test("should throw on joining own lobby", () => {
-      expect(() => lobbyService.join(Lobbies.davesLobby, Sessions.dave)).toThrow(LockedError)
-    })
+      expect(() =>
+        lobbyService.join(Lobbies.davesLobby, Sessions.dave),
+      ).toThrow(LockedError);
+    });
 
     test("should  throw on joining locked lobby", () => {
-      expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(LockedError)
-    })
-  })
+      expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(
+        LockedError,
+      );
+    });
+  });
 
   describe("setData", () => {
     test("should replace lobby data", () => {
