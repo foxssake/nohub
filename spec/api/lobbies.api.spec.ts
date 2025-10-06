@@ -138,7 +138,48 @@ describe("Lobbies API", () => {
       }).toThrow();
     });
 
-    test.todo("should include locked flag", () => {});
-    test.todo("should include hidden flag", () => {});
+    test("should include locked flag", async () => {
+      // Create and lock lobby
+      const lobbyId = await api.client.createLobby()
+      await api.client.lockLobby(lobbyId)
+
+      // Query lobby
+      const reply = await api.send({ name: "lobby/get", params: [lobbyId], isRequest: true, requestId: ""}).onStream()
+      
+      // Lobby should be locked
+      expect(reply.params).toContain("locked")
+    });
+
+    test("should include hidden flag", async () => {
+      // Create and lock lobby
+      const lobbyId = await api.client.createLobby()
+      await api.client.hideLobby(lobbyId)
+
+      // Query lobby
+      const reply = await api.send({ name: "lobby/get", text: lobbyId, isRequest: true, requestId: ""}).onStream()
+      
+      // Lobby should be hidden
+      expect(reply.params).toContain("hidden")
+    });
   });
+
+  describe("list", () => {
+    test.only("should list with properties", async() => {
+      // Create some lobbies
+      const lobbyIds = await Promise.all([
+        api.client.createLobby(Lobbies.coolLobby.data),
+        api.client.createLobby(Lobbies.davesLobby.data)
+      ])
+
+      // List lobbies and their names
+      const chunks = await Array.fromAsync(api.send({ name: "lobby/list", isRequest: true, requestId: "", params: ["name"]}).chunks())
+      const properties = chunks.map(it => it.kvParams)
+
+      // Check names
+      expect(properties).toEqual([
+        [["name", "Cool Lobby"]],
+        [["name", "Dave's Lobby"]]
+      ])
+    })
+  })
 });
