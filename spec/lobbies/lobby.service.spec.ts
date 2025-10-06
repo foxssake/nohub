@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
-import { Lobbies, Sessions } from "@spec/fixtures";
-import { UnauthorizedError } from "@src/errors";
+import { Addresses, Lobbies, Sessions } from "@spec/fixtures";
+import { LockedError, UnauthorizedError } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
@@ -28,12 +28,17 @@ describe("LobbyService", () => {
       const expected: Lobby = {
         id: "",
         owner: Sessions.dave,
+        address: Addresses.dave,
         isVisible: true,
         isLocked: false,
         data: lobbyData,
       };
 
-      const lobby = lobbyService.create(lobbyData, Sessions.dave);
+      const lobby = lobbyService.create(
+        Addresses.dave,
+        lobbyData,
+        Sessions.dave,
+      );
 
       expected.id = lobby.id; // Ignore for comparison
       expect(lobby).toEqual(expected); // Lobby data matches
@@ -53,6 +58,26 @@ describe("LobbyService", () => {
         Lobbies.davesLobby,
         Lobbies.coolLobby,
       ]);
+    });
+  });
+
+  describe("join", () => {
+    test("should respond with address", () => {
+      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(
+        Lobbies.davesLobby.address,
+      );
+    });
+
+    test("should throw on joining own lobby", () => {
+      expect(() =>
+        lobbyService.join(Lobbies.davesLobby, Sessions.dave),
+      ).toThrow(LockedError);
+    });
+
+    test("should  throw on joining locked lobby", () => {
+      expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(
+        LockedError,
+      );
     });
   });
 

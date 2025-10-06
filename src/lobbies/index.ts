@@ -18,8 +18,15 @@ export const withLobbyCommands =
         assert(cmd.isRequest, "Command must be a request!");
         logger.info("Creating lobby");
 
+        const address = cmd.kvMap ? cmd.requireParam(0) : cmd.text;
         const data: Map<string, string> = cmd.kvMap ?? new Map();
-        const lobby = lobbyService.create(data, sessionOf(exchange).id);
+        assert(address, "Missing lobby address!");
+
+        const lobby = lobbyService.create(
+          address,
+          data,
+          sessionOf(exchange).id,
+        );
         exchange.reply({ text: lobby.id });
 
         logger.info("Created lobby#%s", lobby.id);
@@ -65,6 +72,19 @@ export const withLobbyCommands =
         xchg.finishStream();
 
         logger.info("Finished listing lobbies");
+      })
+      .on("lobby/join", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+
+        const lobbyId = cmd.requireText();
+        const sessionId = sessionOf(xchg).id;
+        logger.info("Session#%s is joining lobby#%s", sessionId, lobbyId);
+
+        const lobby = lobbyRepository.require(lobbyId);
+        const address = lobbyService.join(lobby, sessionId);
+
+        xchg.reply({ params: [address] });
+        logger.info("Session#%s joined lobby#%s", sessionId, lobbyId);
       })
       .on("lobby/set-data", (cmd, xchg) => {
         assert(cmd.isRequest, "Command must be a request!");

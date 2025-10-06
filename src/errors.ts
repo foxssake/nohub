@@ -5,3 +5,7 @@ export class DataNotFoundError extends Error {
 export class UnauthorizedError extends Error {
   name: string = "UnauthorizedError";
 }
+
+export class LockedError extends UnauthorizedError {
+  name: string = "LockedError";
+}

@@ -1,8 +1,9 @@
-import { UnauthorizedError } from "@src/errors";
+import { LockedError, UnauthorizedError } from "@src/errors";
 
 export interface Lobby {
   id: string;
   owner: string;
+  address: string;
   isVisible: boolean;
   isLocked: boolean;
   data: Map<string, string>;
@@ -18,6 +19,13 @@ export function requireLobbyModifiableIn(
     throw new UnauthorizedError(
       message ?? `Lobby#${lobby.id} can't be modified in session#${sessionId}!`,
     );
+}
+
+export function requireLobbyJoinable(lobby: Lobby, sessionId: string) {
+  if (lobby.isLocked)
+    throw new LockedError(`Can't join locked lobby#${lobby.id}!`);
+  if (lobby.owner === sessionId)
+    throw new LockedError("Can't join your own lobby - you're already there!");
 }
 
 export function isLobbyVisibleTo(lobby: Lobby, sessionId: string): boolean {

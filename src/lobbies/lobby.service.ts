@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import {
   isLobbyVisibleTo,
   type Lobby,
+  requireLobbyJoinable,
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
@@ -13,13 +14,14 @@ export class LobbyService {
     private logger = rootLogger.child({ name: "LobbyService" }),
   ) {}
 
-  create(data: Map<string, string>, sessionId: string): Lobby {
+  create(address: string, data: Map<string, string>, sessionId: string): Lobby {
     this.logger.info(
-      { data: Object.fromEntries(data.entries()) },
+      { data: Object.fromEntries(data.entries()), address },
       "Creating lobby with custom data",
     );
     const lobby: Lobby = {
       id: this.generateId(),
+      address,
       owner: sessionId,
       isVisible: true,
       isLocked: false,
@@ -39,6 +41,11 @@ export class LobbyService {
   *listLobbiesFor(sessionId: string): Generator<Lobby> {
     for (const lobby of this.repository.list())
       if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
+  }
+
+  join(lobby: Lobby, sessionId: string): string {
+    requireLobbyJoinable(lobby, sessionId);
+    return lobby.address;
   }
 
   setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {

@@ -1,8 +1,7 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { ApiTest } from "@spec/apitest";
-import { Lobbies } from "@spec/fixtures";
+import { Addresses, Lobbies } from "@spec/fixtures";
 
-const logger = ApiTest.logger;
 let api: ApiTest;
 
 describe("Lobbies API", () => {
@@ -17,7 +16,12 @@ describe("Lobbies API", () => {
   describe("create", () => {
     test("should create", async () => {
       const reply = await api
-        .send({ name: "lobby/create", isRequest: true, requestId: "" })
+        .send({
+          name: "lobby/create",
+          params: [Addresses.eric],
+          isRequest: true,
+          requestId: "",
+        })
         .onReply();
 
       expect(reply.isSuccessResponse).toBeTrue();
@@ -30,14 +34,25 @@ describe("Lobbies API", () => {
           name: "lobby/create",
           isRequest: true,
           requestId: "",
+          params: [Addresses.dave],
           kvMap: Lobbies.coolLobby.data,
         })
         .onReply();
 
       expect(reply.isSuccessResponse).toBeTrue();
       expect(reply.text).toBeString();
+    });
 
-      logger.info("Created lobby %s", reply.text);
+    test("should throw on missing address", async () => {
+      expect(async () =>
+        api
+          .send({
+            name: "lobby/create",
+            isRequest: true,
+            requestId: "",
+          })
+          .onReply(),
+      ).toThrow();
     });
   });
 
@@ -45,6 +60,7 @@ describe("Lobbies API", () => {
     test("should return custom data", async () => {
       // Create lobby
       const lobbyId = await api.client.createLobby(
+        Addresses.dave,
         new Map([
           ["name", "Cool Lobby"],
           ["player-count", "0"],
@@ -76,6 +92,7 @@ describe("Lobbies API", () => {
     test("should return only requested fields", async () => {
       // Create lobby
       const lobbyId = await api.client.createLobby(
+        Addresses.dave,
         new Map([
           ["name", "Cool Lobby"],
           ["player-count", "0"],
@@ -102,6 +119,7 @@ describe("Lobbies API", () => {
     test("should return no fields if none match", async () => {
       // Create lobby
       const lobbyId = await api.client.createLobby(
+        Addresses.dave,
         new Map([
           ["name", "Cool Lobby"],
           ["player-count", "0"],
@@ -140,7 +158,7 @@ describe("Lobbies API", () => {
 
     test("should include locked flag", async () => {
       // Create and lock lobby
-      const lobbyId = await api.client.createLobby();
+      const lobbyId = await api.client.createLobby(Addresses.eric);
       await api.client.lockLobby(lobbyId);
 
       // Query lobby
@@ -159,7 +177,7 @@ describe("Lobbies API", () => {
 
     test("should include hidden flag", async () => {
       // Create and lock lobby
-      const lobbyId = await api.client.createLobby();
+      const lobbyId = await api.client.createLobby(Addresses.eric);
       await api.client.hideLobby(lobbyId);
 
       // Query lobby
@@ -181,8 +199,8 @@ describe("Lobbies API", () => {
     test("should list with properties", async () => {
       // Create some lobbies
       await Promise.all([
-        api.client.createLobby(Lobbies.coolLobby.data),
-        api.client.createLobby(Lobbies.davesLobby.data),
+        api.client.createLobby(Addresses.eric, Lobbies.coolLobby.data),
+        api.client.createLobby(Addresses.dave, Lobbies.davesLobby.data),
       ]);
 
       // List lobbies and their names
@@ -203,6 +221,38 @@ describe("Lobbies API", () => {
         [["name", "Cool Lobby"]],
         [["name", "Dave's Lobby"]],
       ]);
+    });
+  });
+
+  describe("join", () => {
+    test.todo("should join", () => {
+      // TODO: Insert fixtures in testing
+      // TODO: Support multiple sessions per test
+    });
+
+    test("should throw on missing lobby ID", async () => {
+      expect(async () =>
+        api
+          .send({
+            name: "lobby/join",
+            isRequest: true,
+            requestId: "",
+          })
+          .onReply(),
+      ).toThrow();
+    });
+
+    test("should throw on unknown lobby ID", async () => {
+      expect(async () =>
+        api
+          .send({
+            name: "lobby/join",
+            isRequest: true,
+            requestId: "",
+            params: ["uknown"],
+          })
+          .onReply(),
+      ).toThrow();
     });
   });
 });
