@@ -69,6 +69,19 @@ export const withLobbyCommands =
 
         logger.info("Finished listing lobbies");
       })
+      .on("lobby/join", (cmd, xchg) => {
+        assert(cmd.isRequest, "Command must be a request!");
+
+        const lobbyId = cmd.requireText()
+        const sessionId = sessionOf(xchg).id
+        logger.info("Session#%s is joining lobby#%s", sessionId, lobbyId);
+
+        const lobby = lobbyRepository.require(lobbyId)
+        const address = lobbyService.join(lobby, sessionId)
+
+        xchg.reply({ params: [ address ]})
+        logger.info("Session#%s joined lobby#%s", sessionId, lobbyId)
+    })
       .on("lobby/set-data", (cmd, xchg) => {
         assert(cmd.isRequest, "Command must be a request!");
         assert(cmd.text, "No lobby ID specified!");

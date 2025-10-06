@@ -213,4 +213,28 @@ describe("Lobbies API", () => {
       ]);
     });
   });
+
+  describe("join", () => {
+    test.todo("should join", () => {
+      // TODO: Insert fixtures in testing
+      // TODO: Support multiple sessions per test
+    })
+
+    test("should throw on missing lobby ID", async () => {
+      expect(async () => api.send({
+        name: "lobby/join",
+        isRequest: true,
+        requestId: ""
+      }).onReply()).toThrow()
+    })
+
+    test("should throw on unknown lobby ID", async() => {
+      expect(async () => api.send({
+        name: "lobby/join",
+        isRequest: true,
+        requestId: "",
+        params: ["uknown"]
+      }).onReply()).toThrow()
+    })
+  })
 });

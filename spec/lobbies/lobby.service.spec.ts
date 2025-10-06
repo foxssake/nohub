@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { Addresses, Lobbies, Sessions } from "@spec/fixtures";
-import { UnauthorizedError } from "@src/errors";
+import { LockedError, UnauthorizedError } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
@@ -56,6 +56,20 @@ describe("LobbyService", () => {
       ]);
     });
   });
+
+  describe("join", () => {
+    test("should respond with address", () => {
+      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(Lobbies.davesLobby.address)
+    })
+
+    test("should throw on joining own lobby", () => {
+      expect(() => lobbyService.join(Lobbies.davesLobby, Sessions.dave)).toThrow(LockedError)
+    })
+
+    test("should  throw on joining locked lobby", () => {
+      expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(LockedError)
+    })
+  })
 
   describe("setData", () => {
     test("should replace lobby data", () => {

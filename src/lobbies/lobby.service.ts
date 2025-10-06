@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import {
   isLobbyVisibleTo,
   type Lobby,
+  requireLobbyJoinable,
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
@@ -40,6 +41,11 @@ export class LobbyService {
   *listLobbiesFor(sessionId: string): Generator<Lobby> {
     for (const lobby of this.repository.list())
       if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
+  }
+
+  join(lobby: Lobby, sessionId: string): string {
+    requireLobbyJoinable(lobby, sessionId)
+    return lobby.address
   }
 
   setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {

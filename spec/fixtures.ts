@@ -12,7 +12,7 @@ export const Sessions = {
 
 export const Addresses = {
   dave: "enet://224.103.6.176:49582",
-  eric:  "enet://118.154.159.94:51488"
+  eric: "enet://118.154.159.94:51488"
 }
 
 export const Lobbies = {
