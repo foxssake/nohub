@@ -41,6 +41,21 @@ describe("LobbyService", () => {
     });
   });
 
+  describe("listLobbiesFor", () => {
+    test("should not list hidden lobbies", () => {
+      expect([...lobbyService.listLobbiesFor(Sessions.dave)]).toEqual([
+        Lobbies.davesLobby,
+      ]);
+    });
+
+    test("should list owned hidden lobbies", () => {
+      expect([...lobbyService.listLobbiesFor(Sessions.eric)]).toEqual([
+        Lobbies.davesLobby,
+        Lobbies.coolLobby,
+      ]);
+    });
+  });
+
   describe("setData", () => {
     test("should replace lobby data", () => {
       const newData = Lobbies.coolLobby.data;

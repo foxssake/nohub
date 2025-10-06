@@ -21,7 +21,7 @@ export function nohub(
           resetLobbies();
 
           xchg.replyOrSend({ name: "reset", text: "ok" });
-          rootLogger.info("Replying ok");
+          rootLogger.info("Reset finished");
         });
       }
     })
