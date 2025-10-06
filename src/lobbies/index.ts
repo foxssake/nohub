@@ -18,8 +18,11 @@ export const withLobbyCommands =
         assert(cmd.isRequest, "Command must be a request!");
         logger.info("Creating lobby");
 
+        const address = cmd.kvMap ? cmd.requireParam(0) : cmd.text
         const data: Map<string, string> = cmd.kvMap ?? new Map();
-        const lobby = lobbyService.create(data, sessionOf(exchange).id);
+        assert(address, "Missing lobby address!")
+
+        const lobby = lobbyService.create(address, data, sessionOf(exchange).id);
         exchange.reply({ text: lobby.id });
 
         logger.info("Created lobby#%s", lobby.id);

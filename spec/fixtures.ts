@@ -10,10 +10,16 @@ export const Sessions = {
   },
 };
 
+export const Addresses = {
+  dave: "enet://224.103.6.176:49582",
+  eric:  "enet://118.154.159.94:51488"
+}
+
 export const Lobbies = {
   davesLobby: {
     id: "WzXOsEhM",
     owner: Sessions.dave,
+    address: Addresses.dave,
     isVisible: true,
     isLocked: false,
     data: new Map([
@@ -26,6 +32,7 @@ export const Lobbies = {
   coolLobby: {
     id: "5fl8Rbc7",
     owner: Sessions.eric,
+    address: Addresses.eric,
     isVisible: false,
     isLocked: true,
     data: new Map([

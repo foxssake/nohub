@@ -3,6 +3,7 @@ import { UnauthorizedError } from "@src/errors";
 export interface Lobby {
   id: string;
   owner: string;
+  address: string;
   isVisible: boolean;
   isLocked: boolean;
   data: Map<string, string>;

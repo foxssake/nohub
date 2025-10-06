@@ -13,13 +13,14 @@ export class LobbyService {
     private logger = rootLogger.child({ name: "LobbyService" }),
   ) {}
 
-  create(data: Map<string, string>, sessionId: string): Lobby {
+  create(address: string, data: Map<string, string>, sessionId: string): Lobby {
     this.logger.info(
-      { data: Object.fromEntries(data.entries()) },
+      { data: Object.fromEntries(data.entries()), address },
       "Creating lobby with custom data",
     );
     const lobby: Lobby = {
       id: this.generateId(),
+      address,
       owner: sessionId,
       isVisible: true,
       isLocked: false,
