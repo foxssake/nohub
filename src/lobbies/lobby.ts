@@ -21,26 +21,25 @@ export function requireLobbyModifiableIn(
 }
 
 export function isLobbyVisibleTo(lobby: Lobby, sessionId: string): boolean {
-  if (lobby.isVisible)
-    return true
+  if (lobby.isVisible) return true;
 
-  return lobby.owner === sessionId
+  return lobby.owner === sessionId;
 }
 
-export function lobbyToKvPairs(lobby: Lobby, properties?: string[]): [string, string][] {
-  if (properties === undefined)
-    return [...lobby.data.entries()]
-  if (properties.length == 0)
-    return []
+export function lobbyToKvPairs(
+  lobby: Lobby,
+  properties?: string[],
+): [string, string][] {
+  if (properties === undefined) return [...lobby.data.entries()];
+  if (properties.length === 0) return [];
 
-  return [...lobby.data.entries()]
-    .filter(([key]) => properties.includes(key))
+  return [...lobby.data.entries()].filter(([key]) => properties.includes(key));
 }
 
 export function lobbyKeywords(lobby: Lobby): string[] {
-  const result = []
-  if (lobby.isLocked) result.push("locked")
-  if (!lobby.isVisible) result.push("hidden")
+  const result = [];
+  if (lobby.isLocked) result.push("locked");
+  if (!lobby.isVisible) result.push("hidden");
 
-  return result
+  return result;
 }

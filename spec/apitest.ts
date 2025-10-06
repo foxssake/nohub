@@ -111,21 +111,25 @@ export class TrimsockClient<T> {
   }
 
   async lockLobby(lobbyId: string): Promise<void> {
-    await this.reactor.send(this.serverTarget, {
-      name: "lobby/lock",
-      params: [lobbyId],
-      isRequest: true,
-      requestId: this.exchangeId()
-    }).onReply()
+    await this.reactor
+      .send(this.serverTarget, {
+        name: "lobby/lock",
+        params: [lobbyId],
+        isRequest: true,
+        requestId: this.exchangeId(),
+      })
+      .onReply();
   }
 
   async hideLobby(lobbyId: string): Promise<void> {
-    await this.reactor.send(this.serverTarget, {
-      name: "lobby/hide",
-      params: [lobbyId],
-      isRequest: true,
-      requestId: this.exchangeId()
-    }).onReply()
+    await this.reactor
+      .send(this.serverTarget, {
+        name: "lobby/hide",
+        params: [lobbyId],
+        isRequest: true,
+        requestId: this.exchangeId(),
+      })
+      .onReply();
   }
 
   private exchangeId(): string {

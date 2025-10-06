@@ -1,7 +1,11 @@
 import { rootLogger } from "@src/logger";
 import { nanoid } from "nanoid";
-import { isLobbyVisibleTo, type Lobby, requireLobbyModifiableIn } from "./lobby";
-import { LobbyRepository } from "./lobby.repository";
+import {
+  isLobbyVisibleTo,
+  type Lobby,
+  requireLobbyModifiableIn,
+} from "./lobby";
+import type { LobbyRepository } from "./lobby.repository";
 
 export class LobbyService {
   constructor(
@@ -34,8 +38,7 @@ export class LobbyService {
 
   *listLobbiesFor(sessionId: string): Generator<Lobby> {
     for (const lobby of this.repository.list())
-      if (isLobbyVisibleTo(lobby, sessionId))
-        yield lobby
+      if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
   }
 
   setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {
