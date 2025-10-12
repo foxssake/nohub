@@ -10,6 +10,7 @@ script/source = "extends Control
 @onready var lobby_list: ItemList = %\"Lobby List\"
 @onready var create_name_input: LineEdit = %\"Lobby Name Input\"
 @onready var create_button: Button = %\"Create Lobby Button\"
+@onready var address_label: Label = %\"Address Label\"
 
 var list_interval: float = 2.0
 var time: float = 0.0
@@ -23,6 +24,11 @@ func _ready():
 	connect_button.pressed.connect(_connect)
 	disconnect_button.pressed.connect(_disconnect)
 	create_button.pressed.connect(_create_lobby)
+	lobby_list.item_activated.connect(_join_lobby)
+	
+	address_label.text = \"...\"
+	var ip := await _get_ip()
+	address_label.text = ip
 
 func _process(dt: float) -> void:
 	time += dt
@@ -75,10 +81,24 @@ func _disconnect() -> void:
 
 func _create_lobby() -> void:
 	var name := create_name_input.text
-	var lobby := await _client.create_lobby(\"enet://\", { \"name\": name })
+	var lobby := await _client.create_lobby(\"enet://\" + address_label.text, { \"name\": name })
 	print(\"Created lobby #%s\" % lobby.id)
 
 	create_name_input.text = \"\"
+
+func _join_lobby(clicked_idx: int) -> void:
+	var row_idx := clicked_idx / lobby_list.max_columns - 1
+	if row_idx < 0:
+		# User clicked header row, do nothing
+		return
+
+	var lobby := _lobbies_in_list[row_idx]
+	var address := await _client.join_lobby(lobby.id)
+
+	if not address:
+		OS.alert(\"Failed to join lobby #%s!\" % [lobby.id])
+	else:
+		OS.alert(\"Lobby address: %s\" % [address])
 
 func _update_list() -> void:
 	if _client == null: return
@@ -121,6 +141,33 @@ func _update_list() -> void:
 		lobby_list.add_item(JSON.stringify(lobby.data))
 
 	_lobbies_in_list.assign(lobbies)
+
+func _get_ip() -> String:
+	var ip := await _get_ip_ipify()
+	if not ip: ip = _get_ip_local()
+
+	return ip
+
+func _get_ip_ipify() -> String:
+	var request := HTTPRequest.new()
+	add_child(request)
+	
+	if request.request(\"https://api.ipify.org/\") != OK:
+		return \"\"
+
+	var response = await request.request_completed
+	var result := response[0] as int
+	var response_code := response[1] as int
+	var headers := response[2] as PackedStringArray
+	var body := response[3] as PackedByteArray
+
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		return \"\"
+
+	return body.get_string_from_utf8()
+
+func _get_ip_local() -> String:
+	return IP.get_local_addresses()[0]
 "
 
 [node name="Browser" type="Control"]
@@ -177,6 +224,24 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "None"
 
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Address Prefix" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+text = "Your address:"
+
+[node name="Address Label" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Help Label" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+text = "Double click a lobby to join"
+
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -191,8 +256,10 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+max_text_lines = 4
 max_columns = 5
 same_column_width = true
+fixed_column_width = 160
 
 [node name="Create Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
