@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://bhs77nb6hvx2t"]
+[gd_scene load_steps=2 format=3 uid="uid://4n0eqw25becg"]
 
 [sub_resource type="GDScript" id="GDScript_xkt7l"]
 script/source = "extends Control
@@ -38,7 +38,7 @@ func _process(dt: float) -> void:
 
 	if _client != null:
 		_client.poll()
-		
+
 		if time >= _last_list + list_interval:
 			_update_list()
 			_last_list = time
@@ -47,7 +47,7 @@ func _connect() -> void:
 	var input := host_input.text
 	var host := input
 	var port := 9980
-	
+
 	if input.contains(\":\"):
 		var at := input.rfind(\":\")
 		host = input.substr(0, at)
@@ -71,20 +71,32 @@ func _disconnect() -> void:
 
 func _create_lobby() -> void:
 	var name := create_name_input.text
-	var id := await _client.create_lobby(\"enet://\", { \"name\": name })
-	print(\"Created lobby #%s\" % id)
-	
+	var lobby := await _client.create_lobby(\"enet://\", { \"name\": name })
+	print(\"Created lobby #%s\" % lobby.id)
+
 	create_name_input.text = \"\"
 
 func _update_list() -> void:
 	if _client == null: return
-	
+
 	var lobbies := await _client.list_lobbies()
 	print(\"Received lobbies: %s\" % [lobbies])
-	
+
 	lobby_list.clear()
-	for lobby_id in lobbies:
-		lobby_list.add_item(lobby_id)
+
+	# Add header
+	lobby_list.add_item(\"ID\", null, false)
+	lobby_list.add_item(\"Name\", null, false)
+	lobby_list.add_item(\"Locked?\", null, false)
+	lobby_list.add_item(\"Hidden?\", null, false)
+	lobby_list.add_item(\"Data\", null, false)
+
+	for lobby in lobbies:
+		lobby_list.add_item(lobby.id)
+		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
+		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"\")
+		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\")
+		lobby_list.add_item(JSON.stringify(lobby.data))
 "
 
 [node name="Browser" type="Control"]
@@ -155,6 +167,7 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+max_columns = 5
 same_column_width = true
 
 [node name="Create Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
