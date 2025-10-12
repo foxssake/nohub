@@ -17,6 +17,7 @@ var time: float = 0.0
 var _connection: StreamPeerTCP = null
 var _client: NohubClient = null
 var _last_list: float = -1.
+var _lobbies_in_list: Array[NohubLobby] = []
 
 func _ready():
 	connect_button.pressed.connect(_connect)
@@ -69,6 +70,9 @@ func _disconnect() -> void:
 	_connection = null
 	_client = null
 
+	lobby_list.clear()
+	_lobbies_in_list.clear()
+
 func _create_lobby() -> void:
 	var name := create_name_input.text
 	var lobby := await _client.create_lobby(\"enet://\", { \"name\": name })
@@ -82,21 +86,41 @@ func _update_list() -> void:
 	var lobbies := await _client.list_lobbies()
 	print(\"Received lobbies: %s\" % [lobbies])
 
-	lobby_list.clear()
-
 	# Add header
-	lobby_list.add_item(\"ID\", null, false)
-	lobby_list.add_item(\"Name\", null, false)
-	lobby_list.add_item(\"Locked?\", null, false)
-	lobby_list.add_item(\"Hidden?\", null, false)
-	lobby_list.add_item(\"Data\", null, false)
+	if lobby_list.item_count == 0:
+		lobby_list.add_item(\"ID\", null, false)
+		lobby_list.add_item(\"Name\", null, false)
+		lobby_list.add_item(\"Locked?\", null, false)
+		lobby_list.add_item(\"Hidden?\", null, false)
+		lobby_list.add_item(\"Data\", null, false)
 
+	# Remove lobbies that are no longer in the list
+	var at := lobby_list.max_columns
+	while at < lobby_list.item_count:
+		var id_in_list := lobby_list.get_item_text(at)
+
+		# Lobby still in list, do nothing
+		if lobbies.any(func(it: NohubLobby): return it.id == id_in_list):
+			at += lobby_list.max_columns
+			continue
+
+		# Remove row
+		for i in lobby_list.max_columns:
+			lobby_list.remove_item(at)
+
+	# Add lobbies that are not in the list yet
 	for lobby in lobbies:
+		# Lobby already in list, do nothing
+		if _lobbies_in_list.any(func(it: NohubLobby): return it.id == lobby.id):
+			continue
+
 		lobby_list.add_item(lobby.id)
 		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
 		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"\")
 		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\")
 		lobby_list.add_item(JSON.stringify(lobby.data))
+
+	_lobbies_in_list.assign(lobbies)
 "
 
 [node name="Browser" type="Control"]
