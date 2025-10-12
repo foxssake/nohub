@@ -15,7 +15,7 @@ func _init(connection: StreamPeerTCP):
 func poll() -> void:
 	_reactor.poll()
 
-func create_lobby(address: String, data: Dictionary) -> String:
+func create_lobby(address: String, data: Dictionary) -> NohubLobby:
 	var request := TrimsockCommand.request("lobby/create")\
 		.with_params([address])
 	for key in data:
@@ -25,12 +25,15 @@ func create_lobby(address: String, data: Dictionary) -> String:
 	var response := await xchg.read()
 	
 	if response.is_success():
-		return response.text
+		var lobby := NohubLobby.new()
+		lobby.id = response.text
+		lobby.data = data
+		return lobby
 	else:
-		return ""
+		return null
 
-func list_lobbies(fields: Array[String] = []) -> Array[String]:
-	var result := [] as Array[String]
+func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
+	var result := [] as Array[NohubLobby]
 	var request := TrimsockCommand.request("lobby/list")\
 		.with_params(fields)
 
@@ -39,17 +42,13 @@ func list_lobbies(fields: Array[String] = []) -> Array[String]:
 		var cmd := await xchg.read()
 		if not cmd.is_stream_chunk():
 			continue
-		result.append(cmd.params[0]) # TODO: Parse keywords and fields
+
+		var lobby := NohubLobby.new()
+		lobby.id = cmd.params[0]
+		lobby.is_locked = cmd.params.has("locked")
+		lobby.is_visible = not cmd.params.has("hidden")
+		lobby.data = cmd.kv_map
+
+		result.append(lobby)
 	
 	return result
-
-func join_lobby(id: String) -> String:
-	var request := TrimsockCommand.request("lobby/join")\
-		.with_params([id])
-
-	var xchg := _reactor.submit_request(request)
-	var response := await xchg.read()
-	
-	if response.is_success():
-		return response.text
-	return ""
