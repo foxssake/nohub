@@ -52,3 +52,15 @@ func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
 		result.append(lobby)
 	
 	return result
+
+func join_lobby(lobby_id: String) -> String:
+	var request := TrimsockCommand.request("lobby/join")\
+		.with_params([lobby_id])
+
+	var xchg := _reactor.submit_request(request)
+	var response := await xchg.read()
+	
+	if response.is_success():
+		return response.params[0]
+	else:
+		return ""
