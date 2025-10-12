@@ -1,0 +1,212 @@
+[gd_scene load_steps=2 format=3 uid="uid://4n0eqw25becg"]
+
+[sub_resource type="GDScript" id="GDScript_xkt7l"]
+script/source = "extends Control
+
+@onready var host_input: LineEdit = %\"Host Input\"
+@onready var connect_button: Button = %\"Connect Button\"
+@onready var disconnect_button: Button = %\"Disconnect Button\"
+@onready var status_label: Label = %\"Status Label\"
+@onready var lobby_list: ItemList = %\"Lobby List\"
+@onready var create_name_input: LineEdit = %\"Lobby Name Input\"
+@onready var create_button: Button = %\"Create Lobby Button\"
+
+var list_interval: float = 2.0
+var time: float = 0.0
+
+var _connection: StreamPeerTCP = null
+var _client: NohubClient = null
+var _last_list: float = -1.
+var _lobbies_in_list: Array[NohubLobby] = []
+
+func _ready():
+	connect_button.pressed.connect(_connect)
+	disconnect_button.pressed.connect(_disconnect)
+	create_button.pressed.connect(_create_lobby)
+
+func _process(dt: float) -> void:
+	time += dt
+	status_label.text = \"None\"
+
+	if _connection != null:
+		match _connection.get_status():
+			StreamPeerTCP.STATUS_NONE: status_label.text = \"None\"
+			StreamPeerTCP.STATUS_CONNECTING: status_label.text = \"Connecting...\"
+			StreamPeerTCP.STATUS_CONNECTED: status_label.text = \"Connected\"
+			StreamPeerTCP.STATUS_ERROR: status_label.text = \"Error\"
+		
+		_connection.poll()
+
+	if _client != null:
+		_client.poll()
+
+		if time >= _last_list + list_interval:
+			_update_list()
+			_last_list = time
+
+func _connect() -> void:
+	var input := host_input.text
+	var host := input
+	var port := 9980
+
+	if input.contains(\":\"):
+		var at := input.rfind(\":\")
+		host = input.substr(0, at)
+		port = int(input.substr(at + 1))
+
+	print(\"Connecting to nohub at %s:%d\" % [host, port])
+
+	_connection = StreamPeerTCP.new()
+	_connection.connect_to_host(host, port)
+
+	_client = NohubClient.new(_connection)
+
+func _disconnect() -> void:
+	if _connection == null:
+		return
+
+	print(\"Disconnecting from host\")
+	_connection.disconnect_from_host()
+	_connection = null
+	_client = null
+
+	lobby_list.clear()
+	_lobbies_in_list.clear()
+
+func _create_lobby() -> void:
+	var name := create_name_input.text
+	var lobby := await _client.create_lobby(\"enet://\", { \"name\": name })
+	print(\"Created lobby #%s\" % lobby.id)
+
+	create_name_input.text = \"\"
+
+func _update_list() -> void:
+	if _client == null: return
+
+	var lobbies := await _client.list_lobbies()
+	print(\"Received lobbies: %s\" % [lobbies])
+
+	# Add header
+	if lobby_list.item_count == 0:
+		lobby_list.add_item(\"ID\", null, false)
+		lobby_list.add_item(\"Name\", null, false)
+		lobby_list.add_item(\"Locked?\", null, false)
+		lobby_list.add_item(\"Hidden?\", null, false)
+		lobby_list.add_item(\"Data\", null, false)
+
+	# Remove lobbies that are no longer in the list
+	var at := lobby_list.max_columns
+	while at < lobby_list.item_count:
+		var id_in_list := lobby_list.get_item_text(at)
+
+		# Lobby still in list, do nothing
+		if lobbies.any(func(it: NohubLobby): return it.id == id_in_list):
+			at += lobby_list.max_columns
+			continue
+
+		# Remove row
+		for i in lobby_list.max_columns:
+			lobby_list.remove_item(at)
+
+	# Add lobbies that are not in the list yet
+	for lobby in lobbies:
+		# Lobby already in list, do nothing
+		if _lobbies_in_list.any(func(it: NohubLobby): return it.id == lobby.id):
+			continue
+
+		lobby_list.add_item(lobby.id)
+		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
+		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"\")
+		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\")
+		lobby_list.add_item(JSON.stringify(lobby.data))
+
+	_lobbies_in_list.assign(lobbies)
+"
+
+[node name="Browser" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_xkt7l")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Left Panel" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/Left Panel"]
+layout_mode = 2
+
+[node name="Host Input" type="LineEdit" parent="HBoxContainer/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Address"
+
+[node name="Buttons Container" type="HBoxContainer" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Connect Button" type="Button" parent="HBoxContainer/Left Panel/VBoxContainer/Buttons Container"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Connect"
+
+[node name="Disconnect Button" type="Button" parent="HBoxContainer/Left Panel/VBoxContainer/Buttons Container"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Disconnect"
+
+[node name="Status Container" type="HBoxContainer" parent="HBoxContainer/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Status Prefix" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer/Status Container"]
+layout_mode = 2
+text = "Status:"
+
+[node name="Status Label" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer/Status Container"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "None"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="List Panel" type="ScrollContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Lobby List" type="ItemList" parent="HBoxContainer/VBoxContainer/List Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+max_columns = 5
+same_column_width = true
+
+[node name="Create Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Lobby Name Label" type="Label" parent="HBoxContainer/VBoxContainer/Create Container"]
+layout_mode = 2
+text = "Lobby name: "
+
+[node name="Lobby Name Input" type="LineEdit" parent="HBoxContainer/VBoxContainer/Create Container"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Create Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Create Container"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Create Lobby"
