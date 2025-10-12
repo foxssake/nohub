@@ -7,6 +7,7 @@ var _readers: Dictionary = {} # source to reader
 var _handlers: Dictionary = {} # command name to handler method
 var _exchanges: Array[TrimsockExchange] = []
 var _unknown_handler: Callable = func(_cmd): pass
+var _id_generator: TrimsockIDGenerator = RandomTrimsockIDGenerator.new(12)
 
 
 signal on_attach(source: Variant)
@@ -25,13 +26,28 @@ func poll() -> void:
 
 			_handle(command, source)
 
-# TODO(trimsock): Return exchange
 func send(target: Variant, command: TrimsockCommand) -> TrimsockExchange:
+	# Send command
 	_write(target, command)
-	# TODO(trimsock): Return exchange
+
+	# Ensure exchange
 	var xchg := _get_exchange_for(command, target)
-	if xchg == null: xchg = _make_exchange_for(command, target)
+	if xchg == null:
+		xchg = _make_exchange_for(command, target)
+
 	return xchg
+
+func request(target: Variant, command: TrimsockCommand) ->  TrimsockExchange:
+	command.as_request()
+	if not command.exchange_id:
+		command.exchange_id = _id_generator.get_id()
+	return send(target, command)
+
+func stream(target: Variant, command: TrimsockCommand) ->  TrimsockExchange:
+	command.as_stream()
+	if not command.exchange_id:
+		command.exchange_id = _id_generator.get_id()
+	return send(target, command)
 
 func attach(source: Variant) -> void:
 	if _sources.has(source):
@@ -55,6 +71,9 @@ func set_session(source: Variant, data: Variant) -> void:
 
 func get_session(source: Variant) -> Variant:
 	return _sessions.get(source)
+
+func set_id_generator(id_generator: TrimsockIDGenerator) -> void:
+	_id_generator = id_generator
 
 func on(command_name: String, handler: Callable) -> TrimsockReactor:
 	_handlers[command_name] = handler
