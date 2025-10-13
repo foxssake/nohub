@@ -119,7 +119,7 @@ func _create_lobby() -> void:
 	var name := create_name_input.text
 	var lobby := await _client.create_lobby(\"enet://\" + address_label.text, { \"name\": name })
 	if lobby == null:
-		print(\"Failed to create lobby!\")
+		popup(\"Failed to create lobby!\")
 		return
 
 	print(\"Created lobby #%s\" % lobby.id)
