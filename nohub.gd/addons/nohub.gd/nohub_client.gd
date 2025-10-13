@@ -64,3 +64,34 @@ func join_lobby(lobby_id: String) -> String:
 		return response.params[0]
 	else:
 		return ""
+
+func lock_lobby(lobby_id: String) -> bool:
+	var request := TrimsockCommand.request("lobby/lock")\
+		.with_params([lobby_id])
+	return await _bool_request(request)
+
+func unlock_lobby(lobby_id: String) -> bool:
+	var request := TrimsockCommand.request("lobby/unlock")\
+		.with_params([lobby_id])
+	return await _bool_request(request)
+
+func hide_lobby(lobby_id: String) -> bool:
+	var request := TrimsockCommand.request("lobby/hide")\
+		.with_params([lobby_id])
+	return await _bool_request(request)
+
+func publish_lobby(lobby_id: String) -> bool:
+	var request := TrimsockCommand.request("lobby/publish")\
+		.with_params([lobby_id])
+	return await _bool_request(request)
+
+func set_lobby_data(lobby_id: String, data: Dictionary) -> bool:
+	var request := TrimsockCommand.request("lobby/set-data")\
+		.with_params([lobby_id])\
+		.with_kv_map(data)
+	return await _bool_request(request)
+
+func _bool_request(request: TrimsockCommand) -> bool:
+	var xchg := _reactor.submit_request(request)
+	var response := await xchg.read()
+	return response.is_success()
