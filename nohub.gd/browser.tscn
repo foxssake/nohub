@@ -11,6 +11,10 @@ script/source = "extends Control
 @onready var create_name_input: LineEdit = %\"Lobby Name Input\"
 @onready var create_button: Button = %\"Create Lobby Button\"
 @onready var address_label: Label = %\"Address Label\"
+@onready var selected_lobby_label: Label = %\"Selected Lobby Label\"
+@onready var lock_lobby_button: Button = %\"Lock Lobby Button\"
+@onready var hide_lobby_button: Button = %\"Hide Lobby Button\"
+@onready var join_lobby_button: Button = %\"Join Lobby Button\"
 
 var list_interval: float = 2.0
 var time: float = 0.0
@@ -20,11 +24,25 @@ var _client: NohubClient = null
 var _last_list: float = -1.
 var _lobbies_in_list: Array[NohubLobby] = []
 
+var _selected_lobby: NohubLobby = null
+
+func set_selected_lobby(lobby: NohubLobby) -> void:
+	_selected_lobby = lobby
+	if is_instance_valid(lobby):
+		selected_lobby_label.text = lobby.id
+	else:
+		selected_lobby_label.text = \"\"
+
+func get_selected_lobby() -> NohubLobby:
+	return _selected_lobby
+
 func _ready():
 	connect_button.pressed.connect(_connect)
 	disconnect_button.pressed.connect(_disconnect)
 	create_button.pressed.connect(_create_lobby)
-	lobby_list.item_activated.connect(_join_lobby)
+	lobby_list.item_selected.connect(_select_lobby)
+
+	join_lobby_button.pressed.connect(_join_lobby)
 	
 	address_label.text = \"...\"
 	var ip := await _get_ip()
@@ -86,13 +104,21 @@ func _create_lobby() -> void:
 
 	create_name_input.text = \"\"
 
-func _join_lobby(clicked_idx: int) -> void:
+func _select_lobby(clicked_idx: int) -> void:
 	var row_idx := clicked_idx / lobby_list.max_columns - 1
 	if row_idx < 0:
 		# User clicked header row, do nothing
 		return
 
 	var lobby := _lobbies_in_list[row_idx]
+	set_selected_lobby(lobby)
+
+func _join_lobby() -> void:
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
 	var address := await _client.join_lobby(lobby.id)
 
 	if not address:
@@ -235,13 +261,6 @@ text = "Your address:"
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="HSeparator2" type="HSeparator" parent="HBoxContainer/Left Panel/VBoxContainer"]
-layout_mode = 2
-
-[node name="Help Label" type="Label" parent="HBoxContainer/Left Panel/VBoxContainer"]
-layout_mode = 2
-text = "Double click a lobby to join"
-
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -261,19 +280,67 @@ max_columns = 5
 same_column_width = true
 fixed_column_width = 160
 
-[node name="Create Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+[node name="Tools" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Lobby Name Label" type="Label" parent="HBoxContainer/VBoxContainer/Create Container"]
+[node name="Create Container" type="PanelContainer" parent="HBoxContainer/VBoxContainer/Tools"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/Tools/Create Container"]
+layout_mode = 2
+
+[node name="Lobby Name Label" type="Label" parent="HBoxContainer/VBoxContainer/Tools/Create Container/VBoxContainer"]
 layout_mode = 2
 text = "Lobby name: "
 
-[node name="Lobby Name Input" type="LineEdit" parent="HBoxContainer/VBoxContainer/Create Container"]
+[node name="Lobby Name Input" type="LineEdit" parent="HBoxContainer/VBoxContainer/Tools/Create Container/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Create Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Create Container"]
+[node name="Create Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Tools/Create Container/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Create Lobby"
+
+[node name="Tools Container" type="PanelContainer" parent="HBoxContainer/VBoxContainer/Tools"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Rows" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/Tools/Tools Container"]
+layout_mode = 2
+
+[node name="Selected Lobby Row" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows"]
+layout_mode = 2
+
+[node name="Selected Lobby Prefix" type="Label" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows/Selected Lobby Row"]
+layout_mode = 2
+text = "Selected Lobby: "
+
+[node name="Selected Lobby Label" type="Label" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows/Selected Lobby Row"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tools Row" type="HBoxContainer" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Lock Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Lock / Unlock"
+
+[node name="Hide Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hide / Publish"
+
+[node name="Join Lobby Button" type="Button" parent="HBoxContainer/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Join"
