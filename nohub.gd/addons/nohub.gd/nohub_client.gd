@@ -53,6 +53,11 @@ func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
 	
 	return result
 
+func delete_lobby(lobby_id: String) -> bool:
+	var request := TrimsockCommand.request("lobby/delete")\
+		.with_params([lobby_id])
+	return await _bool_request(request)
+
 func join_lobby(lobby_id: String) -> String:
 	var request := TrimsockCommand.request("lobby/join")\
 		.with_params([lobby_id])
