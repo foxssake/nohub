@@ -63,13 +63,17 @@ describe("LobbyService", () => {
 
   describe("delete", () => {
     test("should delete lobby", () => {
-      expect(() => lobbyService.delete(Lobbies.davesLobby, Sessions.dave)).not.toThrow()
-    })
+      expect(() =>
+        lobbyService.delete(Lobbies.davesLobby, Sessions.dave),
+      ).not.toThrow();
+    });
 
     test("should throw if not owner", () => {
-      expect(() => lobbyService.delete(Lobbies.davesLobby, Sessions.pam)).toThrow()
-    })
-  })
+      expect(() =>
+        lobbyService.delete(Lobbies.davesLobby, Sessions.pam),
+      ).toThrow();
+    });
+  });
 
   describe("join", () => {
     test("should respond with address", () => {

@@ -119,10 +119,10 @@ export class TrimsockClient<T> {
       name: "lobby/delete",
       isRequest: true,
       requestId: this.exchangeId(),
-      params: [lobbyId]
-    })
+      params: [lobbyId],
+    });
 
-    await xchg.onReply()
+    await xchg.onReply();
   }
 
   async lockLobby(lobbyId: string): Promise<void> {

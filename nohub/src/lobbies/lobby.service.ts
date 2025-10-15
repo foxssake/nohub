@@ -44,8 +44,8 @@ export class LobbyService {
   }
 
   delete(lobby: Lobby, sessionId: string) {
-    requireLobbyModifiableIn(lobby, sessionId)
-    this.repository.remove(lobby.id)
+    requireLobbyModifiableIn(lobby, sessionId);
+    this.repository.remove(lobby.id);
   }
 
   join(lobby: Lobby, sessionId: string): string {

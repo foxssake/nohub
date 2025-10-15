@@ -58,16 +58,16 @@ export const withLobbyCommands =
       })
       .on("lobby/delete", (cmd, xchg) => {
         assert(cmd.isRequest, "Command must be a request!"); // TODO: Extract to method
-        assert(cmd.text, "Missing lobby ID!")
+        assert(cmd.text, "Missing lobby ID!");
 
         const id = cmd.text;
-        logger.info("Deleting lobby #%s", id)
+        logger.info("Deleting lobby #%s", id);
 
-        const lobby = lobbyRepository.require(id)
-        lobbyService.delete(lobby, sessionOf(xchg).id)
+        const lobby = lobbyRepository.require(id);
+        lobbyService.delete(lobby, sessionOf(xchg).id);
 
-        logger.info("Deleted lobby #%s", id)
-        xchg.reply({ text: "ok" })
+        logger.info("Deleted lobby #%s", id);
+        xchg.reply({ text: "ok" });
       })
       .on("lobby/list", (cmd, xchg) => {
         assert(cmd.isRequest, "Command must be a request!");
