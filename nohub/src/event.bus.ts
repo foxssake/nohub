@@ -27,3 +27,25 @@ export class EventBus {
     return this.subscribers.get(event) ?? [];
   }
 }
+
+export class TypedEventBus<T extends Record<string, Function>> extends EventBus {
+  on(event: keyof(T), handler: T[typeof event]): void;
+  on(event: string, handler: Function) {
+    super.on(event, handler)
+  }
+
+  off(event: keyof(T), handler: T[typeof event]): void;
+  off(event: string, handler: Function) {
+    super.off(event, handler)
+  }
+
+  emit(event: string, ...args: any[]): void {
+    super.emit(event, ...args)
+  }
+}
+
+export class CoolEventBus extends TypedEventBus<{
+  "session-close": (sessionId: string) => void
+}> {}
+
+const ceb = new CoolEventBus()
