@@ -61,6 +61,20 @@ describe("LobbyService", () => {
     });
   });
 
+  describe("delete", () => {
+    test("should delete lobby", () => {
+      expect(() =>
+        lobbyService.delete(Lobbies.davesLobby, Sessions.dave),
+      ).not.toThrow();
+    });
+
+    test("should throw if not owner", () => {
+      expect(() =>
+        lobbyService.delete(Lobbies.davesLobby, Sessions.pam),
+      ).toThrow();
+    });
+  });
+
   describe("join", () => {
     test("should respond with address", () => {
       expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(

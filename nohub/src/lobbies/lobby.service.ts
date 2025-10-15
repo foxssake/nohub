@@ -43,6 +43,11 @@ export class LobbyService {
       if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
   }
 
+  delete(lobby: Lobby, sessionId: string) {
+    requireLobbyModifiableIn(lobby, sessionId);
+    this.repository.remove(lobby.id);
+  }
+
   join(lobby: Lobby, sessionId: string): string {
     requireLobbyJoinable(lobby, sessionId);
     return lobby.address;

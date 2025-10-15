@@ -224,6 +224,23 @@ describe("Lobbies API", () => {
     });
   });
 
+  describe("delete", () => {
+    test("should throw on missing lobby ID", () => {
+      expect(async () => {
+        await api
+          .send({
+            name: "lobby/delete",
+            isRequest: true,
+            requestId: "",
+          })
+          .onReply();
+      }).toThrow();
+    });
+    test("should throw on unknown lobby ID", () => {
+      expect(async () => await api.client.deleteLobby("unknown")).toThrow();
+    });
+  });
+
   describe("join", () => {
     test.todo("should join", () => {
       // TODO: Insert fixtures in testing

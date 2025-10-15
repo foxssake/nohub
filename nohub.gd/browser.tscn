@@ -7,14 +7,18 @@ script/source = "extends Control
 @onready var connect_button: Button = %\"Connect Button\"
 @onready var disconnect_button: Button = %\"Disconnect Button\"
 @onready var status_label: Label = %\"Status Label\"
+
 @onready var lobby_list: ItemList = %\"Lobby List\"
+
 @onready var create_name_input: LineEdit = %\"Lobby Name Input\"
 @onready var create_button: Button = %\"Create Lobby Button\"
 @onready var address_label: Label = %\"Address Label\"
 @onready var selected_lobby_label: Label = %\"Selected Lobby Label\"
+
 @onready var lock_lobby_button: Button = %\"Lock Lobby Button\"
 @onready var hide_lobby_button: Button = %\"Hide Lobby Button\"
 @onready var join_lobby_button: Button = %\"Join Lobby Button\"
+@onready var delete_lobby_button: Button = %\"Delete Lobby Button\"
 
 @onready var modal: Popup = %Modal
 @onready var modal_message_label: Label = %\"Message Label\"
@@ -57,6 +61,7 @@ func _ready():
 	join_lobby_button.pressed.connect(_join_lobby)
 	lock_lobby_button.pressed.connect(_lock_lobby)
 	hide_lobby_button.pressed.connect(_hide_lobby)
+	delete_lobby_button.pressed.connect(_delete_lobby)
 	
 	modal_confirm_button.pressed.connect(func():
 		modal.hide()
@@ -176,13 +181,25 @@ func _hide_lobby():
 		return
 
 	if lobby.is_visible:
-		if not await _client.publish_lobby(lobby.id):
-			popup(\"Failed to publish lobby #%s!\" % [lobby.id])
-	else:
 		if not await _client.hide_lobby(lobby.id):
 			popup(\"Failed to hide lobby #%s!\" % [lobby.id])
+	else:
+		if not await _client.publish_lobby(lobby.id):
+			popup(\"Failed to publish lobby #%s!\" % [lobby.id])
 
 	_update_list()
+
+func _delete_lobby():
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var success := await _client.delete_lobby(lobby.id)
+	if not success:
+		popup(\"Failed to delete lobby #%s!\" % [lobby.id])
+	else:
+		_update_list()
 
 func _update_list() -> void:
 	if _client == null: return
@@ -395,6 +412,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Join"
 
+[node name="Delete Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete"
+
 [node name="Modal" type="PopupPanel" parent="."]
 unique_name_in_owner = true
 initial_position = 4
@@ -407,16 +430,23 @@ offset_top = 4.0
 offset_right = 244.0
 offset_bottom = 164.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Modal/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Modal/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Modal/PanelContainer/MarginContainer"]
 layout_mode = 2
 
-[node name="Message Label" type="Label" parent="Modal/PanelContainer/VBoxContainer"]
+[node name="Message Label" type="Label" parent="Modal/PanelContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 text = "Message here"
 
-[node name="Confirm Button" type="Button" parent="Modal/PanelContainer/VBoxContainer"]
+[node name="Confirm Button" type="Button" parent="Modal/PanelContainer/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
