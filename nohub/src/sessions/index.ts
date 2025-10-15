@@ -1,4 +1,5 @@
 import type { Exchange } from "@foxssake/trimsock-js";
+import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
@@ -22,7 +23,9 @@ export function openSession(socket: Socket<SessionData>) {
 }
 
 export function closeSession(socket: Socket<SessionData>) {
-  logger.info("Closed session: %s", socket.data.id);
+  const sessionId = socket.data.id;
+  logger.info("Closed session: %s", sessionId);
+  eventBus.emit("session-close", sessionId);
 }
 
 export function sessionOf(
