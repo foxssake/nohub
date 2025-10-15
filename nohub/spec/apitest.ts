@@ -114,6 +114,17 @@ export class TrimsockClient<T> {
     return reply.text;
   }
 
+  async deleteLobby(lobbyId: string): Promise<void> {
+    const xchg = this.reactor.send(this.serverTarget, {
+      name: "lobby/delete",
+      isRequest: true,
+      requestId: this.exchangeId(),
+      params: [lobbyId]
+    })
+
+    await xchg.onReply()
+  }
+
   async lockLobby(lobbyId: string): Promise<void> {
     await this.reactor
       .send(this.serverTarget, {
