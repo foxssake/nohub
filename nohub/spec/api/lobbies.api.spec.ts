@@ -278,6 +278,6 @@ describe("Lobbies API", () => {
     test.todo("should delete sessions on owner disconnect", async () => {
       // TODO: Insert fixtures in testing
       // TODO: Support multiple sessions per test
-    })
-  })
+    });
+  });
 });

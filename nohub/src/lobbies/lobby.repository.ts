@@ -9,8 +9,7 @@ export class LobbyRepository extends Repository<Lobby, string> {
 
   removeLobbiesOf(sessionId: string): void {
     for (const lobby of this.list())
-      if (lobby.owner === sessionId)
-        this.removeItem(lobby)
+      if (lobby.owner === sessionId) this.removeItem(lobby);
   }
 
   protected notFoundError(id: string): Error {
