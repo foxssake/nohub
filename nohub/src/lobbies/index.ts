@@ -36,6 +36,7 @@ export const withLobbyCommands =
         logger.info("Created lobby#%s", lobby.id);
       })
       .on("lobby/get", (cmd, xchg) => {
+        // TODO: Move into Ops method
         // Validate request
         requireRequest(cmd);
         // Lobby ID is either first param, or command data if no params
@@ -72,6 +73,7 @@ export const withLobbyCommands =
         xchg.reply({ text: "ok" });
       })
       .on("lobby/list", (cmd, xchg) => {
+        // TODO: Move into Ops method
         requireRequest(cmd);
         logger.info("Listing lobbies");
 

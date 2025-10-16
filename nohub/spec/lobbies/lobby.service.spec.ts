@@ -43,6 +43,8 @@ describe("LobbyService", () => {
       expect(lobby).toEqual(expected); // Lobby data matches
       expect(lobbyRepository.find(expected.id)).toEqual(expected); // Lobby was saved in repo
     });
+
+    test.todo("should not create without game in session", () => {})
   });
 
   describe("listLobbiesFor", () => {
@@ -58,6 +60,10 @@ describe("LobbyService", () => {
         Lobbies.coolLobby,
       ]);
     });
+
+    test.todo("should not list lobbies in different games", () => {
+
+    })
   });
 
   describe("delete", () => {
@@ -92,6 +98,8 @@ describe("LobbyService", () => {
         LockedError,
       );
     });
+
+    test.todo("should not join lobby in different game", () => {})
   });
 
   describe("setData", () => {
