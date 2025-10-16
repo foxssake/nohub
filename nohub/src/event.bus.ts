@@ -2,6 +2,7 @@
 // biome-ignore-all lint/complexity/noBannedTypes: Event handlers are generic and thus use Function, use overloads to provide specifics
 
 type EventHandler = (...args: any[]) => void;
+type EventMap = { [key: string]: EventHandler };
 
 export class EventBus {
   private subscribers: Map<string, EventHandler[]> = new Map();
@@ -30,18 +31,20 @@ export class EventBus {
   }
 }
 
-export class TypedEventBus<T extends Record<string, EventHandler>> extends EventBus {
-  on(event: keyof(T), handler: T[typeof event]): void;
+// Type magic based on: https://github.com/andywer/typed-emitter
+// Thanks, @andywer!
+export class TypedEventBus<T extends EventMap> extends EventBus {
+  on<E extends keyof T>(event: E, handler: T[E]): void;
   on(event: string, handler: EventHandler) {
     super.on(event, handler)
   }
 
-  off(event: keyof(T), handler: T[typeof event]): void;
+  off<E extends keyof T>(event: E, handler: T[E]): void;
   off(event: string, handler: EventHandler) {
     super.off(event, handler)
   }
 
-  emit(event: keyof(T), ...args: Parameters<T[typeof event]>): void;
+  emit<E extends keyof T>(event: E, ...args: Parameters<T[E]>): void;
   emit(event: string, ...args: any[]): void {
     super.emit(event, ...args)
   }

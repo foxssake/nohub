@@ -7,6 +7,3 @@ export class NohubEventBus extends TypedEventBus<{
 }
 
 export const eventBus = new NohubEventBus();
-
-eventBus.emit("session-close", "foo")
-eventBus.emit("lobby-transfer", "foo") // TODO: Should require 2 params
