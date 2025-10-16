@@ -41,8 +41,16 @@ export class Nohub {
         },
       });
 
-    rootLogger.info("Listening on %s:%d", config.tcp.host, config.tcp.port);
+    rootLogger.info("Listening on %s:%s", this.host, this.port);
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);
+  }
+
+  get host(): string | undefined {
+    return this.socket?.hostname
+  }
+
+  get port(): number | undefined {
+    return this.socket?.port
   }
 
   shutdown() {

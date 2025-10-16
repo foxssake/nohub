@@ -6,6 +6,7 @@ import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
+import assert from "node:assert"
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
@@ -23,11 +24,12 @@ export class ApiTest {
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureHost();
 
+    const host = ApiTest.nohub?.host
+    const port = ApiTest.nohub?.port
+    assert(host && port)
+
     ApiTest.logger.info(
-      "Connecting to host at %s:%d",
-      config.tcp.host,
-      config.tcp.port,
-    );
+      "Connecting to host at %s:%d", host, port);
     const clientReactor = new BunSocketReactor();
     let clientSocket: Bun.Socket | undefined;
 
@@ -35,8 +37,8 @@ export class ApiTest {
     for (let i = 0; i < 5; ++i) {
       try {
         clientSocket = await clientReactor.connect({
-          hostname: config.tcp.host,
-          port: config.tcp.port,
+          hostname: host,
+          port: port,
           socket: {},
         });
         ApiTest.logger.info("Connected to host");
@@ -65,11 +67,12 @@ export class ApiTest {
 
     ApiTest.logger.info("Starting local nohub for testing");
     ApiTest.nohub = new Nohub();
-    ApiTest.nohub.run(config);
+    // Run listening on a random port
+    ApiTest.nohub.run({ ...config, tcp: {
+      host: "localhost",
+      port: 0
+    }});
     ApiTest.logger.info("Local nohub started");
-
-    // ApiTest.logger.info("Waiting for host to start");
-    // await sleep(100.0);
 
     process.on("beforeExit", () => {
       if (ApiTest.nohub) {
