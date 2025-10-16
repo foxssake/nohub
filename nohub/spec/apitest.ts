@@ -1,13 +1,15 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
+import { lobbyRepository } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
+import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
-  private static sharedWorker?: Worker;
+  private static nohub?: Nohub;
 
   readonly client: TrimsockClient<Bun.Socket>;
 
@@ -19,7 +21,7 @@ export class ApiTest {
   }
 
   static async create(): Promise<ApiTest> {
-    await ApiTest.ensureWorker();
+    await ApiTest.ensureHost();
 
     ApiTest.logger.info(
       "Connecting to host at %s:%d",
@@ -54,37 +56,30 @@ export class ApiTest {
     return this.clientReactor.send(this.clientSocket, command);
   }
 
-  async reset(): Promise<void> {
-    await Promise.race([
-      this.send({ name: "reset", requestId: "reset" }).onReply(),
-      sleep(50),
-    ]);
+  reset(): void {
+    lobbyRepository.clear()
   }
 
-  private static async ensureWorker(): Promise<Worker> {
-    if (ApiTest.sharedWorker) return ApiTest.sharedWorker;
+  private static async ensureHost(): Promise<Nohub> {
+    if (ApiTest.nohub) return ApiTest.nohub;
 
-    ApiTest.logger.info("Starting worker thread for host");
-    const worker = new Worker(`${import.meta.dir}/apitest.worker.ts`);
-    ApiTest.logger.info("Started host thread %d", worker.threadId);
+    ApiTest.logger.info("Starting local nohub for testing")
+    ApiTest.nohub = new Nohub();
+    ApiTest.nohub.run(config)
+    ApiTest.logger.info("Local nohub started")
 
-    ApiTest.logger.info("Waiting for host to start");
-    await sleep(100.0);
-
-    ApiTest.sharedWorker = worker;
+    // ApiTest.logger.info("Waiting for host to start");
+    // await sleep(100.0);
 
     process.on("beforeExit", () => {
-      if (ApiTest.sharedWorker) {
-        ApiTest.logger.info(
-          "Shutting down worker thread %d",
-          ApiTest.sharedWorker.threadId,
-        );
-        ApiTest.sharedWorker.terminate();
-        ApiTest.logger.info("Shutdown complete");
+      if (ApiTest.nohub) {
+        ApiTest.logger.info("Shutting down local nohub")
+        ApiTest.nohub.shutdown()
+        ApiTest.logger.info("Local nohub shut down")
       }
     });
 
-    return ApiTest.sharedWorker;
+    return ApiTest.nohub;
   }
 }
 

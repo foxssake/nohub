@@ -1,58 +1,56 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command } from "@foxssake/trimsock-js";
-import { type AppConfig, config } from "@src/config";
-import { resetLobbies, withLobbyCommands } from "@src/lobbies";
+import { type AppConfig } from "@src/config";
+import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
 import { closeSession, openSession, type SessionData } from "@src/sessions";
 
-export function nohub(
-  appConfig: AppConfig = config,
-  isTesting: boolean = false,
-) {
-  rootLogger.info({ config: appConfig }, "Starting with config");
+export class Nohub {
+  private socket?: Bun.TCPSocketListener<SessionData>
 
-  new BunSocketReactor<SessionData>()
-    .configure(withLobbyCommands())
-    .configure((reactor) => {
-      if (isTesting) {
-        rootLogger.info("Running in test mode!");
-        reactor.on("reset", (_, xchg) => {
-          rootLogger.info("Resetting instance!");
-          resetLobbies();
+  run(config: AppConfig) {
+    rootLogger.info({ config: config }, "Starting with config");
 
-          xchg.replyOrSend({ name: "reset", text: "ok" });
-          rootLogger.info("Reset finished");
-        });
-      }
-    })
-    .onError((cmd, exchange, error) => {
-      if (error instanceof Error)
-        exchange.failOrSend({
-          name: "error",
-          params: [error.name, error.message],
-        });
-      else exchange.failOrSend({ name: "error", text: `${error}` });
+    this.socket = new BunSocketReactor<SessionData>()
+      .configure(withLobbyCommands())
+      .onError((cmd, exchange, error) => {
+        if (error instanceof Error)
+          exchange.failOrSend({
+            name: "error",
+            params: [error.name, error.message],
+          });
+        else exchange.failOrSend({ name: "error", text: `${error}` });
 
-      rootLogger.error(
-        error,
-        "Failed processing command: %s",
-        Command.serialize(cmd),
-      );
-    })
-    .listen({
-      hostname: appConfig.tcp.host,
-      port: appConfig.tcp.port,
-      socket: {
-        open(socket) {
-          openSession(socket);
+        rootLogger.error(
+          error,
+          "Failed processing command: %s",
+          Command.serialize(cmd),
+        );
+      })
+      .listen({
+        hostname: config.tcp.host,
+        port: config.tcp.port,
+        socket: {
+          open(socket) {
+            openSession(socket);
+          },
+
+          close(socket) {
+            closeSession(socket);
+          },
         },
+      });
 
-        close(socket) {
-          closeSession(socket);
-        },
-      },
-    });
+    rootLogger.info("Listening on %s:%d", config.tcp.host, config.tcp.port);
+    rootLogger.info("Started in %sms", process.uptime() * 1000.0);
+  }
 
-  rootLogger.info("Listening on %s:%d", appConfig.tcp.host, appConfig.tcp.port);
-  rootLogger.info("Started in %fms", process.uptime() * 1000);
+  shutdown() {
+    if (!this.socket) return
+
+    rootLogger.info("Shutting down")
+    this.socket?.stop(true)
+    rootLogger.info("Socket closed")
+  }
 }
+
