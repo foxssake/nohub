@@ -36,17 +36,16 @@ export class EventBus {
 export class TypedEventBus<T extends EventMap> extends EventBus {
   on<E extends keyof T>(event: E, handler: T[E]): void;
   on(event: string, handler: EventHandler) {
-    super.on(event, handler)
+    super.on(event, handler);
   }
 
   off<E extends keyof T>(event: E, handler: T[E]): void;
   off(event: string, handler: EventHandler) {
-    super.off(event, handler)
+    super.off(event, handler);
   }
 
   emit<E extends keyof T>(event: E, ...args: Parameters<T[E]>): void;
   emit(event: string, ...args: any[]): void {
-    super.emit(event, ...args)
+    super.emit(event, ...args);
   }
 }
-

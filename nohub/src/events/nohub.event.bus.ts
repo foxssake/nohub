@@ -1,9 +1,7 @@
-import { EventBus, TypedEventBus } from "@src/event.bus";
+import { TypedEventBus } from "@src/event.bus";
 
 export class NohubEventBus extends TypedEventBus<{
-  "session-close": (sessionId: string) => void,
-  "lobby-transfer": (from: string, to: string) => void, // Test event
-}> {
-}
+  "session-close": (sessionId: string) => void;
+}> {}
 
 export const eventBus = new NohubEventBus();
