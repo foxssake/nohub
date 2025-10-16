@@ -44,6 +44,7 @@ export const Lobbies = {
     id: "WzXOsEhM",
     owner: Sessions.dave.id,
     address: Addresses.dave,
+    gameId: Games.forestBrawl.id,
     isVisible: true,
     isLocked: false,
     data: new Map([
@@ -57,6 +58,7 @@ export const Lobbies = {
     id: "5fl8Rbc7",
     owner: Sessions.eric.id,
     address: Addresses.eric,
+    gameId: Games.forestBrawl.id,
     isVisible: false,
     isLocked: true,
     data: new Map([

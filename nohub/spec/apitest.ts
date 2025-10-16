@@ -116,6 +116,19 @@ export class TrimsockClient<T> {
     return this.serverTarget;
   }
 
+  async setGame(id: string): Promise<void> {
+    const xchg = this.reactor.send(this.serverTarget, {
+      name: "session/set-game",
+      isRequest: true,
+      requestId: this.exchangeId(),
+      params: [id]
+    })
+
+    const reply = await xchg.onReply();
+    if (!reply.isSuccessResponse)
+      throw new Error("Failed to set game ID!");
+  }
+
   async createLobby(
     address: string,
     data?: Map<string, string>,

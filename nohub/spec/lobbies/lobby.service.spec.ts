@@ -27,6 +27,7 @@ describe("LobbyService", () => {
         id: "",
         owner: Sessions.dave.id,
         address: Addresses.dave,
+        gameId: Sessions.dave.game?.id,
         isVisible: true,
         isLocked: false,
         data: lobbyData,
