@@ -1,6 +1,11 @@
-import type { Exchange } from "@foxssake/trimsock-js";
+import type { Exchange, Reactor } from "@foxssake/trimsock-js";
+import { LockedError } from "@src/errors";
 import { eventBus } from "@src/events/nohub.event.bus";
+import { gameRepository } from "@src/games";
+import type { Game } from "@src/games/game";
+import { lobbyRepository } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
+import { requireRequest, requireSingleParam } from "@src/validators";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
 
@@ -12,6 +17,7 @@ function generateSessionId(): string {
 
 export interface SessionData {
   id: string;
+  game?: Game;
 }
 
 export function openSession(socket: Socket<SessionData>) {
@@ -32,4 +38,25 @@ export function sessionOf(
   exchange: Exchange<Socket<SessionData>>,
 ): SessionData {
   return exchange.source.data;
+}
+
+export const withSessionCommands = () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
+  reactor.on("session/set-game", (cmd, xchg) => {
+    requireRequest(cmd);
+    const gameId = requireSingleParam(cmd, "Missing Game ID!");
+    const session = sessionOf(xchg)
+
+    logger.info("Switching game for session #%s", session.id)
+    const game = gameRepository.require(gameId);
+
+    if (session.game !== undefined)
+      throw new LockedError("Session already has a game set!")
+
+    if (lobbyRepository.existsBySession(session.id))
+      throw new LockedError("Session already has active lobbies!")
+
+    session.game = game
+    xchg.reply({ text: "ok" })
+    logger.info({ game, sessionId: session.id }, "Game set for session!")
+  })
 }

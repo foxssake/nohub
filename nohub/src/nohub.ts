@@ -3,7 +3,7 @@ import { Command } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
-import { closeSession, openSession, type SessionData } from "@src/sessions";
+import { closeSession, openSession, withSessionCommands, type SessionData } from "@src/sessions";
 import { importGames } from "./games";
 
 export class Nohub {
@@ -14,6 +14,7 @@ export class Nohub {
 
     this.socket = new BunSocketReactor<SessionData>()
       .configure(withLobbyCommands())
+      .configure(withSessionCommands())
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({

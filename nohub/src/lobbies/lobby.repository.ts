@@ -12,6 +12,13 @@ export class LobbyRepository extends Repository<Lobby, string> {
       if (lobby.owner === sessionId) this.removeItem(lobby);
   }
 
+  existsBySession(sessionId: string): boolean {
+    for (const lobby of this.list()) 
+      if (lobby.owner === sessionId)
+        return true
+    return false
+  }
+
   protected notFoundError(id: string): Error {
     return new DataNotFoundError(`Lobby#${id} not found!`);
   }
