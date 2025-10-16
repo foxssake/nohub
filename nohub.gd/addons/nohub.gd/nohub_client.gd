@@ -15,6 +15,11 @@ func _init(connection: StreamPeerTCP):
 func poll() -> void:
 	_reactor.poll()
 
+func set_game(id: String) -> bool:
+	var request := TrimsockCommand.request("session/set-game")\
+		.with_params([id])
+	return await _bool_request(request)
+
 func create_lobby(address: String, data: Dictionary) -> NohubLobby:
 	var request := TrimsockCommand.request("lobby/create")\
 		.with_params([address])
