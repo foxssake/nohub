@@ -301,6 +301,28 @@ describe("Lobbies API", () => {
           .onReply(),
       ).toThrow();
     });
+
+    test.only("should throw on lobby in different game", async () => {
+      Lobbies.insert();
+
+      // Join as client in Campfire
+      await api.setupClient("luna");
+      await api.client("luna").setGame(Games.campfire.id);
+
+      // Try to join a Forest Brawl lobby
+      expect(
+        async () =>
+          await api
+            .client("luna")
+            .send({
+              name: "lobby/join",
+              isRequest: true,
+              requestId: "",
+              params: [Lobbies.davesLobby.id],
+            })
+            .onReply(),
+      ).toThrow();
+    });
   });
 
   describe("events", () => {

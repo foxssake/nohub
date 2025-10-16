@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { Addresses, Lobbies, Sessions } from "@spec/fixtures";
-import { LockedError, UnauthorizedError } from "@src/errors";
+import {
+  InvalidCommandError,
+  LockedError,
+  UnauthorizedError,
+} from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
@@ -44,7 +48,11 @@ describe("LobbyService", () => {
       expect(lobbyRepository.find(expected.id)).toEqual(expected); // Lobby was saved in repo
     });
 
-    test.todo("should not create without game in session", () => {});
+    test("should not create without game in session", () => {
+      expect(() =>
+        lobbyService.create(Addresses.pam, new Map(), Sessions.pam),
+      ).toThrow(InvalidCommandError);
+    });
   });
 
   describe("listLobbiesFor", () => {
@@ -61,7 +69,11 @@ describe("LobbyService", () => {
       ]);
     });
 
-    test.todo("should not list lobbies in different games", () => {});
+    test("should not list lobbies in different games", () => {
+      expect([...lobbyService.listLobbiesFor(Sessions.luna)]).not.toContain(
+        Lobbies.davesLobby,
+      );
+    });
   });
 
   describe("delete", () => {
@@ -73,7 +85,7 @@ describe("LobbyService", () => {
 
     test("should throw if not owner", () => {
       expect(() =>
-        lobbyService.delete(Lobbies.davesLobby, Sessions.pam.id),
+        lobbyService.delete(Lobbies.davesLobby, Sessions.eric.id),
       ).toThrow();
     });
   });
@@ -96,8 +108,6 @@ describe("LobbyService", () => {
         lobbyService.join(Lobbies.coolLobby, Sessions.eric.id),
       ).toThrow(LockedError);
     });
-
-    test.todo("should not join lobby in different game", () => {});
   });
 
   describe("setData", () => {

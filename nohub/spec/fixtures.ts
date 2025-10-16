@@ -37,11 +37,14 @@ export const Sessions = {
   dave: sessionFixture({ id: "94kwM3zUaNCn", game: Games.forestBrawl }),
   eric: sessionFixture({ id: "Nd49VE4RWJh0", game: Games.forestBrawl }),
   pam: sessionFixture({ id: "DCLyAVxClvO_" }),
+  luna: sessionFixture({ id: "IOx6fARLyowY", game: Games.campfire }),
 };
 
 export const Addresses = {
   dave: "enet://224.103.6.176:49582",
   eric: "enet://118.154.159.94:51488",
+  pam: "enet://81.53.112.234:57228",
+  luna: "noray://noray-eu.foxssake.studio/r4L1iEkarSm8",
 };
 
 export const Lobbies = {
@@ -70,6 +73,20 @@ export const Lobbies = {
       ["name", "Cool Lobby"],
       ["player-count", "9"],
       ["player-capacity", "16"],
+    ]),
+  }),
+
+  mithrilParty: lobbyFixture({
+    id: "mLG-7Wbx",
+    owner: Sessions.luna.id,
+    address: Addresses.luna,
+    gameId: Games.campfire.id,
+    isVisible: true,
+    isLocked: false,
+    data: new Map([
+      ["name", "Mithril Party"],
+      ["player-count", "4"],
+      ["player-capacity", "6"],
     ]),
   }),
 
