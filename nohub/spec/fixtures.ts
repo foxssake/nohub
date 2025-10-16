@@ -1,15 +1,37 @@
+import type { Game } from "@src/games/game";
 import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
+import type { SessionData } from "@src/sessions";
+
+// These methods ensure type safety when used in fixture object literals
+function fixture<T>(data: T): T { return data }
+const gameFixture = fixture<Game>;
+const sessionFixture = fixture<SessionData>;
+const lobbyFixture = fixture<Lobby>;
+
+function fixturesOf<T>(fixtures: Record<string, T | Function>): T[] {
+  return Object.values(fixtures).filter(it => typeof it !== "function") as T[]; 
+}
+
+export const Games = {
+  forestBrawl: gameFixture({
+    id: "q5jM",
+    name: "Forest Brawl"
+  }),
+
+  campfire: gameFixture({
+    id: "Yf8c",
+    name: "Campfire: Surviving Orom"
+  }),
+
+  all: () => fixturesOf<Game>(Games)
+}
 
 export const Sessions = {
-  dave: "94kwM3zUaNCn",
-  eric: "Nd49VE4RWJh0",
-  pam: "DCLyAVxClvO_",
-
-  all(): string[] {
-    return Object.values(this).filter((it) => typeof it === "string");
-  },
+  dave: sessionFixture({ id: "94kwM3zUaNCn", game: Games.forestBrawl }),
+  eric: sessionFixture({ id: "Nd49VE4RWJh0", game: Games.forestBrawl }),
+  pam: sessionFixture({ id: "DCLyAVxClvO_"}),
 };
 
 export const Addresses = {
@@ -18,9 +40,9 @@ export const Addresses = {
 };
 
 export const Lobbies = {
-  davesLobby: {
+  davesLobby: lobbyFixture({
     id: "WzXOsEhM",
-    owner: Sessions.dave,
+    owner: Sessions.dave.id,
     address: Addresses.dave,
     isVisible: true,
     isLocked: false,
@@ -29,11 +51,11 @@ export const Lobbies = {
       ["player-count", "8"],
       ["player-capacity", "12"],
     ]),
-  },
+  }),
 
-  coolLobby: {
+  coolLobby: lobbyFixture({
     id: "5fl8Rbc7",
-    owner: Sessions.eric,
+    owner: Sessions.eric.id,
     address: Addresses.eric,
     isVisible: false,
     isLocked: true,
@@ -42,12 +64,10 @@ export const Lobbies = {
       ["player-count", "9"],
       ["player-capacity", "16"],
     ]),
-  },
+  }),
 
   all(): Lobby[] {
-    return Object.values(this).filter(
-      (it) => typeof it === "object",
-    ) as Lobby[];
+    return fixturesOf<Lobby>(Lobbies)
   },
 
   insert(repository: LobbyRepository = lobbyRepository): void {
