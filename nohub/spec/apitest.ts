@@ -3,6 +3,7 @@ import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { lobbyRepository } from "@src/lobbies";
+import type { Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
@@ -12,17 +13,18 @@ export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
   private static nohub?: Nohub;
 
-  readonly client: TrimsockClient<Bun.Socket>;
-
-  constructor(
-    public readonly clientReactor: BunSocketReactor,
-    public readonly clientSocket: Bun.Socket,
-  ) {
-    this.client = new TrimsockClient(this.clientReactor, this.clientSocket);
-  }
+  private clients: Map<string, TrimsockClient<Bun.Socket>> = new Map();
 
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureHost();
+    const api = new ApiTest();
+    await api.setupClient();
+
+    return api;
+  }
+
+  async setupClient(name: string = ""): Promise<void> {
+    if (this.clients.has(name)) return;
 
     const host = ApiTest.nohub?.host;
     const port = ApiTest.nohub?.port;
@@ -50,11 +52,23 @@ export class ApiTest {
 
     if (!clientSocket) throw new Error("Failed to connect to host!");
 
-    return new ApiTest(clientReactor, clientSocket);
+    const client = new TrimsockClient(clientReactor, clientSocket);
+    this.clients.set(name, client);
   }
 
-  send(command: CommandSpec): Exchange<Bun.Socket> {
-    return this.clientReactor.send(this.clientSocket, command);
+  disconnectClient(name: string = "") {
+    const client = this.clients.get(name);
+    if (!client) return;
+
+    const socket = client.connection();
+    socket.end();
+    this.clients.delete(name);
+  }
+
+  client(name: string = ""): TrimsockClient<Bun.Socket> {
+    const client = this.clients.get(name);
+    assert(client, `Client ${name} not set up!`);
+    return client;
   }
 
   reset(): void {
@@ -94,6 +108,14 @@ export class TrimsockClient<T> {
     private serverTarget: T,
   ) {}
 
+  send(command: CommandSpec): Exchange<T> {
+    return this.reactor.send(this.serverTarget, command);
+  }
+
+  connection(): T {
+    return this.serverTarget;
+  }
+
   async createLobby(
     address: string,
     data?: Map<string, string>,
@@ -112,6 +134,30 @@ export class TrimsockClient<T> {
       throw new Error("Failed to create lobby!");
 
     return reply.text;
+  }
+
+  async listLobbies(): Promise<Lobby[]> {
+    const result: Lobby[] = [];
+
+    const xchg = this.reactor.send(this.serverTarget, {
+      name: "lobby/list",
+      isRequest: true,
+      requestId: this.exchangeId(),
+    });
+
+    for await (const chunk of xchg.chunks()) {
+      result.push({
+        id: chunk.params?.at(0) ?? chunk.text ?? "",
+        isLocked: chunk.params?.includes("locked") === true,
+        isVisible: chunk.params?.includes("hidden") !== true,
+
+        data: new Map(),
+        address: "",
+        owner: "",
+      });
+    }
+
+    return result;
   }
 
   async deleteLobby(lobbyId: string): Promise<void> {
