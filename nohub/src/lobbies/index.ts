@@ -3,6 +3,7 @@ import type { Reactor } from "@foxssake/trimsock-js";
 import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
 import { type SessionData, sessionOf } from "@src/sessions";
+import { requireRequest, requireSingleParam } from "@src/validators";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
@@ -17,10 +18,10 @@ export const withLobbyCommands =
   () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
     reactor
       .on("lobby/create", (cmd, exchange) => {
-        assert(cmd.isRequest, "Command must be a request!");
+        requireRequest(cmd);
+        const address = requireSingleParam(cmd);
         logger.info("Creating lobby");
 
-        const address = cmd.kvMap ? cmd.requireParam(0) : cmd.text;
         const data: Map<string, string> = cmd.kvMap ?? new Map();
         assert(address, "Missing lobby address!");
 
@@ -35,11 +36,10 @@ export const withLobbyCommands =
       })
       .on("lobby/get", (cmd, exchange) => {
         // Validate request
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "Missing lobby ID!");
-
+        requireRequest(cmd);
         // Lobby ID is either first param, or command data if no params
-        const id = cmd.params?.at(0) ?? cmd.text;
+        const id = requireSingleParam(cmd, "Missing lobby ID!");
+
         // Queried properties, or undefined
         const properties = cmd.params?.slice(1);
 
@@ -59,10 +59,9 @@ export const withLobbyCommands =
         logger.info("Finished retrieving lobby #%s", id);
       })
       .on("lobby/delete", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!"); // TODO: Extract to method
-        assert(cmd.text, "Missing lobby ID!");
+        requireRequest(cmd);
+        const id = requireSingleParam(cmd, "Missing lobby ID!");
 
-        const id = cmd.text;
         logger.info("Deleting lobby #%s", id);
 
         const lobby = lobbyRepository.require(id);
@@ -72,7 +71,7 @@ export const withLobbyCommands =
         xchg.reply({ text: "ok" });
       })
       .on("lobby/list", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
+        requireRequest(cmd);
         logger.info("Listing lobbies");
 
         // Set of params, or singleton set of text, or empty set if no text
@@ -89,7 +88,7 @@ export const withLobbyCommands =
         logger.info("Finished listing lobbies");
       })
       .on("lobby/join", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
+        requireRequest(cmd);
 
         const lobbyId = cmd.requireText();
         const sessionId = sessionOf(xchg).id;
@@ -102,11 +101,10 @@ export const withLobbyCommands =
         logger.info("Session#%s joined lobby#%s", sessionId, lobbyId);
       })
       .on("lobby/set-data", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "No lobby ID specified!");
-
-        const lobbyId = cmd.params?.at(0) ?? cmd.text;
+        requireRequest(cmd);
+        const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
         const data = cmd.kvMap ?? new Map();
+
         logger.info(cmd, "Setting data for lobby#%s", lobbyId);
 
         const lobby = lobbyRepository.require(lobbyId);
@@ -117,10 +115,9 @@ export const withLobbyCommands =
         logger.info("Updated data for lobby#%s", lobbyId);
       })
       .on("lobby/lock", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "No lobby ID specified!");
+        requireRequest(cmd);
+        const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
 
-        const lobbyId = cmd.text;
         logger.info("Locking lobby#%s", lobbyId);
 
         const lobby = lobbyRepository.require(lobbyId);
@@ -130,10 +127,9 @@ export const withLobbyCommands =
         logger.info("Locked lobby#%s", lobbyId);
       })
       .on("lobby/unlock", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "No lobby ID specified!");
+        requireRequest(cmd);
+        const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
 
-        const lobbyId = cmd.text;
         logger.info("Unlocking lobby#%s", lobbyId);
 
         const lobby = lobbyRepository.require(lobbyId);
@@ -143,10 +139,9 @@ export const withLobbyCommands =
         logger.info("Unlocked lobby#%s", lobbyId);
       })
       .on("lobby/hide", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "No lobby ID specified!");
+        requireRequest(cmd);
+        const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
 
-        const lobbyId = cmd.text;
         logger.info("Hiding lobby#%s", lobbyId);
 
         const lobby = lobbyRepository.require(lobbyId);
@@ -156,10 +151,9 @@ export const withLobbyCommands =
         logger.info("Hidden lobby#%s", lobbyId);
       })
       .on("lobby/publish", (cmd, xchg) => {
-        assert(cmd.isRequest, "Command must be a request!");
-        assert(cmd.text, "No lobby ID specified!");
+        requireRequest(cmd);
+        const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
 
-        const lobbyId = cmd.text;
         logger.info("Publishing lobby#%s", lobbyId);
 
         const lobby = lobbyRepository.require(lobbyId);
