@@ -46,11 +46,11 @@ export class Nohub {
   }
 
   get host(): string | undefined {
-    return this.socket?.hostname
+    return this.socket?.hostname;
   }
 
   get port(): number | undefined {
-    return this.socket?.port
+    return this.socket?.port;
   }
 
   shutdown() {

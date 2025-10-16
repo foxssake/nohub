@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
@@ -6,7 +7,6 @@ import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
-import assert from "node:assert"
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
@@ -24,12 +24,11 @@ export class ApiTest {
   static async create(): Promise<ApiTest> {
     await ApiTest.ensureHost();
 
-    const host = ApiTest.nohub?.host
-    const port = ApiTest.nohub?.port
-    assert(host && port)
+    const host = ApiTest.nohub?.host;
+    const port = ApiTest.nohub?.port;
+    assert(host && port);
 
-    ApiTest.logger.info(
-      "Connecting to host at %s:%d", host, port);
+    ApiTest.logger.info("Connecting to host at %s:%d", host, port);
     const clientReactor = new BunSocketReactor();
     let clientSocket: Bun.Socket | undefined;
 
@@ -68,10 +67,13 @@ export class ApiTest {
     ApiTest.logger.info("Starting local nohub for testing");
     ApiTest.nohub = new Nohub();
     // Run listening on a random port
-    ApiTest.nohub.run({ ...config, tcp: {
-      host: "localhost",
-      port: 0
-    }});
+    ApiTest.nohub.run({
+      ...config,
+      tcp: {
+        host: "localhost",
+        port: 0,
+      },
+    });
     ApiTest.logger.info("Local nohub started");
 
     process.on("beforeExit", () => {
