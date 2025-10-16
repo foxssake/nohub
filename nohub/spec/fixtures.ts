@@ -1,4 +1,6 @@
+import { gameRepository } from "@src/games";
 import type { Game } from "@src/games/game";
+import type { GameRepository } from "@src/games/game.repository";
 import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
@@ -31,6 +33,10 @@ export const Games = {
   }),
 
   all: () => fixturesOf<Game>(Games),
+
+  insert(repository: GameRepository = gameRepository) {
+    Games.all().forEach(it => { repository.add(it) })
+  }
 };
 
 export const Sessions = {

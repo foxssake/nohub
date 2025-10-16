@@ -8,6 +8,7 @@ import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
+import { gameRepository } from "@src/games";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });

@@ -1,11 +1,13 @@
-import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { ApiTest } from "@spec/apitest";
 import { Addresses, Games, Lobbies } from "@spec/fixtures";
+import { gameRepository } from "@src/games";
 
 let api: ApiTest;
 
 describe("Lobbies API", () => {
   beforeAll(async () => {
+    Games.insert()
     api = await ApiTest.create();
     await api.client().setGame(Games.forestBrawl.id);
   });
