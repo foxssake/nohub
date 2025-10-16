@@ -12,7 +12,6 @@ func submit(command: TrimsockCommand) -> TrimsockExchange:
 	return send(_connection, command)
 
 func submit_request(command: TrimsockCommand) -> TrimsockExchange:
-	print(">>>", command.serialize().get_string_from_utf8())
 	return request(_connection, command)
 
 func submit_stream(command: TrimsockCommand) -> TrimsockExchange:
