@@ -31,7 +31,7 @@ export const config = {
 
   sessions: {
     defaultGameId: process.env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
-  }
+  },
 };
 
 export type AppConfig = typeof config;
