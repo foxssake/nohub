@@ -3,7 +3,12 @@ import { Command } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
-import { closeSession, openSession, withSessionCommands, type SessionData } from "@src/sessions";
+import {
+  closeSession,
+  openSession,
+  type SessionData,
+  withSessionCommands,
+} from "@src/sessions";
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;

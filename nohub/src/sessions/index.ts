@@ -36,10 +36,10 @@ export function sessionOf(
 
 export const withSessionCommands =
   () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
-  reactor.on("whereami", (_cmd, xchg) => {
-    xchg.replyOrSend({
-      name: "youarehere",
-      params: [xchg.source.remoteAddress]
-    })
-  })
-}
+    reactor.on("whereami", (_cmd, xchg) => {
+      xchg.replyOrSend({
+        name: "youarehere",
+        params: [xchg.source.remoteAddress],
+      });
+    });
+  };
