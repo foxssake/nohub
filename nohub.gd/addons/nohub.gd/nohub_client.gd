@@ -96,6 +96,16 @@ func set_lobby_data(lobby_id: String, data: Dictionary) -> bool:
 		.with_kv_map(data)
 	return await _bool_request(request)
 
+func whereami() -> String:
+	var request := TrimsockCommand.request("whereami")
+	var xchg := _reactor.submit_request(request)
+	var response := await xchg.read()
+	
+	if response.is_success():
+		return response.text
+	else:
+		return ""
+
 func _bool_request(request: TrimsockCommand) -> bool:
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()

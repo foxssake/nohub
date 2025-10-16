@@ -66,10 +66,6 @@ func _ready():
 	modal_confirm_button.pressed.connect(func():
 		modal.hide()
 	)
-	
-	address_label.text = \"...\"
-	var ip := await _get_ip()
-	address_label.text = ip
 
 func _process(dt: float) -> void:
 	time += dt
@@ -81,6 +77,12 @@ func _process(dt: float) -> void:
 			StreamPeerTCP.STATUS_CONNECTING: status_label.text = \"Connecting...\"
 			StreamPeerTCP.STATUS_CONNECTED: status_label.text = \"Connected\"
 			StreamPeerTCP.STATUS_ERROR: status_label.text = \"Error\"
+		
+		if _connection.get_status() == StreamPeerTCP.STATUS_CONNECTED and address_label.text == \"\":
+			# Get IP
+			address_label.text = \"...\"
+			var ip := await _get_ip()
+			address_label.text = ip
 		
 		_connection.poll()
 
@@ -104,7 +106,10 @@ func _connect() -> void:
 	print(\"Connecting to nohub at %s:%d\" % [host, port])
 
 	_connection = StreamPeerTCP.new()
-	_connection.connect_to_host(host, port)
+	var err := _connection.connect_to_host(host, port)
+	if err != OK:
+		popup(\"Couldn't connect to nohub at %s:%d - %s\" % [host, port, error_string(err)])
+		return
 
 	_client = NohubClient.new(_connection)
 
@@ -119,6 +124,7 @@ func _disconnect() -> void:
 
 	lobby_list.clear()
 	_lobbies_in_list.clear()
+	address_label.text = \"\"
 
 func _create_lobby() -> void:
 	var name := create_name_input.text
@@ -236,28 +242,10 @@ func _update_list() -> void:
 				set_selected_lobby(lobby)
 
 func _get_ip() -> String:
-	var ip := await _get_ip_ipify()
+	var ip := await _client.whereami()
 	if not ip: ip = _get_ip_local()
 
 	return ip
-
-func _get_ip_ipify() -> String:
-	var request := HTTPRequest.new()
-	add_child(request)
-	
-	if request.request(\"https://api.ipify.org/\") != OK:
-		return \"\"
-
-	var response = await request.request_completed
-	var result := response[0] as int
-	var response_code := response[1] as int
-	var headers := response[2] as PackedStringArray
-	var body := response[3] as PackedByteArray
-
-	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
-		return \"\"
-
-	return body.get_string_from_utf8()
 
 func _get_ip_local() -> String:
 	return IP.get_local_addresses()[0]

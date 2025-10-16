@@ -63,4 +63,10 @@ export const withSessionCommands = () => (reactor: Reactor<Bun.Socket<SessionDat
     xchg.reply({ text: "ok" })
     logger.info({ game, sessionId: session.id }, "Game set for session!")
   })
+  .on("whereami", (_cmd, xchg) => {
+      xchg.replyOrSend({
+        name: "youarehere",
+        params: [xchg.source.remoteAddress],
+      });
+    });
 }
