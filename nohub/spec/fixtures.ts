@@ -1,4 +1,6 @@
+import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
+import type { LobbyRepository } from "@src/lobbies/lobby.repository";
 
 export const Sessions = {
   dave: "94kwM3zUaNCn",
@@ -46,5 +48,9 @@ export const Lobbies = {
     return Object.values(this).filter(
       (it) => typeof it === "object",
     ) as Lobby[];
+  },
+
+  insert(repository: LobbyRepository = lobbyRepository): void {
+    for (const lobby of this.all()) repository.add(lobby);
   },
 };

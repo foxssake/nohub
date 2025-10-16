@@ -13,9 +13,7 @@ describe("LobbyService", () => {
     lobbyRepository = new LobbyRepository();
     lobbyService = new LobbyService(lobbyRepository);
 
-    Lobbies.all().forEach((it) => {
-      lobbyRepository.add(it);
-    });
+    Lobbies.insert(lobbyRepository);
   });
 
   describe("create", () => {

@@ -9,8 +9,8 @@ describe("Lobbies API", () => {
     api = await ApiTest.create();
   });
 
-  afterEach(async () => {
-    await api.reset();
+  afterEach(() => {
+    api.reset();
   });
 
   describe("create", () => {
@@ -144,6 +144,8 @@ describe("Lobbies API", () => {
     });
 
     test("should throw on unknown lobby", async () => {
+      Lobbies.insert();
+
       expect(async () => {
         await api
           .send({

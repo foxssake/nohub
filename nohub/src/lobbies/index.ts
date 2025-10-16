@@ -7,7 +7,7 @@ import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
 
-const lobbyRepository = new LobbyRepository();
+export const lobbyRepository = new LobbyRepository();
 export const lobbyService = new LobbyService(lobbyRepository);
 
 const logger = rootLogger.child({ name: "Lobbies" });
@@ -176,7 +176,3 @@ eventBus.on("session-close", (sessionId: string) => {
   lobbyRepository.removeLobbiesOf(sessionId);
   logger.info("Removed all lobbies belonging to #%s", sessionId);
 });
-
-export function resetLobbies() {
-  lobbyRepository.clear();
-}
