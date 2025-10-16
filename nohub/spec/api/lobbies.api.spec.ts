@@ -144,7 +144,7 @@ describe("Lobbies API", () => {
     });
 
     test("should throw on unknown lobby", async () => {
-      Lobbies.insert()
+      Lobbies.insert();
 
       expect(async () => {
         await api

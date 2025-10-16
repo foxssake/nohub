@@ -1,12 +1,12 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command } from "@foxssake/trimsock-js";
-import { type AppConfig } from "@src/config";
+import type { AppConfig } from "@src/config";
 import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
 import { closeSession, openSession, type SessionData } from "@src/sessions";
 
 export class Nohub {
-  private socket?: Bun.TCPSocketListener<SessionData>
+  private socket?: Bun.TCPSocketListener<SessionData>;
 
   run(config: AppConfig) {
     rootLogger.info({ config: config }, "Starting with config");
@@ -46,11 +46,10 @@ export class Nohub {
   }
 
   shutdown() {
-    if (!this.socket) return
+    if (!this.socket) return;
 
-    rootLogger.info("Shutting down")
-    this.socket?.stop(true)
-    rootLogger.info("Socket closed")
+    rootLogger.info("Shutting down");
+    this.socket?.stop(true);
+    rootLogger.info("Socket closed");
   }
 }
-

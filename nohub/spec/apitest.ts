@@ -57,25 +57,25 @@ export class ApiTest {
   }
 
   reset(): void {
-    lobbyRepository.clear()
+    lobbyRepository.clear();
   }
 
   private static async ensureHost(): Promise<Nohub> {
     if (ApiTest.nohub) return ApiTest.nohub;
 
-    ApiTest.logger.info("Starting local nohub for testing")
+    ApiTest.logger.info("Starting local nohub for testing");
     ApiTest.nohub = new Nohub();
-    ApiTest.nohub.run(config)
-    ApiTest.logger.info("Local nohub started")
+    ApiTest.nohub.run(config);
+    ApiTest.logger.info("Local nohub started");
 
     // ApiTest.logger.info("Waiting for host to start");
     // await sleep(100.0);
 
     process.on("beforeExit", () => {
       if (ApiTest.nohub) {
-        ApiTest.logger.info("Shutting down local nohub")
-        ApiTest.nohub.shutdown()
-        ApiTest.logger.info("Local nohub shut down")
+        ApiTest.logger.info("Shutting down local nohub");
+        ApiTest.nohub.shutdown();
+        ApiTest.logger.info("Local nohub shut down");
       }
     });
 

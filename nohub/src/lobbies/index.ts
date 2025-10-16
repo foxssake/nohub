@@ -176,4 +176,3 @@ eventBus.on("session-close", (sessionId: string) => {
   lobbyRepository.removeLobbiesOf(sessionId);
   logger.info("Removed all lobbies belonging to #%s", sessionId);
 });
-

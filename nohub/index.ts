@@ -1,4 +1,4 @@
+import { config } from "@src/config";
 import { Nohub } from "@src/nohub";
-import { config } from "@src/config"
 
-(new Nohub()).run(config)
+new Nohub().run(config);

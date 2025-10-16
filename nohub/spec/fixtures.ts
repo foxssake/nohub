@@ -1,7 +1,6 @@
 import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
-import type { LobbyService } from "@src/lobbies/lobby.service";
 
 export const Sessions = {
   dave: "94kwM3zUaNCn",
@@ -52,7 +51,6 @@ export const Lobbies = {
   },
 
   insert(repository: LobbyRepository = lobbyRepository): void {
-    for (const lobby of this.all())
-      repository.add(lobby)
-  }
+    for (const lobby of this.all()) repository.add(lobby);
+  },
 };
