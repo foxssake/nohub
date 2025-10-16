@@ -9,3 +9,7 @@ export class UnauthorizedError extends Error {
 export class LockedError extends UnauthorizedError {
   name: string = "LockedError";
 }
+
+export class InvalidCommandError extends Error {
+  name: string = "InvalidCommandError";
+}

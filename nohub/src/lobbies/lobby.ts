@@ -9,7 +9,6 @@ export interface Lobby {
   data: Map<string, string>;
 }
 
-// TODO: `class Lobby`, `interface LobbySpec`
 export function requireLobbyModifiableIn(
   lobby: Lobby,
   sessionId: string,
