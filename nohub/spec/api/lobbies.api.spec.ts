@@ -302,7 +302,7 @@ describe("Lobbies API", () => {
       ).toThrow();
     });
 
-    test.only("should throw on lobby in different game", async () => {
+    test("should throw on lobby in different game", async () => {
       Lobbies.insert();
 
       // Join as client in Campfire
