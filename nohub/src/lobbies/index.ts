@@ -7,9 +7,10 @@ import { requireRequest, requireSingleParam } from "@src/validators";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
+import { config } from "@src/config"
 
 export const lobbyRepository = new LobbyRepository();
-export const lobbyService = new LobbyService(lobbyRepository);
+export const lobbyService = new LobbyService(lobbyRepository, config.lobbies.enableGameless);
 
 const logger = rootLogger.child({ name: "Lobbies" });
 
@@ -28,7 +29,7 @@ export const withLobbyCommands =
         const lobby = lobbyService.create(
           address,
           data,
-          sessionOf(exchange).id,
+          sessionOf(exchange),
         );
         exchange.reply({ text: lobby.id });
 

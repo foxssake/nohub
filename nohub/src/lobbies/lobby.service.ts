@@ -7,22 +7,30 @@ import {
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
+import type { SessionData } from "@src/sessions";
+import { UnauthorizedError } from "@src/errors";
 
 export class LobbyService {
   constructor(
     private repository: LobbyRepository,
+    private enableGameless = false,
     private logger = rootLogger.child({ name: "LobbyService" }),
   ) {}
 
-  create(address: string, data: Map<string, string>, sessionId: string): Lobby {
+  create(address: string, data: Map<string, string>, session: SessionData): Lobby {
     this.logger.info(
       { data: Object.fromEntries(data.entries()), address },
       "Creating lobby with custom data",
     );
+
+    if (session.game === undefined && !this.enableGameless)
+      throw new UnauthorizedError("Can't create lobbies without a game!")
+
     const lobby: Lobby = {
       id: this.generateId(),
       address,
-      owner: sessionId,
+      gameId: session.game?.id,
+      owner: session.id,
       isVisible: true,
       isLocked: false,
       data,
@@ -33,7 +41,7 @@ export class LobbyService {
     this.logger.info(
       "Lobby#%s created, bound to session#%s",
       lobby.id,
-      sessionId,
+      session.id,
     );
     return lobby;
   }

@@ -33,7 +33,6 @@ export function enumerated<T>(value: T, values: T[]): T | undefined {
  * @param {string} value
  * @returns {number[]}
  */
-// TODO
 function extractUnit(value: string): [string, string] {
   const pattern = /^([0-9.,]+)([a-zA-Z]*)/;
 

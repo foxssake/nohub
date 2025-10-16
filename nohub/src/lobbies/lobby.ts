@@ -3,6 +3,7 @@ import { LockedError, UnauthorizedError } from "@src/errors";
 export interface Lobby {
   id: string;
   owner: string;
+  gameId?: string;
   address: string;
   isVisible: boolean;
   isLocked: boolean;

@@ -22,7 +22,11 @@ export const config = {
       ]) ?? "info",
   },
 
-  games: games(process.env.NOHUB_GAMES) ?? []
+  games: games(process.env.NOHUB_GAMES) ?? [],
+
+  lobbies: {
+    enableGameless: (process.env.NOHUB_LOBBIES_WITHOUT_GAME ?? "false") === "true"
+  }
 };
 
 export type AppConfig = typeof config;
