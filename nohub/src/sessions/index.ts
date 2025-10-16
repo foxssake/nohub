@@ -25,8 +25,8 @@ export function openSession(socket: Socket<SessionData>) {
   socket.data = {
     id: generateSessionId(),
     game:
-      config.lobbies.defaultGameId !== undefined
-        ? gameRepository.require(config.lobbies.defaultGameId)
+      config.sessions.defaultGameId !== undefined
+        ? gameRepository.require(config.sessions.defaultGameId)
         : undefined,
   };
 
