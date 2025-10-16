@@ -1,4 +1,4 @@
-import type { Exchange } from "@foxssake/trimsock-js";
+import type { Exchange, Reactor } from "@foxssake/trimsock-js";
 import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
 import type { Socket } from "bun";
@@ -32,4 +32,14 @@ export function sessionOf(
   exchange: Exchange<Socket<SessionData>>,
 ): SessionData {
   return exchange.source.data;
+}
+
+export const withSessionCommands =
+  () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
+  reactor.on("whereami", (_cmd, xchg) => {
+    xchg.replyOrSend({
+      name: "youarehere",
+      params: [xchg.source.remoteAddress]
+    })
+  })
 }
