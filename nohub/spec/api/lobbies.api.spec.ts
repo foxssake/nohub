@@ -245,6 +245,7 @@ describe("Lobbies API", () => {
     test.todo("should join", () => {
       // TODO: Insert fixtures in testing
       // TODO: Support multiple sessions per test
+      // Join a pre-defined lobby, expect OK response
     });
 
     test("should throw on missing lobby ID", async () => {
@@ -270,6 +271,13 @@ describe("Lobbies API", () => {
           })
           .onReply(),
       ).toThrow();
+    });
+  });
+
+  describe("events", () => {
+    test.todo("should delete sessions on owner disconnect", async () => {
+      // TODO: Insert fixtures in testing
+      // TODO: Support multiple sessions per test
     });
   });
 });

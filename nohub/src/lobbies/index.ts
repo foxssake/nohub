@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import type { Reactor } from "@foxssake/trimsock-js";
+import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
 import { type SessionData, sessionOf } from "@src/sessions";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
@@ -11,6 +12,7 @@ export const lobbyService = new LobbyService(lobbyRepository);
 
 const logger = rootLogger.child({ name: "Lobbies" });
 
+// Command handlers
 export const withLobbyCommands =
   () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
     reactor
@@ -167,6 +169,13 @@ export const withLobbyCommands =
         logger.info("Published lobby#%s", lobbyId);
       });
   };
+
+// Event handlers
+eventBus.on("session-close", (sessionId: string) => {
+  logger.info("Cleaning up lobbies belonging to #%s", sessionId);
+  lobbyRepository.removeLobbiesOf(sessionId);
+  logger.info("Removed all lobbies belonging to #%s", sessionId);
+});
 
 export function resetLobbies() {
   lobbyRepository.clear();

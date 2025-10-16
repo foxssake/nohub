@@ -10,7 +10,7 @@ export type ItemMerger<T> = (a: T, b: Partial<T>) => T;
  * @typeParam K - ID type
  */
 export class Repository<T, K = string> {
-  private items = new Map<K, T>();
+  protected items = new Map<K, T>();
 
   constructor(
     private getId: IdMapper<T, K>,
