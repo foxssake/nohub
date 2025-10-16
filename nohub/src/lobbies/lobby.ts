@@ -1,5 +1,5 @@
 import { LockedError, UnauthorizedError } from "@src/errors";
-import { sessionOf, type SessionData } from "@src/sessions";
+import type { SessionData } from "@src/sessions";
 
 export interface Lobby {
   id: string;
@@ -35,7 +35,7 @@ export function isLobbyVisibleTo(lobby: Lobby, session: SessionData): boolean {
   // Lobby is hidden, and session does not own it
   if (!lobby.isVisible && lobby.owner !== session.id) return false;
 
-  return true
+  return true;
 }
 
 export function lobbyToKvPairs(

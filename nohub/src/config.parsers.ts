@@ -144,10 +144,11 @@ export function ports(value: string | undefined): number[] | undefined {
 }
 
 export function games(value: string | undefined): Game[] | undefined {
-  const gameRegex = /(\S*)\s+(.+)/
-  return value?.split('\n')
-    ?.map(l => l.trim())
-    ?.map(l => gameRegex.exec(l))
-    ?.filter(it => !!it)
-    ?.map(it => ({ id: it.at(1) ?? "", name: it.at(2) ?? "" }))
+  const gameRegex = /(\S*)\s+(.+)/;
+  return value
+    ?.split("\n")
+    ?.map((l) => l.trim())
+    ?.map((l) => gameRegex.exec(l))
+    ?.filter((it) => !!it)
+    ?.map((it) => ({ id: it.at(1) ?? "", name: it.at(2) ?? "" }));
 }

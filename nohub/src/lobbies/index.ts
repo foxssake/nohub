@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import type { Reactor } from "@foxssake/trimsock-js";
+import { config } from "@src/config";
 import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
 import { type SessionData, sessionOf } from "@src/sessions";
@@ -7,10 +8,12 @@ import { requireRequest, requireSingleParam } from "@src/validators";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
-import { config } from "@src/config"
 
 export const lobbyRepository = new LobbyRepository();
-export const lobbyService = new LobbyService(lobbyRepository, config.lobbies.enableGameless);
+export const lobbyService = new LobbyService(
+  lobbyRepository,
+  config.lobbies.enableGameless,
+);
 
 const logger = rootLogger.child({ name: "Lobbies" });
 
@@ -26,11 +29,7 @@ export const withLobbyCommands =
         const data: Map<string, string> = cmd.kvMap ?? new Map();
         assert(address, "Missing lobby address!");
 
-        const lobby = lobbyService.create(
-          address,
-          data,
-          sessionOf(exchange),
-        );
+        const lobby = lobbyService.create(address, data, sessionOf(exchange));
         exchange.reply({ text: lobby.id });
 
         logger.info("Created lobby#%s", lobby.id);
@@ -48,7 +47,10 @@ export const withLobbyCommands =
         logger.info("Retrieving lobby #%s", id);
 
         // Find lobby
-        const lobby = lobbyRepository.requireInGame(id, sessionOf(xchg).game?.id);
+        const lobby = lobbyRepository.requireInGame(
+          id,
+          sessionOf(xchg).game?.id,
+        );
 
         // Stream first chunk with ID and keywords
         xchg.stream({ params: [id, ...lobbyKeywords(lobby)] });

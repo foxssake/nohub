@@ -121,12 +121,11 @@ export class TrimsockClient<T> {
       name: "session/set-game",
       isRequest: true,
       requestId: this.exchangeId(),
-      params: [id]
-    })
+      params: [id],
+    });
 
     const reply = await xchg.onReply();
-    if (!reply.isSuccessResponse)
-      throw new Error("Failed to set game ID!");
+    if (!reply.isSuccessResponse) throw new Error("Failed to set game ID!");
   }
 
   async createLobby(

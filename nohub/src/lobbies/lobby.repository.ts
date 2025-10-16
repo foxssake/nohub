@@ -8,17 +8,15 @@ export class LobbyRepository extends Repository<Lobby, string> {
   }
 
   findInGame(lobbyId: string, gameId?: string): Lobby | undefined {
-    const lobby = this.find(lobbyId)
-    if (lobby?.gameId != gameId)
-      return undefined
-    return lobby
+    const lobby = this.find(lobbyId);
+    if (lobby?.gameId !== gameId) return undefined;
+    return lobby;
   }
 
   requireInGame(lobbyId: string, gameId?: string): Lobby {
-    const lobby = this.findInGame(lobbyId, gameId)
-    if (!lobby)
-      throw this.notFoundError(lobbyId)
-    return lobby
+    const lobby = this.findInGame(lobbyId, gameId);
+    if (!lobby) throw this.notFoundError(lobbyId);
+    return lobby;
   }
 
   removeLobbiesOf(sessionId: string): void {
@@ -27,10 +25,8 @@ export class LobbyRepository extends Repository<Lobby, string> {
   }
 
   existsBySession(sessionId: string): boolean {
-    for (const lobby of this.list()) 
-      if (lobby.owner === sessionId)
-        return true
-    return false
+    for (const lobby of this.list()) if (lobby.owner === sessionId) return true;
+    return false;
   }
 
   protected notFoundError(id: string): Error {

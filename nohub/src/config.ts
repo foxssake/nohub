@@ -25,9 +25,10 @@ export const config = {
   games: games(process.env.NOHUB_GAMES) ?? [],
 
   lobbies: {
-    enableGameless: (process.env.NOHUB_LOBBIES_WITHOUT_GAME ?? "false") === "true",
-    defaultGameId: process.env.NOHUB_LOBBIES_DEFAULT_GAME_ID
-  }
+    enableGameless:
+      (process.env.NOHUB_LOBBIES_WITHOUT_GAME ?? "false") === "true",
+    defaultGameId: process.env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
+  },
 };
 
 export type AppConfig = typeof config;

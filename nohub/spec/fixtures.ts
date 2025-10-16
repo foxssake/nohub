@@ -5,33 +5,38 @@ import type { LobbyRepository } from "@src/lobbies/lobby.repository";
 import type { SessionData } from "@src/sessions";
 
 // These methods ensure type safety when used in fixture object literals
-function fixture<T>(data: T): T { return data }
+function fixture<T>(data: T): T {
+  return data;
+}
 const gameFixture = fixture<Game>;
 const sessionFixture = fixture<SessionData>;
 const lobbyFixture = fixture<Lobby>;
 
+// biome-ignore lint/complexity/noBannedTypes: We indeed don't care about the shape here
 function fixturesOf<T>(fixtures: Record<string, T | Function>): T[] {
-  return Object.values(fixtures).filter(it => typeof it !== "function") as T[]; 
+  return Object.values(fixtures).filter(
+    (it) => typeof it !== "function",
+  ) as T[];
 }
 
 export const Games = {
   forestBrawl: gameFixture({
     id: "q5jM",
-    name: "Forest Brawl"
+    name: "Forest Brawl",
   }),
 
   campfire: gameFixture({
     id: "Yf8c",
-    name: "Campfire: Surviving Orom"
+    name: "Campfire: Surviving Orom",
   }),
 
-  all: () => fixturesOf<Game>(Games)
-}
+  all: () => fixturesOf<Game>(Games),
+};
 
 export const Sessions = {
   dave: sessionFixture({ id: "94kwM3zUaNCn", game: Games.forestBrawl }),
   eric: sessionFixture({ id: "Nd49VE4RWJh0", game: Games.forestBrawl }),
-  pam: sessionFixture({ id: "DCLyAVxClvO_"}),
+  pam: sessionFixture({ id: "DCLyAVxClvO_" }),
 };
 
 export const Addresses = {
@@ -69,7 +74,7 @@ export const Lobbies = {
   }),
 
   all(): Lobby[] {
-    return fixturesOf<Lobby>(Lobbies)
+    return fixturesOf<Lobby>(Lobbies);
   },
 
   insert(repository: LobbyRepository = lobbyRepository): void {
