@@ -35,7 +35,7 @@ export const withLobbyCommands =
 
         logger.info("Created lobby#%s", lobby.id);
       })
-      .on("lobby/get", (cmd, exchange) => {
+      .on("lobby/get", (cmd, xchg) => {
         // Validate request
         requireRequest(cmd);
         // Lobby ID is either first param, or command data if no params
@@ -47,15 +47,15 @@ export const withLobbyCommands =
         logger.info("Retrieving lobby #%s", id);
 
         // Find lobby
-        const lobby = lobbyRepository.require(id);
+        const lobby = lobbyRepository.requireInGame(id, sessionOf(xchg).game?.id);
 
         // Stream first chunk with ID and keywords
-        exchange.stream({ params: [id, ...lobbyKeywords(lobby)] });
+        xchg.stream({ params: [id, ...lobbyKeywords(lobby)] });
 
         // Stream properties
         for (const entry of lobbyToKvPairs(lobby, properties))
-          exchange.stream({ kvParams: [entry] });
-        exchange.finishStream();
+          xchg.stream({ kvParams: [entry] });
+        xchg.finishStream();
 
         logger.info("Finished retrieving lobby #%s", id);
       })
@@ -79,7 +79,7 @@ export const withLobbyCommands =
         const properties = cmd.params ?? (cmd.text ? [cmd.text] : undefined);
 
         // List lobbies
-        for (const lobby of lobbyService.listLobbiesFor(sessionOf(xchg).id))
+        for (const lobby of lobbyService.listLobbiesFor(sessionOf(xchg)))
           xchg.stream({
             params: [lobby.id, ...lobbyKeywords(lobby)],
             kvParams: lobbyToKvPairs(lobby, properties),
@@ -92,14 +92,14 @@ export const withLobbyCommands =
         requireRequest(cmd);
 
         const lobbyId = cmd.requireText();
-        const sessionId = sessionOf(xchg).id;
-        logger.info("Session#%s is joining lobby#%s", sessionId, lobbyId);
+        const session = sessionOf(xchg);
+        logger.info("Session#%s is joining lobby#%s", session.id, lobbyId);
 
-        const lobby = lobbyRepository.require(lobbyId);
-        const address = lobbyService.join(lobby, sessionId);
+        const lobby = lobbyRepository.requireInGame(lobbyId, session.game?.id);
+        const address = lobbyService.join(lobby, session.id);
 
         xchg.reply({ params: [address] });
-        logger.info("Session#%s joined lobby#%s", sessionId, lobbyId);
+        logger.info("Session#%s joined lobby#%s", session.id, lobbyId);
       })
       .on("lobby/set-data", (cmd, xchg) => {
         requireRequest(cmd);

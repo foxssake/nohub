@@ -8,7 +8,7 @@ import {
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
 import type { SessionData } from "@src/sessions";
-import { UnauthorizedError } from "@src/errors";
+import { InvalidCommandError } from "@src/errors";
 
 export class LobbyService {
   constructor(
@@ -24,7 +24,7 @@ export class LobbyService {
     );
 
     if (session.game === undefined && !this.enableGameless)
-      throw new UnauthorizedError("Can't create lobbies without a game!")
+      throw new InvalidCommandError("Can't create lobbies without a game!")
 
     const lobby: Lobby = {
       id: this.generateId(),
@@ -39,6 +39,7 @@ export class LobbyService {
     this.repository.add(lobby);
 
     this.logger.info(
+      { session, lobby },
       "Lobby#%s created, bound to session#%s",
       lobby.id,
       session.id,
@@ -46,9 +47,9 @@ export class LobbyService {
     return lobby;
   }
 
-  *listLobbiesFor(sessionId: string): Generator<Lobby> {
+  *listLobbiesFor(session: SessionData): Generator<Lobby> {
     for (const lobby of this.repository.list())
-      if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
+      if (isLobbyVisibleTo(lobby, session)) yield lobby;
   }
 
   delete(lobby: Lobby, sessionId: string) {

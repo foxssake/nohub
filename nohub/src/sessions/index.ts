@@ -8,6 +8,7 @@ import { rootLogger } from "@src/logger";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
+import { config } from "@src/config";
 
 const logger = rootLogger.child({ name: "sessions" });
 
@@ -23,6 +24,9 @@ export interface SessionData {
 export function openSession(socket: Socket<SessionData>) {
   socket.data = {
     id: generateSessionId(),
+    game: config.lobbies.defaultGameId !== undefined
+      ? gameRepository.require(config.lobbies.defaultGameId)
+      : undefined
   };
 
   logger.info("Created new session: %s", socket.data.id);

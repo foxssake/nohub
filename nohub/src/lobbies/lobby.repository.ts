@@ -7,6 +7,20 @@ export class LobbyRepository extends Repository<Lobby, string> {
     super((lobby) => lobby.id);
   }
 
+  findInGame(lobbyId: string, gameId?: string): Lobby | undefined {
+    const lobby = this.find(lobbyId)
+    if (lobby?.gameId != gameId)
+      return undefined
+    return lobby
+  }
+
+  requireInGame(lobbyId: string, gameId?: string): Lobby {
+    const lobby = this.findInGame(lobbyId, gameId)
+    if (!lobby)
+      throw this.notFoundError(lobbyId)
+    return lobby
+  }
+
   removeLobbiesOf(sessionId: string): void {
     for (const lobby of this.list())
       if (lobby.owner === sessionId) this.removeItem(lobby);

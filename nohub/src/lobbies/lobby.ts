@@ -1,4 +1,5 @@
 import { LockedError, UnauthorizedError } from "@src/errors";
+import { sessionOf, type SessionData } from "@src/sessions";
 
 export interface Lobby {
   id: string;
@@ -28,10 +29,13 @@ export function requireLobbyJoinable(lobby: Lobby, sessionId: string) {
     throw new LockedError("Can't join your own lobby - you're already there!");
 }
 
-export function isLobbyVisibleTo(lobby: Lobby, sessionId: string): boolean {
-  if (lobby.isVisible) return true;
+export function isLobbyVisibleTo(lobby: Lobby, session: SessionData): boolean {
+  // Lobby is in a different game
+  if (lobby.gameId !== session.game?.id) return false;
+  // Lobby is hidden, and session does not own it
+  if (!lobby.isVisible && lobby.owner !== session.id) return false;
 
-  return lobby.owner === sessionId;
+  return true
 }
 
 export function lobbyToKvPairs(
