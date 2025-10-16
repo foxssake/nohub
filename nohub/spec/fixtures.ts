@@ -35,8 +35,10 @@ export const Games = {
   all: () => fixturesOf<Game>(Games),
 
   insert(repository: GameRepository = gameRepository) {
-    Games.all().forEach(it => { repository.add(it) })
-  }
+    Games.all().forEach((it) => {
+      repository.add(it);
+    });
+  },
 };
 
 export const Sessions = {
