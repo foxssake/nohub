@@ -1,12 +1,14 @@
 import { afterEach, beforeAll, describe, expect, test } from "bun:test";
 import { ApiTest } from "@spec/apitest";
-import { Addresses, Lobbies } from "@spec/fixtures";
+import { Addresses, Games, Lobbies } from "@spec/fixtures";
 
 let api: ApiTest;
 
 describe("Lobbies API", () => {
   beforeAll(async () => {
+    Games.insert();
     api = await ApiTest.create();
+    await api.client().setGame(Games.forestBrawl.id);
   });
 
   afterEach(() => {
@@ -300,12 +302,35 @@ describe("Lobbies API", () => {
           .onReply(),
       ).toThrow();
     });
+
+    test("should throw on lobby in different game", async () => {
+      Lobbies.insert();
+
+      // Join as client in Campfire
+      await api.setupClient("luna");
+      await api.client("luna").setGame(Games.campfire.id);
+
+      // Try to join a Forest Brawl lobby
+      expect(
+        async () =>
+          await api
+            .client("luna")
+            .send({
+              name: "lobby/join",
+              isRequest: true,
+              requestId: "",
+              params: [Lobbies.davesLobby.id],
+            })
+            .onReply(),
+      ).toThrow();
+    });
   });
 
   describe("events", () => {
     test("should delete sessions on owner disconnect", async () => {
       // Start a new session
       await api.setupClient("test");
+      await api.client("test").setGame(Games.forestBrawl.id);
 
       // Create some lobbies
       await api.client("test").createLobby(Addresses.dave);

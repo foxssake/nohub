@@ -8,6 +8,9 @@ script/source = "extends Control
 @onready var disconnect_button: Button = %\"Disconnect Button\"
 @onready var status_label: Label = %\"Status Label\"
 
+@onready var game_id_input: LineEdit = %\"Game ID Input\"
+@onready var set_game_id_button: Button = %\"Set Game ID Button\"
+
 @onready var lobby_list: ItemList = %\"Lobby List\"
 
 @onready var create_name_input: LineEdit = %\"Lobby Name Input\"
@@ -56,6 +59,7 @@ func _ready():
 	connect_button.pressed.connect(_connect)
 	disconnect_button.pressed.connect(_disconnect)
 	create_button.pressed.connect(_create_lobby)
+	set_game_id_button.pressed.connect(_set_game_id)
 	lobby_list.item_selected.connect(_select_lobby)
 
 	join_lobby_button.pressed.connect(_join_lobby)
@@ -127,6 +131,8 @@ func _disconnect() -> void:
 	address_label.text = \"\"
 
 func _create_lobby() -> void:
+	if not _client: return
+
 	var name := create_name_input.text
 	var lobby := await _client.create_lobby(\"enet://\" + address_label.text, { \"name\": name })
 	if lobby == null:
@@ -143,6 +149,18 @@ func _create_lobby() -> void:
 
 	_update_list()
 
+func _set_game_id() -> void:
+	if not _client: return
+
+	var game_id := game_id_input.text
+	
+	if not await _client.set_game(game_id):
+		popup(\"Failed to set game ID to %s\" % [game_id])
+	else:
+		print(\"Game ID set to %s\" % [game_id])
+
+	_update_list()
+
 func _select_lobby(clicked_idx: int) -> void:
 	var row_idx := clicked_idx / lobby_list.max_columns - 1
 	if row_idx < 0:
@@ -153,6 +171,8 @@ func _select_lobby(clicked_idx: int) -> void:
 	set_selected_lobby(lobby)
 
 func _join_lobby() -> void:
+	if not _client: return
+
 	var lobby := get_selected_lobby()
 	if not is_instance_valid(lobby):
 		# No lobby selected!
@@ -166,6 +186,8 @@ func _join_lobby() -> void:
 		popup(\"Lobby address: %s\" % [address])
 
 func _lock_lobby():
+	if not _client: return
+
 	var lobby := get_selected_lobby()
 	if not is_instance_valid(lobby):
 		# No lobby selected!
@@ -181,6 +203,8 @@ func _lock_lobby():
 	_update_list()
 
 func _hide_lobby():
+	if not _client: return
+
 	var lobby := get_selected_lobby()
 	if not is_instance_valid(lobby):
 		# No lobby selected!
@@ -196,6 +220,8 @@ func _hide_lobby():
 	_update_list()
 
 func _delete_lobby():
+	if not _client: return
+
 	var lobby := get_selected_lobby()
 	if not is_instance_valid(lobby):
 		# No lobby selected!
@@ -242,6 +268,8 @@ func _update_list() -> void:
 				set_selected_lobby(lobby)
 
 func _get_ip() -> String:
+	if not _client: return _get_ip_local()
+
 	var ip := await _client.whereami()
 	if not ip: ip = _get_ip_local()
 
@@ -306,6 +334,19 @@ size_flags_horizontal = 3
 text = "None"
 
 [node name="HSeparator" type="HSeparator" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Game ID Input" type="LineEdit" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Game ID"
+
+[node name="Set Game ID Button" type="Button" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Set  Game ID"
+
+[node name="HSeparator2" type="HSeparator" parent="Browser UI/Left Panel/VBoxContainer"]
 layout_mode = 2
 
 [node name="Address Prefix" type="Label" parent="Browser UI/Left Panel/VBoxContainer"]

@@ -9,6 +9,7 @@ import {
   type SessionData,
   withSessionCommands,
 } from "@src/sessions";
+import { importGames } from "./games";
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
@@ -46,6 +47,8 @@ export class Nohub {
           },
         },
       });
+
+    importGames();
 
     rootLogger.info("Listening on %s:%s", this.host, this.port);
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);

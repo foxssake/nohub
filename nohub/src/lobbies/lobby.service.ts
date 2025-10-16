@@ -1,4 +1,6 @@
+import { InvalidCommandError } from "@src/errors";
 import { rootLogger } from "@src/logger";
+import type { SessionData } from "@src/sessions";
 import { nanoid } from "nanoid";
 import {
   isLobbyVisibleTo,
@@ -11,18 +13,28 @@ import type { LobbyRepository } from "./lobby.repository";
 export class LobbyService {
   constructor(
     private repository: LobbyRepository,
+    private enableGameless = false,
     private logger = rootLogger.child({ name: "LobbyService" }),
   ) {}
 
-  create(address: string, data: Map<string, string>, sessionId: string): Lobby {
+  create(
+    address: string,
+    data: Map<string, string>,
+    session: SessionData,
+  ): Lobby {
     this.logger.info(
       { data: Object.fromEntries(data.entries()), address },
       "Creating lobby with custom data",
     );
+
+    if (session.game === undefined && !this.enableGameless)
+      throw new InvalidCommandError("Can't create lobbies without a game!");
+
     const lobby: Lobby = {
       id: this.generateId(),
       address,
-      owner: sessionId,
+      gameId: session.game?.id,
+      owner: session.id,
       isVisible: true,
       isLocked: false,
       data,
@@ -31,16 +43,17 @@ export class LobbyService {
     this.repository.add(lobby);
 
     this.logger.info(
+      { session, lobby },
       "Lobby#%s created, bound to session#%s",
       lobby.id,
-      sessionId,
+      session.id,
     );
     return lobby;
   }
 
-  *listLobbiesFor(sessionId: string): Generator<Lobby> {
+  *listLobbiesFor(session: SessionData): Generator<Lobby> {
     for (const lobby of this.repository.list())
-      if (isLobbyVisibleTo(lobby, sessionId)) yield lobby;
+      if (isLobbyVisibleTo(lobby, session)) yield lobby;
   }
 
   delete(lobby: Lobby, sessionId: string) {

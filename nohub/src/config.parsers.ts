@@ -1,4 +1,5 @@
 import assert from "node:assert";
+import type { Game } from "./games/game";
 
 /**
  * Parse config value as integer.
@@ -32,7 +33,6 @@ export function enumerated<T>(value: T, values: T[]): T | undefined {
  * @param {string} value
  * @returns {number[]}
  */
-// TODO
 function extractUnit(value: string): [string, string] {
   const pattern = /^([0-9.,]+)([a-zA-Z]*)/;
 
@@ -141,4 +141,14 @@ export function ports(value: string | undefined): number[] | undefined {
     .filter((v, i, a) => i === 0 || v !== a[i - 1]); // ensure every port is unique
 
   return result.length > 0 ? result : undefined;
+}
+
+export function games(value: string | undefined): Game[] | undefined {
+  const gameRegex = /(\S*)\s+(.+)/;
+  return value
+    ?.split("\n")
+    ?.map((l) => l.trim())
+    ?.map((l) => gameRegex.exec(l))
+    ?.filter((it) => !!it)
+    ?.map((it) => ({ id: it.at(1) ?? "", name: it.at(2) ?? "" }));
 }
