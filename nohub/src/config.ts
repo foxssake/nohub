@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { enumerated, integer } from "./config.parsers";
+import { enumerated, games, integer } from "./config.parsers";
 
 dotenv.config();
 
@@ -21,6 +21,8 @@ export const config = {
         "fatal",
       ]) ?? "info",
   },
+
+  games: games(process.env.NOHUB_GAMES) ?? []
 };
 
 export type AppConfig = typeof config;

@@ -4,6 +4,7 @@ import type { AppConfig } from "@src/config";
 import { withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
 import { closeSession, openSession, type SessionData } from "@src/sessions";
+import { importGames } from "./games";
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
@@ -40,6 +41,8 @@ export class Nohub {
           },
         },
       });
+
+    importGames();
 
     rootLogger.info("Listening on %s:%s", this.host, this.port);
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);
