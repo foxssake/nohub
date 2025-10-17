@@ -3,11 +3,12 @@ import type { Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
 import { eventBus } from "@src/events/nohub.event.bus";
 import { rootLogger } from "@src/logger";
-import { type SessionData, sessionOf } from "@src/sessions";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
+import type { NohubReactor } from "@src/nohub";
+import { sessionOf } from "@src/sessions/session.api";
 
 export const lobbyRepository = new LobbyRepository();
 export const lobbyService = new LobbyService(
@@ -19,7 +20,7 @@ const logger = rootLogger.child({ name: "Lobbies" });
 
 // Command handlers
 export const withLobbyCommands =
-  () => (reactor: Reactor<Bun.Socket<SessionData>>) => {
+  () => (reactor: NohubReactor) => {
     reactor
       .on("lobby/create", (cmd, exchange) => {
         requireRequest(cmd);

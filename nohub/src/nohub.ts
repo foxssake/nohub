@@ -1,25 +1,33 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import { Command } from "@foxssake/trimsock-js";
+import { Command, Reactor } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
-import { withLobbyCommands } from "@src/lobbies";
+import { lobbyRepository, withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
 import {
-  closeSession,
-  openSession,
   type SessionData,
-  withSessionCommands,
 } from "@src/sessions";
-import { importGames } from "./games";
+import { gameRepository, importGames } from "./games";
+import { SessionModule } from "./sessions/session.module";
+import { eventBus } from "./events/nohub.event.bus";
+import type { Module } from "./module";
+
+export type NohubReactor = BunSocketReactor<SessionData>;
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
+  private reactor?: BunSocketReactor<SessionData>;
+
+  // TODO: Inject from the other modules
+  private readonly sessionModule = new SessionModule(lobbyRepository, gameRepository, eventBus);
+  private readonly modules: Module[] = [
+    this.sessionModule
+  ]
 
   run(config: AppConfig) {
     rootLogger.info({ config: config }, "Starting with config");
-
-    this.socket = new BunSocketReactor<SessionData>()
+  
+    this.reactor = new BunSocketReactor<SessionData>()
       .configure(withLobbyCommands())
-      .configure(withSessionCommands())
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
@@ -34,23 +42,32 @@ export class Nohub {
           Command.serialize(cmd),
         );
       })
-      .listen({
+
+    const modules = this.modules
+    this.socket = this.reactor.listen({
         hostname: config.tcp.host,
         port: config.tcp.port,
         socket: {
           open(socket) {
-            openSession(socket);
+            modules.forEach(it => { it.openSocket?.call(it, socket) })
           },
 
           close(socket) {
-            closeSession(socket);
+            modules.forEach(it => { it.closeSocket?.call(it, socket) })
           },
         },
       });
 
-    importGames();
-
     rootLogger.info("Listening on %s:%s", this.host, this.port);
+
+    rootLogger.info("Attaching %d modules...", modules.length)
+    modules.forEach(it => {
+      it.attachTo(this)
+      this.reactor && it.configure && it.configure(this.reactor)
+    })
+    importGames()
+    rootLogger.info("Attached %d modules", modules.length)
+
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);
   }
 
