@@ -1,7 +1,7 @@
 {
   "name": "@foxssake/nohub",
   "module": "index.ts",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "type": "module",
   "scripts": {
     "dev": "bun --watch . | pino-pretty",
