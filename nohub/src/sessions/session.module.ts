@@ -3,7 +3,7 @@ import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import type { Module } from "@src/module";
-import type { Nohub, NohubReactor } from "@src/nohub";
+import type { NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
@@ -24,8 +24,6 @@ export class SessionModule implements Module {
       this.config,
     );
   }
-
-  attachTo(_app: Nohub): void {}
 
   configure(reactor: NohubReactor): void {
     reactor
