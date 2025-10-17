@@ -3,13 +3,11 @@ import { Command, Reactor } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { lobbyRepository, withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
-import {
-  type SessionData,
-} from "@src/sessions";
-import { gameRepository, importGames } from "./games";
 import { SessionModule } from "./sessions/session.module";
 import { eventBus } from "./events/nohub.event.bus";
 import type { Module } from "./module";
+import { GameModule } from "./games/game.module";
+import type { SessionData } from "./sessions/session";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -18,8 +16,10 @@ export class Nohub {
   private reactor?: BunSocketReactor<SessionData>;
 
   // TODO: Inject from the other modules
-  private readonly sessionModule = new SessionModule(lobbyRepository, gameRepository, eventBus);
+  private readonly gameModule = new GameModule()
+  private readonly sessionModule = new SessionModule(lobbyRepository, this.gameModule.gameRepository, eventBus);
   private readonly modules: Module[] = [
+    this.gameModule,
     this.sessionModule
   ]
 
@@ -65,7 +65,6 @@ export class Nohub {
       it.attachTo(this)
       this.reactor && it.configure && it.configure(this.reactor)
     })
-    importGames()
     rootLogger.info("Attached %d modules", modules.length)
 
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);
