@@ -52,7 +52,6 @@ export class SessionApi {
       throw new LockedError("Session already has active lobbies!");
 
     // Check if game exists
-    // TODO: Config to enable arbitrary game ID's
     const game = this.config.arbitraryGameId
       ? this.gameLookup.find(gameId)
       : this.gameLookup.require(gameId);
