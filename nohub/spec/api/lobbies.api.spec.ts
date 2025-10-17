@@ -7,9 +7,7 @@ let api: ApiTest;
 describe("Lobbies API", () => {
   beforeAll(async () => {
     api = await ApiTest.create();
-    Games.insert();
     await api.client().setGame(Games.forestBrawl.id);
-    console.log("Games:", ApiTest.nohub?.gameModule?.gameRepository?.list());
   });
 
   afterEach(() => {

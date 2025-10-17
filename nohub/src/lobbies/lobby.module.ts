@@ -2,7 +2,7 @@ import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
 import { requireRequest, requireSingleParam } from "@src/validators";
-import { config } from "../config";
+import { type LobbiesConfig } from "../config";
 import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
 import { LobbyRepository } from "./lobby.repository";
@@ -13,17 +13,19 @@ export class LobbyModule implements Module {
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
-  constructor() {
+  constructor(
+    private config: LobbiesConfig
+  ) {
     this.lobbyRepository = new LobbyRepository();
     this.lobbyService = new LobbyService(
       this.lobbyRepository,
-      config.lobbies.enableGameless,
-    ); // TODO: Inject config
+      this.config.enableGameless,
+    ); 
     this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService);
   }
 
   attachTo(app: Nohub): void {
-    app.eventBus.on("session-close", (sessionId) => {
+    app.modules.eventBus.on("session-close", (sessionId) => {
       this.lobbyApi.onSessionClose(sessionId);
     });
   }

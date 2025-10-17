@@ -11,27 +11,44 @@ import { SessionModule } from "./sessions/session.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
+export class NohubModules {
+  readonly eventBus: NohubEventBus
+  readonly gameModule: GameModule
+  readonly lobbyModule: LobbyModule
+  readonly sessionModule: SessionModule
+
+  readonly all: Module[]
+
+  constructor(
+    readonly config: AppConfig
+  ) {
+    this.eventBus = new NohubEventBus()
+    this.gameModule = new GameModule(this.config.games)
+    this.lobbyModule = new LobbyModule(this.config.lobbies)
+    this.sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus, config.sessions)
+
+    this.all = [
+      this.gameModule,
+      this.lobbyModule,
+      this.sessionModule
+    ]
+  }
+}
+
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
   private reactor?: BunSocketReactor<SessionData>;
 
-  // TODO: Inject from the other modules
-  readonly eventBus = new NohubEventBus();
-  public readonly gameModule = new GameModule();
-  public readonly lobbyModule = new LobbyModule();
-  public readonly sessionModule = new SessionModule(
-    this.lobbyModule.lobbyRepository,
-    this.gameModule.gameRepository,
-    this.eventBus,
-  );
-  public readonly modules: Module[] = [
-    this.gameModule,
-    this.lobbyModule,
-    this.sessionModule,
-  ];
+  readonly modules: NohubModules
 
-  run(config: AppConfig) {
-    rootLogger.info({ config: config }, "Starting with config");
+  constructor(
+    readonly config: AppConfig
+  ) {
+    this.modules = new NohubModules(this.config)
+  }
+
+  run() {
+    rootLogger.info({ config: this.config }, "Starting with config");
 
     this.reactor = new BunSocketReactor<SessionData>().onError(
       (cmd, exchange, error) => {
@@ -50,10 +67,10 @@ export class Nohub {
       },
     );
 
-    const modules = this.modules;
+    const modules = this.modules.all;
     this.socket = this.reactor.listen({
-      hostname: config.tcp.host,
-      port: config.tcp.port,
+      hostname: this.config.tcp.host,
+      port: this.config.tcp.port,
       socket: {
         open(socket) {
           modules.forEach((it) => {

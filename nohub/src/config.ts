@@ -34,4 +34,7 @@ export const config = {
   },
 };
 
+export type GamesConfig = typeof config.games;
+export type LobbiesConfig = typeof config.lobbies;
+export type SessionsConfig = typeof config.sessions;
 export type AppConfig = typeof config;

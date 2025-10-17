@@ -6,6 +6,7 @@ import type { Nohub, NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
+import type { SessionsConfig } from "@src/config";
 
 export class SessionModule implements Module {
   readonly sessionApi: SessionApi;
@@ -14,11 +15,13 @@ export class SessionModule implements Module {
     private lobbyRepository: LobbyRepository, // TODO: Lookup
     private gameRepository: GameRepository, // TODO: Lookup
     private eventBus: NohubEventBus,
+    private config: SessionsConfig
   ) {
     this.sessionApi = new SessionApi(
       this.lobbyRepository,
       this.gameRepository,
       this.eventBus,
+      this.config,
     );
   }
 

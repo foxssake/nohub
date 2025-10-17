@@ -1,5 +1,5 @@
 import type { Exchange } from "@foxssake/trimsock-js";
-import { config } from "@src/config";
+import { type SessionsConfig } from "@src/config";
 import { LockedError } from "@src/errors";
 import type { NohubEventBus } from "@src/events/nohub.event.bus";
 import type { GameRepository } from "@src/games/game.repository";
@@ -16,6 +16,7 @@ export class SessionApi {
     private lobbyRepository: LobbyRepository, // TODO: Lookup
     private gameRepository: GameRepository, // TODO: Lookup
     private eventBus: NohubEventBus,
+    private config: SessionsConfig
   ) {}
 
   generateSessionId(): string {
@@ -25,7 +26,7 @@ export class SessionApi {
   openSession(socket: Socket<SessionData>): void {
     socket.data = {
       id: this.generateSessionId(),
-      gameId: config.sessions.defaultGameId, // TODO: Inject config
+      gameId: this.config.defaultGameId, 
     };
   }
 
