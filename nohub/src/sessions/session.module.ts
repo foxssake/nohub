@@ -3,9 +3,9 @@ import type { Nohub, NohubReactor } from "@src/nohub";
 import { SessionApi, sessionOf } from "./session.api";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
 import type { GameRepository } from "@src/games/game.repository";
-import type { NohubEventBus } from "@src/events/nohub.event.bus";
 import type { SessionData } from "./session";
 import { requireRequest, requireSingleParam } from "@src/validators";
+import type { NohubEventBus } from "@src/events";
 
 export class SessionModule implements Module {
   readonly sessionApi: SessionApi

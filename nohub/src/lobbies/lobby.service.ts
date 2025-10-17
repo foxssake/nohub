@@ -1,6 +1,5 @@
 import { InvalidCommandError } from "@src/errors";
 import { rootLogger } from "@src/logger";
-import type { SessionData } from "@src/sessions";
 import { nanoid } from "nanoid";
 import {
   isLobbyVisibleTo,
@@ -9,6 +8,7 @@ import {
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
+import type { SessionData } from "@src/sessions/session";
 
 export class LobbyService {
   constructor(
@@ -27,13 +27,13 @@ export class LobbyService {
       "Creating lobby with custom data",
     );
 
-    if (session.game === undefined && !this.enableGameless)
+    if (session.gameId === undefined && !this.enableGameless)
       throw new InvalidCommandError("Can't create lobbies without a game!");
 
     const lobby: Lobby = {
       id: this.generateId(),
       address,
-      gameId: session.game?.id,
+      gameId: session.gameId,
       owner: session.id,
       isVisible: true,
       isLocked: false,

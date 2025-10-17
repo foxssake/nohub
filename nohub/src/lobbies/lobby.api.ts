@@ -14,7 +14,7 @@ export class LobbyApi {
 
   create(address: string, session: SessionData, data?: Map<string, string>): string {
     this.logger.info({ session }, "Creating lobby")
-    const lobby = this.lobbyService.create(address, data ?? new Map(), session.id);
+    const lobby = this.lobbyService.create(address, data ?? new Map(), session);
     this.logger.info({ session, lobby }, "Created lobby #%s", lobby.id)
 
     return lobby.id;

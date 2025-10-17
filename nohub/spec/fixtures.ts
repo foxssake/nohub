@@ -1,10 +1,9 @@
-import { gameRepository } from "@src/games";
 import type { Game } from "@src/games/game";
 import type { GameRepository } from "@src/games/game.repository";
-import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
-import type { SessionData } from "@src/sessions";
+import type { SessionData } from "@src/sessions/session";
+import { ApiTest } from "./apitest";
 
 // These methods ensure type safety when used in fixture object literals
 function fixture<T>(data: T): T {
@@ -34,18 +33,18 @@ export const Games = {
 
   all: () => fixturesOf<Game>(Games),
 
-  insert(repository: GameRepository = gameRepository) {
+  insert(repository: GameRepository | undefined = ApiTest.nohub?.gameModule.gameRepository) {
     Games.all().forEach((it) => {
-      repository.add(it);
+      repository?.add(it);
     });
   },
 };
 
 export const Sessions = {
-  dave: sessionFixture({ id: "94kwM3zUaNCn", game: Games.forestBrawl }),
-  eric: sessionFixture({ id: "Nd49VE4RWJh0", game: Games.forestBrawl }),
+  dave: sessionFixture({ id: "94kwM3zUaNCn", gameId: Games.forestBrawl.id }),
+  eric: sessionFixture({ id: "Nd49VE4RWJh0", gameId: Games.forestBrawl.id }),
   pam: sessionFixture({ id: "DCLyAVxClvO_" }),
-  luna: sessionFixture({ id: "IOx6fARLyowY", game: Games.campfire }),
+  luna: sessionFixture({ id: "IOx6fARLyowY", gameId: Games.campfire.id }),
 };
 
 export const Addresses = {
@@ -102,7 +101,8 @@ export const Lobbies = {
     return fixturesOf<Lobby>(Lobbies);
   },
 
-  insert(repository: LobbyRepository = lobbyRepository): void {
-    for (const lobby of this.all()) repository.add(lobby);
+  insert(repository: LobbyRepository | undefined = ApiTest.nohub?.lobbyModule.lobbyRepository): void {
+    for (const lobby of this.all()) 
+      repository?.add(lobby);
   },
 };

@@ -17,10 +17,10 @@ export class Nohub {
 
   // TODO: Inject from the other modules
   readonly eventBus = new NohubEventBus();
-  private readonly gameModule = new GameModule()
-  private readonly lobbyModule = new LobbyModule()
-  private readonly sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus);
-  private readonly modules: Module[] = [
+  public readonly gameModule = new GameModule()
+  public readonly lobbyModule = new LobbyModule()
+  public readonly sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus);
+  public readonly modules: Module[] = [
     this.gameModule,
     this.lobbyModule,
     this.sessionModule

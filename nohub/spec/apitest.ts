@@ -2,7 +2,6 @@ import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
-import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
@@ -11,7 +10,7 @@ import { nanoid } from "nanoid";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
-  private static nohub?: Nohub;
+  static nohub?: Nohub;
 
   private clients: Map<string, TrimsockClient<Bun.Socket>> = new Map();
 
@@ -72,7 +71,7 @@ export class ApiTest {
   }
 
   reset(): void {
-    lobbyRepository.clear();
+    ApiTest.nohub?.lobbyModule.lobbyRepository.clear()
   }
 
   private static async ensureHost(): Promise<Nohub> {
