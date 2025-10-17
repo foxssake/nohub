@@ -28,6 +28,11 @@ export function enumerated<T>(value: T, values: T[]): T | undefined {
   return values.includes(value) ? value : undefined;
 }
 
+export function bool(value: string | undefined): boolean | undefined {
+  if (value === undefined) return undefined;
+  return value === "true";
+}
+
 /**
  * Split an input into nominator and unit
  * @param {string} value
