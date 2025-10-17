@@ -48,7 +48,7 @@ export class LobbyModule implements Module {
         const session = sessionOf(xchg);
 
         const lobby = this.lobbyApi.get(id, session, properties);
-        xchg.reply(lobbyToCommand(lobby))
+        xchg.reply(lobbyToCommand(lobby));
       })
       .on("lobby/delete", (cmd, xchg) => {
         requireRequest(cmd);

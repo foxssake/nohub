@@ -57,5 +57,5 @@ export function commandToLobby(command: CommandSpec): Lobby {
     gameId: "",
     address: "",
     owner: "",
-  }
+  };
 }

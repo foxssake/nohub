@@ -63,25 +63,25 @@ describe("Lobbies API", () => {
   describe("get", () => {
     test("should return custom data", async () => {
       // Create lobby
-      const lobbyData = 
-        new Map([
-          ["name", "Cool Lobby"],
-          ["player-count", "0"],
-          ["player-capacity", "16"],
-        ])
-      const createdLobby = await api.client().createLobby(        Addresses.dave, lobbyData      );
+      const lobbyData = new Map([
+        ["name", "Cool Lobby"],
+        ["player-count", "0"],
+        ["player-capacity", "16"],
+      ]);
+      const createdLobby = await api
+        .client()
+        .createLobby(Addresses.dave, lobbyData);
 
       // Get lobby data
-      const response = await 
-        api
-          .client()
-          .send({
-            name: "lobby/get",
-            text: createdLobby.id,
-            isRequest: true,
-            requestId: "",
-          })
-          .onReply()
+      const response = await api
+        .client()
+        .send({
+          name: "lobby/get",
+          text: createdLobby.id,
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
       expect(response.kvMap).toEqual(lobbyData);
     });
@@ -98,16 +98,15 @@ describe("Lobbies API", () => {
       );
 
       // Get lobby data
-      const response = 
-        await api
-          .client()
-          .send({
-            name: "lobby/get",
-            params: [lobby.id, "name"],
-            isRequest: true,
-            requestId: "",
-          })
-          .onReply()
+      const response = await api
+        .client()
+        .send({
+          name: "lobby/get",
+          params: [lobby.id, "name"],
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
       expect(response.kvParams).toEqual([["name", "Cool Lobby"]]);
     });
@@ -125,13 +124,14 @@ describe("Lobbies API", () => {
 
       // Get lobby data
       const response = await api
-          .client()
-          .send({
-            name: "lobby/get",
-            params: [lobby.id, "gamemode"],
-            isRequest: true,
-            requestId: "",
-          }).onReply();
+        .client()
+        .send({
+          name: "lobby/get",
+          params: [lobby.id, "gamemode"],
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
       expect(response.kvParams).toBeUndefined();
     });
