@@ -48,7 +48,7 @@ export class LobbyApi {
     );
 
     let count = 0;
-    for (const lobby of this.lobbyService.listLobbiesFor(session)) {
+    for (const lobby of this.lobbyRepository.listLobbiesFor(session)) {
       yield { ...lobby, data: this.filterProperties(lobby.data, properties) };
       ++count;
     }
@@ -72,7 +72,7 @@ export class LobbyApi {
       return;
     }
 
-    this.lobbyService.delete(lobby, session.id);
+    this.lobbyService.delete(lobby, session);
     this.logger.info({ lobbyId: id, session }, "Deleted lobby #%s", id);
   }
 
@@ -80,7 +80,7 @@ export class LobbyApi {
     this.logger.info({ session, lobbyId: id }, "Joining lobby");
 
     const lobby = this.lobbyRepository.requireInGame(id, session.gameId);
-    const address = this.lobbyService.join(lobby, session.id);
+    const address = this.lobbyService.join(lobby, session);
 
     this.logger.info({ session, lobby }, "Successfully joined lobby");
     return address;
@@ -90,7 +90,7 @@ export class LobbyApi {
     this.logger.info({ lobbyId: id, session, data }, "Updating session data");
 
     const lobby = this.lobbyRepository.require(id);
-    this.lobbyService.setData(lobby, data, session.id);
+    this.lobbyService.setData(lobby, data, session);
 
     this.logger.info({ lobbyId: id, session }, "Updated session data");
   }
@@ -99,7 +99,7 @@ export class LobbyApi {
     this.logger.info({ lobbyId: id, session }, "Attempting to lock lobby");
 
     const lobby = this.lobbyRepository.require(id);
-    this.lobbyService.lock(lobby, session.id);
+    this.lobbyService.lock(lobby, session);
 
     this.logger.info({ lobbyId: id, session }, "Successfully locked lobby");
   }
@@ -108,7 +108,7 @@ export class LobbyApi {
     this.logger.info({ lobbyId: id, session }, "Attempting to unlock lobby");
 
     const lobby = this.lobbyRepository.require(id);
-    this.lobbyService.unlock(lobby, session.id);
+    this.lobbyService.unlock(lobby, session);
 
     this.logger.info({ lobbyId: id, session }, "Successfully unlocked lobby");
   }
@@ -117,7 +117,7 @@ export class LobbyApi {
     this.logger.info({ lobbyId: id, session }, "Attempting to hide lobby");
 
     const lobby = this.lobbyRepository.require(id);
-    this.lobbyService.hide(lobby, session.id);
+    this.lobbyService.hide(lobby, session);
 
     this.logger.info({ lobbyId: id, session }, "Successfully hidden lobby");
   }
@@ -126,7 +126,7 @@ export class LobbyApi {
     this.logger.info({ lobbyId: id, session }, "Attempting to publish lobby");
 
     const lobby = this.lobbyRepository.require(id);
-    this.lobbyService.publish(lobby, session.id);
+    this.lobbyService.publish(lobby, session);
 
     this.logger.info({ lobbyId: id, session }, "Successfully published lobby");
   }

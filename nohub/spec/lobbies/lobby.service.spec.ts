@@ -55,57 +55,36 @@ describe("LobbyService", () => {
     });
   });
 
-  describe("listLobbiesFor", () => {
-    test("should not list hidden lobbies", () => {
-      expect([...lobbyService.listLobbiesFor(Sessions.dave)]).toEqual([
-        Lobbies.davesLobby,
-      ]);
-    });
-
-    test("should list owned hidden lobbies", () => {
-      expect([...lobbyService.listLobbiesFor(Sessions.eric)]).toEqual([
-        Lobbies.davesLobby,
-        Lobbies.coolLobby,
-      ]);
-    });
-
-    test("should not list lobbies in different games", () => {
-      expect([...lobbyService.listLobbiesFor(Sessions.luna)]).not.toContain(
-        Lobbies.davesLobby,
-      );
-    });
-  });
-
   describe("delete", () => {
     test("should delete lobby", () => {
       expect(() =>
-        lobbyService.delete(Lobbies.davesLobby, Sessions.dave.id),
+        lobbyService.delete(Lobbies.davesLobby, Sessions.dave),
       ).not.toThrow();
     });
 
     test("should throw if not owner", () => {
       expect(() =>
-        lobbyService.delete(Lobbies.davesLobby, Sessions.eric.id),
+        lobbyService.delete(Lobbies.davesLobby, Sessions.eric),
       ).toThrow();
     });
   });
 
   describe("join", () => {
     test("should respond with address", () => {
-      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam.id)).toEqual(
+      expect(lobbyService.join(Lobbies.davesLobby, Sessions.pam)).toEqual(
         Lobbies.davesLobby.address,
       );
     });
 
     test("should throw on joining own lobby", () => {
       expect(() =>
-        lobbyService.join(Lobbies.davesLobby, Sessions.dave.id),
+        lobbyService.join(Lobbies.davesLobby, Sessions.dave),
       ).toThrow(LockedError);
     });
 
     test("should  throw on joining locked lobby", () => {
       expect(() =>
-        lobbyService.join(Lobbies.coolLobby, Sessions.eric.id),
+        lobbyService.join(Lobbies.coolLobby, Sessions.eric),
       ).toThrow(LockedError);
     });
   });
@@ -118,7 +97,7 @@ describe("LobbyService", () => {
       const lobby = lobbyService.setData(
         Lobbies.davesLobby,
         newData,
-        Sessions.dave.id,
+        Sessions.dave,
       );
 
       expect(lobby.data).toEqual(newData);
@@ -128,14 +107,14 @@ describe("LobbyService", () => {
     test("should throw if unauthorized", () => {
       // Try to update
       expect(() =>
-        lobbyService.setData(Lobbies.coolLobby, new Map(), Sessions.dave.id),
+        lobbyService.setData(Lobbies.coolLobby, new Map(), Sessions.dave),
       );
     });
   });
 
   describe("lock", () => {
     test("should lock lobby", () => {
-      const lobby = lobbyService.lock(Lobbies.davesLobby, Sessions.dave.id);
+      const lobby = lobbyService.lock(Lobbies.davesLobby, Sessions.dave);
 
       expect(lobby.isLocked).toBeTrue();
       expect(lobbyRepository.require(lobby.id).isLocked).toBeTrue();
@@ -143,14 +122,14 @@ describe("LobbyService", () => {
 
     test("should throw if unauthorized", () => {
       expect(() =>
-        lobbyService.lock(Lobbies.davesLobby, Sessions.eric.id),
+        lobbyService.lock(Lobbies.davesLobby, Sessions.eric),
       ).toThrow(UnauthorizedError);
     });
   });
 
   describe("unlock", () => {
     test("should unlock lobby", () => {
-      const lobby = lobbyService.unlock(Lobbies.coolLobby, Sessions.eric.id);
+      const lobby = lobbyService.unlock(Lobbies.coolLobby, Sessions.eric);
 
       expect(lobby.isLocked).toBeFalse();
       expect(lobbyRepository.require(lobby.id).isLocked).toBeFalse();
@@ -158,14 +137,14 @@ describe("LobbyService", () => {
 
     test("should throw if unauthorized", () => {
       expect(() =>
-        lobbyService.unlock(Lobbies.davesLobby, Sessions.eric.id),
+        lobbyService.unlock(Lobbies.davesLobby, Sessions.eric),
       ).toThrow(UnauthorizedError);
     });
   });
 
   describe("hide", () => {
     test("should hide lobby", () => {
-      const lobby = lobbyService.hide(Lobbies.davesLobby, Sessions.dave.id);
+      const lobby = lobbyService.hide(Lobbies.davesLobby, Sessions.dave);
 
       expect(lobby.isVisible).toBeFalse();
       expect(lobbyRepository.require(lobby.id).isVisible).toBeFalse();
@@ -173,14 +152,14 @@ describe("LobbyService", () => {
 
     test("should throw if unauthorized", () => {
       expect(() =>
-        lobbyService.hide(Lobbies.davesLobby, Sessions.eric.id),
+        lobbyService.hide(Lobbies.davesLobby, Sessions.eric),
       ).toThrow(UnauthorizedError);
     });
   });
 
   describe("publish", () => {
     test("should publish lobby", () => {
-      const lobby = lobbyService.publish(Lobbies.coolLobby, Sessions.eric.id);
+      const lobby = lobbyService.publish(Lobbies.coolLobby, Sessions.eric);
 
       expect(lobby.isVisible).toBeTrue();
       expect(lobbyRepository.require(lobby.id).isVisible).toBeTrue();
@@ -188,7 +167,7 @@ describe("LobbyService", () => {
 
     test("should throw if unauthorized", () => {
       expect(() =>
-        lobbyService.publish(Lobbies.davesLobby, Sessions.eric.id),
+        lobbyService.publish(Lobbies.davesLobby, Sessions.eric),
       ).toThrow(UnauthorizedError);
     });
   });

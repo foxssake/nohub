@@ -1,6 +1,7 @@
 import { DataNotFoundError } from "@src/errors";
 import { Repository } from "@src/repository";
-import type { Lobby } from "./lobby";
+import { isLobbyVisibleTo, type Lobby } from "./lobby";
+import type { SessionData } from "@src/sessions/session";
 
 export class LobbyRepository extends Repository<Lobby, string> {
   constructor() {
@@ -27,6 +28,12 @@ export class LobbyRepository extends Repository<Lobby, string> {
   existsBySession(sessionId: string): boolean {
     for (const lobby of this.list()) if (lobby.owner === sessionId) return true;
     return false;
+  }
+
+  *listLobbiesFor(session: SessionData): Generator<Lobby> {
+    for (const lobby of this.list())
+      if (isLobbyVisibleTo(lobby, session))
+        yield lobby
   }
 
   protected notFoundError(id: string): Error {

@@ -51,55 +51,50 @@ export class LobbyService {
     return lobby;
   }
 
-  *listLobbiesFor(session: SessionData): Generator<Lobby> {
-    for (const lobby of this.repository.list())
-      if (isLobbyVisibleTo(lobby, session)) yield lobby;
-  }
-
-  delete(lobby: Lobby, sessionId: string) {
-    requireLobbyModifiableIn(lobby, sessionId);
+  delete(lobby: Lobby, session: SessionData) {
+    requireLobbyModifiableIn(lobby, session);
     this.repository.remove(lobby.id);
   }
 
-  join(lobby: Lobby, sessionId: string): string {
-    requireLobbyJoinable(lobby, sessionId);
+  join(lobby: Lobby, session: SessionData): string {
+    requireLobbyJoinable(lobby, session);
     return lobby.address;
   }
 
-  setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  setData(lobby: Lobby, data: Map<string, string>, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const updated = { ...lobby, data };
     this.repository.update(updated);
     return updated;
   }
 
-  lock(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  lock(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isLocked: true };
     this.repository.update(result);
     return result;
   }
 
-  unlock(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  unlock(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isLocked: false };
     this.repository.update(result);
     return result;
   }
 
-  hide(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  hide(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isVisible: false };
     this.repository.update(result);
     return result;
   }
 
-  publish(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  publish(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isVisible: true };
     this.repository.update(result);

@@ -3,7 +3,7 @@ import type { Nohub, NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import { config } from "../config";
-import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
+import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
 import { LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
@@ -49,10 +49,10 @@ export class LobbyModule implements Module {
 
         // TODO: Simplify response to a single response command
         // Stream first chunk with ID and keywords
-        xchg.stream({ params: [id, ...lobbyKeywords(lobby)] });
+        xchg.stream({ ...lobbyToCommand(lobby), kvParams: undefined });
 
         // Stream properties
-        for (const entry of lobbyToKvPairs(lobby, properties))
+        for (const entry of lobby.data.entries())
           xchg.stream({ kvParams: [entry] });
         xchg.finishStream();
       })
@@ -72,10 +72,7 @@ export class LobbyModule implements Module {
 
         // List lobbies
         for (const lobby of this.lobbyApi.list(properties, session))
-          xchg.stream({
-            params: [lobby.id, ...lobbyKeywords(lobby)],
-            kvParams: lobbyToKvPairs(lobby, properties),
-          });
+          xchg.stream(lobbyToCommand(lobby));
         xchg.finishStream();
       })
       .on("lobby/join", (cmd, xchg) => {
