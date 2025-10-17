@@ -47,3 +47,15 @@ export function lobbyToCommand(lobby: Lobby): Partial<CommandSpec> {
 
   return { params, kvParams: [...lobby.data.entries()] };
 }
+
+export function commandToLobby(command: CommandSpec): Lobby {
+  return {
+    id: command.params?.at(0) ?? command.text ?? "",
+    isLocked: (command.params?.indexOf("locked", 1) ?? -1) >= 0,
+    isVisible: (command.params?.indexOf("hidden", 1) ?? -1) < 0,
+    data: command.kvMap ?? new Map(),
+    gameId: "",
+    address: "",
+    owner: "",
+  }
+}

@@ -2,7 +2,7 @@ import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
-import type { Lobby } from "@src/lobbies/lobby";
+import { commandToLobby, type Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
@@ -132,7 +132,7 @@ export class TrimsockClient<T> {
   async createLobby(
     address: string,
     data?: Map<string, string>,
-  ): Promise<string> {
+  ): Promise<Lobby> {
     const xchg = this.reactor.send(this.serverTarget, {
       name: "lobby/create",
       isRequest: true,
@@ -146,7 +146,7 @@ export class TrimsockClient<T> {
     if (!reply.isSuccessResponse || !reply.text)
       throw new Error("Failed to create lobby!");
 
-    return reply.text;
+    return commandToLobby(reply);
   }
 
   async listLobbies(): Promise<Lobby[]> {
