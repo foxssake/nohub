@@ -12,26 +12,25 @@ import { SessionModule } from "./sessions/session.module";
 export type NohubReactor = BunSocketReactor<SessionData>;
 
 export class NohubModules {
-  readonly eventBus: NohubEventBus
-  readonly gameModule: GameModule
-  readonly lobbyModule: LobbyModule
-  readonly sessionModule: SessionModule
+  readonly eventBus: NohubEventBus;
+  readonly gameModule: GameModule;
+  readonly lobbyModule: LobbyModule;
+  readonly sessionModule: SessionModule;
 
-  readonly all: Module[]
+  readonly all: Module[];
 
-  constructor(
-    readonly config: AppConfig
-  ) {
-    this.eventBus = new NohubEventBus()
-    this.gameModule = new GameModule(this.config.games)
-    this.lobbyModule = new LobbyModule(this.config.lobbies)
-    this.sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus, config.sessions)
+  constructor(readonly config: AppConfig) {
+    this.eventBus = new NohubEventBus();
+    this.gameModule = new GameModule(this.config.games);
+    this.lobbyModule = new LobbyModule(this.config.lobbies);
+    this.sessionModule = new SessionModule(
+      this.lobbyModule.lobbyRepository,
+      this.gameModule.gameRepository,
+      this.eventBus,
+      config.sessions,
+    );
 
-    this.all = [
-      this.gameModule,
-      this.lobbyModule,
-      this.sessionModule
-    ]
+    this.all = [this.gameModule, this.lobbyModule, this.sessionModule];
   }
 }
 
@@ -39,12 +38,10 @@ export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
   private reactor?: BunSocketReactor<SessionData>;
 
-  readonly modules: NohubModules
+  readonly modules: NohubModules;
 
-  constructor(
-    readonly config: AppConfig
-  ) {
-    this.modules = new NohubModules(this.config)
+  constructor(readonly config: AppConfig) {
+    this.modules = new NohubModules(this.config);
   }
 
   run() {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "bun:test";
 import { Lobbies, Sessions } from "@spec/fixtures";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 
-let lobbyRepository: LobbyRepository
+let lobbyRepository: LobbyRepository;
 
 describe("LobbyRepository", () => {
   beforeEach(() => {
@@ -30,5 +30,4 @@ describe("LobbyRepository", () => {
       );
     });
   });
-
-})
+});

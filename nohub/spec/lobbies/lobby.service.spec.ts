@@ -83,9 +83,9 @@ describe("LobbyService", () => {
     });
 
     test("should  throw on joining locked lobby", () => {
-      expect(() =>
-        lobbyService.join(Lobbies.coolLobby, Sessions.eric),
-      ).toThrow(LockedError);
+      expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(
+        LockedError,
+      );
     });
   });
 

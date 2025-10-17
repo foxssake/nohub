@@ -1,9 +1,9 @@
 import type { Exchange } from "@foxssake/trimsock-js";
-import { type SessionsConfig } from "@src/config";
+import type { SessionsConfig } from "@src/config";
 import { LockedError } from "@src/errors";
 import type { NohubEventBus } from "@src/events/nohub.event.bus";
-import type { GameLookup, } from "@src/games/game.repository";
-import type { LobbyLookup, } from "@src/lobbies/lobby.repository";
+import type { GameLookup } from "@src/games/game.repository";
+import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
@@ -16,7 +16,7 @@ export class SessionApi {
     private lobbyLookup: LobbyLookup,
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
-    private config: SessionsConfig
+    private config: SessionsConfig,
   ) {}
 
   generateSessionId(): string {
@@ -26,7 +26,7 @@ export class SessionApi {
   openSession(socket: Socket<SessionData>): void {
     socket.data = {
       id: this.generateSessionId(),
-      gameId: this.config.defaultGameId, 
+      gameId: this.config.defaultGameId,
     };
   }
 

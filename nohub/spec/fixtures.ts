@@ -105,8 +105,8 @@ export const Lobbies = {
   },
 
   insert(
-    repository: LobbyRepository | undefined = ApiTest.nohub?.modules?.lobbyModule
-      .lobbyRepository,
+    repository: LobbyRepository | undefined = ApiTest.nohub?.modules
+      ?.lobbyModule.lobbyRepository,
   ): void {
     for (const lobby of this.all()) repository?.add(lobby);
   },

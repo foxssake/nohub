@@ -19,7 +19,8 @@ export function requireLobbyModifiableIn(
 ) {
   if (lobby.owner !== session.id)
     throw new UnauthorizedError(
-      message ?? `Lobby#${lobby.id} can't be modified in session#${session.id}!`,
+      message ??
+        `Lobby#${lobby.id} can't be modified in session#${session.id}!`,
     );
 }
 
@@ -40,9 +41,9 @@ export function isLobbyVisibleTo(lobby: Lobby, session: SessionData): boolean {
 }
 
 export function lobbyToCommand(lobby: Lobby): Partial<CommandSpec> {
-  const params = [lobby.id]
-  if (lobby.isLocked) params.push("locked")
-  if (!lobby.isVisible) params.push("hidden")
+  const params = [lobby.id];
+  if (lobby.isLocked) params.push("locked");
+  if (!lobby.isVisible) params.push("hidden");
 
-  return { params, kvParams: [...lobby.data.entries()] }
+  return { params, kvParams: [...lobby.data.entries()] };
 }

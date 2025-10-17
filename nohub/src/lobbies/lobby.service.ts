@@ -60,7 +60,11 @@ export class LobbyService {
     return lobby.address;
   }
 
-  setData(lobby: Lobby, data: Map<string, string>, session: SessionData): Lobby {
+  setData(
+    lobby: Lobby,
+    data: Map<string, string>,
+    session: SessionData,
+  ): Lobby {
     requireLobbyModifiableIn(lobby, session);
 
     const updated = { ...lobby, data };

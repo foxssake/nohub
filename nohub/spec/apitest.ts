@@ -85,7 +85,7 @@ export class ApiTest {
         host: "localhost",
         port: 0,
       },
-      games: Games.all()
+      games: Games.all(),
     });
     // Run listening on a random port
     ApiTest.nohub.run();

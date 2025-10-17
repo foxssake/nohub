@@ -2,10 +2,10 @@ import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
 import { requireRequest, requireSingleParam } from "@src/validators";
-import { type LobbiesConfig } from "../config";
+import type { LobbiesConfig } from "../config";
 import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
-import { LobbyRepository, type LobbyLookup } from "./lobby.repository";
+import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
 
 export class LobbyModule implements Module {
@@ -14,15 +14,13 @@ export class LobbyModule implements Module {
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
-  constructor(
-    private config: LobbiesConfig
-  ) {
+  constructor(private config: LobbiesConfig) {
     this.lobbyRepository = new LobbyRepository();
     this.lobbyLookup = this.lobbyRepository;
     this.lobbyService = new LobbyService(
       this.lobbyRepository,
       this.config.enableGameless,
-    ); 
+    );
     this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService);
   }
 

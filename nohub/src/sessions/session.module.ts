@@ -1,12 +1,12 @@
+import type { SessionsConfig } from "@src/config";
 import type { NohubEventBus } from "@src/events";
-import type { GameLookup, GameRepository } from "@src/games/game.repository";
-import type { LobbyLookup, LobbyRepository } from "@src/lobbies/lobby.repository";
+import type { GameLookup } from "@src/games/game.repository";
+import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
-import type { SessionsConfig } from "@src/config";
 
 export class SessionModule implements Module {
   readonly sessionApi: SessionApi;
@@ -15,7 +15,7 @@ export class SessionModule implements Module {
     private lobbyLookup: LobbyLookup,
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
-    private config: SessionsConfig
+    private config: SessionsConfig,
   ) {
     this.sessionApi = new SessionApi(
       this.lobbyLookup,
