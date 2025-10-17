@@ -1,5 +1,5 @@
 import { LockedError, UnauthorizedError } from "@src/errors";
-import type { SessionData } from "@src/sessions";
+import type { SessionData } from "@src/sessions/session";
 
 export interface Lobby {
   id: string;
@@ -31,7 +31,7 @@ export function requireLobbyJoinable(lobby: Lobby, sessionId: string) {
 
 export function isLobbyVisibleTo(lobby: Lobby, session: SessionData): boolean {
   // Lobby is in a different game
-  if (lobby.gameId !== session.game?.id) return false;
+  if (lobby.gameId !== session.gameId) return false;
   // Lobby is hidden, and session does not own it
   if (!lobby.isVisible && lobby.owner !== session.id) return false;
 

@@ -1,13 +1,13 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command, Reactor } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
-import { lobbyRepository, withLobbyCommands } from "@src/lobbies";
 import { rootLogger } from "@src/logger";
 import { SessionModule } from "./sessions/session.module";
-import { eventBus } from "./events/nohub.event.bus";
 import type { Module } from "./module";
 import { GameModule } from "./games/game.module";
 import type { SessionData } from "./sessions/session";
+import { NohubEventBus } from "./events";
+import { LobbyModule } from "./lobbies/lobby.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -16,10 +16,13 @@ export class Nohub {
   private reactor?: BunSocketReactor<SessionData>;
 
   // TODO: Inject from the other modules
+  readonly eventBus = new NohubEventBus();
   private readonly gameModule = new GameModule()
-  private readonly sessionModule = new SessionModule(lobbyRepository, this.gameModule.gameRepository, eventBus);
+  private readonly lobbyModule = new LobbyModule()
+  private readonly sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus);
   private readonly modules: Module[] = [
     this.gameModule,
+    this.lobbyModule,
     this.sessionModule
   ]
 
@@ -27,7 +30,6 @@ export class Nohub {
     rootLogger.info({ config: config }, "Starting with config");
   
     this.reactor = new BunSocketReactor<SessionData>()
-      .configure(withLobbyCommands())
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
@@ -62,7 +64,7 @@ export class Nohub {
 
     rootLogger.info("Attaching %d modules...", modules.length)
     modules.forEach(it => {
-      it.attachTo(this)
+      it.attachTo && it.attachTo(this)
       this.reactor && it.configure && it.configure(this.reactor)
     })
     rootLogger.info("Attached %d modules", modules.length)
