@@ -1,9 +1,8 @@
 import { InvalidCommandError } from "@src/errors";
 import { rootLogger } from "@src/logger";
-import type { SessionData } from "@src/sessions";
+import type { SessionData } from "@src/sessions/session";
 import { nanoid } from "nanoid";
 import {
-  isLobbyVisibleTo,
   type Lobby,
   requireLobbyJoinable,
   requireLobbyModifiableIn,
@@ -27,13 +26,13 @@ export class LobbyService {
       "Creating lobby with custom data",
     );
 
-    if (session.game === undefined && !this.enableGameless)
+    if (session.gameId === undefined && !this.enableGameless)
       throw new InvalidCommandError("Can't create lobbies without a game!");
 
     const lobby: Lobby = {
       id: this.generateId(),
       address,
-      gameId: session.game?.id,
+      gameId: session.gameId,
       owner: session.id,
       isVisible: true,
       isLocked: false,
@@ -51,55 +50,54 @@ export class LobbyService {
     return lobby;
   }
 
-  *listLobbiesFor(session: SessionData): Generator<Lobby> {
-    for (const lobby of this.repository.list())
-      if (isLobbyVisibleTo(lobby, session)) yield lobby;
-  }
-
-  delete(lobby: Lobby, sessionId: string) {
-    requireLobbyModifiableIn(lobby, sessionId);
+  delete(lobby: Lobby, session: SessionData) {
+    requireLobbyModifiableIn(lobby, session);
     this.repository.remove(lobby.id);
   }
 
-  join(lobby: Lobby, sessionId: string): string {
-    requireLobbyJoinable(lobby, sessionId);
+  join(lobby: Lobby, session: SessionData): string {
+    requireLobbyJoinable(lobby, session);
     return lobby.address;
   }
 
-  setData(lobby: Lobby, data: Map<string, string>, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  setData(
+    lobby: Lobby,
+    data: Map<string, string>,
+    session: SessionData,
+  ): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const updated = { ...lobby, data };
     this.repository.update(updated);
     return updated;
   }
 
-  lock(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  lock(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isLocked: true };
     this.repository.update(result);
     return result;
   }
 
-  unlock(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  unlock(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isLocked: false };
     this.repository.update(result);
     return result;
   }
 
-  hide(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  hide(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isVisible: false };
     this.repository.update(result);
     return result;
   }
 
-  publish(lobby: Lobby, sessionId: string): Lobby {
-    requireLobbyModifiableIn(lobby, sessionId);
+  publish(lobby: Lobby, session: SessionData): Lobby {
+    requireLobbyModifiableIn(lobby, session);
 
     const result: Lobby = { ...lobby, isVisible: true };
     this.repository.update(result);

@@ -2,16 +2,16 @@ import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
 import { config } from "@src/config";
-import { lobbyRepository } from "@src/lobbies";
 import type { Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
+import { Games } from "./fixtures";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
-  private static nohub?: Nohub;
+  static nohub?: Nohub;
 
   private clients: Map<string, TrimsockClient<Bun.Socket>> = new Map();
 
@@ -72,22 +72,23 @@ export class ApiTest {
   }
 
   reset(): void {
-    lobbyRepository.clear();
+    ApiTest.nohub?.modules?.lobbyModule.lobbyRepository.clear();
   }
 
   private static async ensureHost(): Promise<Nohub> {
     if (ApiTest.nohub) return ApiTest.nohub;
 
     ApiTest.logger.info("Starting local nohub for testing");
-    ApiTest.nohub = new Nohub();
-    // Run listening on a random port
-    ApiTest.nohub.run({
+    ApiTest.nohub = new Nohub({
       ...config,
       tcp: {
         host: "localhost",
         port: 0,
       },
+      games: Games.all(),
     });
+    // Run listening on a random port
+    ApiTest.nohub.run();
     ApiTest.logger.info("Local nohub started");
 
     process.on("beforeExit", () => {

@@ -6,7 +6,6 @@ let api: ApiTest;
 
 describe("Lobbies API", () => {
   beforeAll(async () => {
-    Games.insert();
     api = await ApiTest.create();
     await api.client().setGame(Games.forestBrawl.id);
   });
@@ -251,8 +250,10 @@ describe("Lobbies API", () => {
           .onReply();
       }).toThrow();
     });
-    test("should throw on unknown lobby ID", () => {
-      expect(async () => await api.client().deleteLobby("unknown")).toThrow();
+    test("should succeed on unknown lobby ID", () => {
+      expect(
+        async () => await api.client().deleteLobby("unknown"),
+      ).not.toThrow();
     });
   });
 

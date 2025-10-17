@@ -49,3 +49,8 @@ export class TypedEventBus<T extends EventMap> extends EventBus {
     super.emit(event, ...args);
   }
 }
+
+// Application specific events
+export class NohubEventBus extends TypedEventBus<{
+  "session-close": (sessionId: string) => void;
+}> {}

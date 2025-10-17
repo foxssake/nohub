@@ -1,8 +1,13 @@
 import { DataNotFoundError } from "@src/errors";
-import { Repository } from "@src/repository";
+import { type Lookup, Repository } from "@src/repository";
 import type { Game } from "./game";
 
-export class GameRepository extends Repository<Game, string> {
+export interface GameLookup extends Lookup<Game, string> {}
+
+export class GameRepository
+  extends Repository<Game, string>
+  implements GameLookup
+{
   constructor() {
     super((game) => game.id);
   }

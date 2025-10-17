@@ -3,13 +3,45 @@ import assert from "node:assert";
 export type IdMapper<T, K> = (item: Partial<T>) => K | undefined;
 export type ItemMerger<T> = (a: T, b: Partial<T>) => T;
 
+export interface Lookup<T, K = string> {
+  /**
+   * Find item based on id.
+   */
+  find(id: K): T | undefined;
+
+  /**
+   * Return item with id or throw
+   */
+  require(id: K): T;
+
+  /**
+   * Check if item with id exists.
+   */
+  has(id: K): boolean;
+
+  /**
+   * List all items in repository.
+   */
+  list(): IterableIterator<T>;
+
+  /**
+   * Count all items in repository
+   */
+  count(): number;
+
+  /**
+   * Check if item exists.
+   */
+  hasItem(item: T): boolean;
+}
+
 /**
  * In-memory repository class
  *
  * @typeParam T - item type
  * @typeParam K - ID type
  */
-export class Repository<T, K = string> {
+export class Repository<T, K = string> implements Lookup<T, K> {
   protected items = new Map<K, T>();
 
   constructor(

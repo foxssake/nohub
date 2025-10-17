@@ -1,5 +1,6 @@
+import type { CommandSpec } from "@foxssake/trimsock-js";
 import { LockedError, UnauthorizedError } from "@src/errors";
-import type { SessionData } from "@src/sessions";
+import type { SessionData } from "@src/sessions/session";
 
 export interface Lobby {
   id: string;
@@ -13,45 +14,36 @@ export interface Lobby {
 
 export function requireLobbyModifiableIn(
   lobby: Lobby,
-  sessionId: string,
+  session: SessionData,
   message?: string,
 ) {
-  if (lobby.owner !== sessionId)
+  if (lobby.owner !== session.id)
     throw new UnauthorizedError(
-      message ?? `Lobby#${lobby.id} can't be modified in session#${sessionId}!`,
+      message ??
+        `Lobby#${lobby.id} can't be modified in session#${session.id}!`,
     );
 }
 
-export function requireLobbyJoinable(lobby: Lobby, sessionId: string) {
+export function requireLobbyJoinable(lobby: Lobby, session: SessionData) {
   if (lobby.isLocked)
     throw new LockedError(`Can't join locked lobby#${lobby.id}!`);
-  if (lobby.owner === sessionId)
+  if (lobby.owner === session.id)
     throw new LockedError("Can't join your own lobby - you're already there!");
 }
 
 export function isLobbyVisibleTo(lobby: Lobby, session: SessionData): boolean {
   // Lobby is in a different game
-  if (lobby.gameId !== session.game?.id) return false;
+  if (lobby.gameId !== session.gameId) return false;
   // Lobby is hidden, and session does not own it
   if (!lobby.isVisible && lobby.owner !== session.id) return false;
 
   return true;
 }
 
-export function lobbyToKvPairs(
-  lobby: Lobby,
-  properties?: string[],
-): [string, string][] {
-  if (properties === undefined) return [...lobby.data.entries()];
-  if (properties.length === 0) return [];
+export function lobbyToCommand(lobby: Lobby): Partial<CommandSpec> {
+  const params = [lobby.id];
+  if (lobby.isLocked) params.push("locked");
+  if (!lobby.isVisible) params.push("hidden");
 
-  return [...lobby.data.entries()].filter(([key]) => properties.includes(key));
-}
-
-export function lobbyKeywords(lobby: Lobby): string[] {
-  const result = [];
-  if (lobby.isLocked) result.push("locked");
-  if (!lobby.isVisible) result.push("hidden");
-
-  return result;
+  return { params, kvParams: [...lobby.data.entries()] };
 }

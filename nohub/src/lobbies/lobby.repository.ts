@@ -1,8 +1,19 @@
 import { DataNotFoundError } from "@src/errors";
-import { Repository } from "@src/repository";
-import type { Lobby } from "./lobby";
+import { type Lookup, Repository } from "@src/repository";
+import type { SessionData } from "@src/sessions/session";
+import { isLobbyVisibleTo, type Lobby } from "./lobby";
 
-export class LobbyRepository extends Repository<Lobby, string> {
+export interface LobbyLookup extends Lookup<Lobby, string> {
+  findInGame(lobbyId: string, gameId?: string): Lobby | undefined;
+  requireInGame(lobbyId: string, gameId?: string): Lobby;
+  existsBySession(sessionId: string): boolean;
+  listLobbiesFor(session: SessionData): Generator<Lobby>;
+}
+
+export class LobbyRepository
+  extends Repository<Lobby, string>
+  implements LobbyLookup
+{
   constructor() {
     super((lobby) => lobby.id);
   }
@@ -27,6 +38,11 @@ export class LobbyRepository extends Repository<Lobby, string> {
   existsBySession(sessionId: string): boolean {
     for (const lobby of this.list()) if (lobby.owner === sessionId) return true;
     return false;
+  }
+
+  *listLobbiesFor(session: SessionData): Generator<Lobby> {
+    for (const lobby of this.list())
+      if (isLobbyVisibleTo(lobby, session)) yield lobby;
   }
 
   protected notFoundError(id: string): Error {
