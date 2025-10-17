@@ -15,7 +15,10 @@ let lobbyService: LobbyService;
 describe("LobbyService", () => {
   beforeEach(() => {
     lobbyRepository = new LobbyRepository();
-    lobbyService = new LobbyService(lobbyRepository);
+    lobbyService = new LobbyService(lobbyRepository, {
+      idLength: 8,
+      enableGameless: false,
+    });
 
     Lobbies.insert(lobbyRepository);
   });
