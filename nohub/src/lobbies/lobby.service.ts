@@ -1,3 +1,4 @@
+import type { LobbiesConfig } from "@src/config";
 import { InvalidCommandError } from "@src/errors";
 import { rootLogger } from "@src/logger";
 import type { SessionData } from "@src/sessions/session";
@@ -12,7 +13,7 @@ import type { LobbyRepository } from "./lobby.repository";
 export class LobbyService {
   constructor(
     private repository: LobbyRepository,
-    private enableGameless = false,
+    private config: LobbiesConfig,
     private logger = rootLogger.child({ name: "LobbyService" }),
   ) {}
 
@@ -26,7 +27,7 @@ export class LobbyService {
       "Creating lobby with custom data",
     );
 
-    if (session.gameId === undefined && !this.enableGameless)
+    if (session.gameId === undefined && !this.config.enableGameless)
       throw new InvalidCommandError("Can't create lobbies without a game!");
 
     const lobby: Lobby = {
@@ -105,6 +106,6 @@ export class LobbyService {
   }
 
   private generateId(): string {
-    return nanoid(8);
+    return nanoid(this.config.idLength);
   }
 }

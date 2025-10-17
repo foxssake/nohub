@@ -17,10 +17,7 @@ export class LobbyModule implements Module {
   constructor(private config: LobbiesConfig) {
     this.lobbyRepository = new LobbyRepository();
     this.lobbyLookup = this.lobbyRepository;
-    this.lobbyService = new LobbyService(
-      this.lobbyRepository,
-      this.config.enableGameless,
-    );
+    this.lobbyService = new LobbyService(this.lobbyRepository, this.config);
     this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService);
   }
 

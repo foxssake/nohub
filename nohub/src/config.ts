@@ -25,11 +25,13 @@ export const config = {
   games: games(process.env.NOHUB_GAMES) ?? [],
 
   lobbies: {
+    idLength: integer(process.env.NOHUB_LOBBIES_ID_LENGTH) ?? 8,
     enableGameless:
       (process.env.NOHUB_LOBBIES_WITHOUT_GAME ?? "false") === "true",
   },
 
   sessions: {
+    idLength: integer(process.env.NOHUB_SESSIONS_ID_LENGTH) ?? 12,
     defaultGameId: process.env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
   },
 };

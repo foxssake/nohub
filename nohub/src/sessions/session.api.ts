@@ -20,7 +20,7 @@ export class SessionApi {
   ) {}
 
   generateSessionId(): string {
-    return nanoid(12); // TODO: Configurable session ID length
+    return nanoid(this.config.idLength);
   }
 
   openSession(socket: Socket<SessionData>): void {
