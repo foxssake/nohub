@@ -1,29 +1,31 @@
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
-import type { SessionData } from "@src/sessions/session";
-import { LobbyService } from "./lobby.service";
-import { LobbyRepository } from "./lobby.repository";
-import { LobbyApi } from "./lobby.api";
-import { config } from "../config"
-import { requireRequest, requireSingleParam } from "@src/validators";
 import { sessionOf } from "@src/sessions/session.api";
+import { requireRequest, requireSingleParam } from "@src/validators";
+import { config } from "../config";
 import { lobbyKeywords, lobbyToKvPairs } from "./lobby";
+import { LobbyApi } from "./lobby.api";
+import { LobbyRepository } from "./lobby.repository";
+import { LobbyService } from "./lobby.service";
 
 export class LobbyModule implements Module {
-  readonly lobbyRepository: LobbyRepository // TODO: Lookup
-  readonly lobbyService: LobbyService
-  readonly lobbyApi: LobbyApi
+  readonly lobbyRepository: LobbyRepository; // TODO: Lookup
+  readonly lobbyService: LobbyService;
+  readonly lobbyApi: LobbyApi;
 
   constructor() {
-    this.lobbyRepository = new LobbyRepository()
-    this.lobbyService = new LobbyService(this.lobbyRepository, config.lobbies.enableGameless) // TODO: Inject config
-    this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService)
+    this.lobbyRepository = new LobbyRepository();
+    this.lobbyService = new LobbyService(
+      this.lobbyRepository,
+      config.lobbies.enableGameless,
+    ); // TODO: Inject config
+    this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService);
   }
 
   attachTo(app: Nohub): void {
-    app.eventBus.on("session-close", sessionId => {
-      this.lobbyApi.onSessionClose(sessionId)
-    })
+    app.eventBus.on("session-close", (sessionId) => {
+      this.lobbyApi.onSessionClose(sessionId);
+    });
   }
 
   configure(reactor: NohubReactor): void {
@@ -32,18 +34,18 @@ export class LobbyModule implements Module {
         requireRequest(cmd);
         const address = requireSingleParam(cmd, "Missing lobby address!");
         const data: Map<string, string> = cmd.kvMap ?? new Map();
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        const lobbyId = this.lobbyApi.create(address, session, data)
+        const lobbyId = this.lobbyApi.create(address, session, data);
         xchg.reply({ text: lobbyId });
       })
       .on("lobby/get", (cmd, xchg) => {
         requireRequest(cmd);
         const id = requireSingleParam(cmd, "Missing lobby ID!");
         const properties = cmd.params?.slice(1);
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        const lobby = this.lobbyApi.get(id, session, properties)
+        const lobby = this.lobbyApi.get(id, session, properties);
 
         // TODO: Simplify response to a single response command
         // Stream first chunk with ID and keywords
@@ -59,7 +61,7 @@ export class LobbyModule implements Module {
         const id = requireSingleParam(cmd, "Missing lobby ID!");
         const session = sessionOf(xchg);
 
-        this.lobbyApi.delete(id, session)
+        this.lobbyApi.delete(id, session);
         xchg.reply({ text: "ok" });
       })
       .on("lobby/list", (cmd, xchg) => {
@@ -90,36 +92,36 @@ export class LobbyModule implements Module {
         const data = cmd.kvMap ?? new Map();
         const session = sessionOf(xchg);
 
-        this.lobbyApi.setData(lobbyId, data, session)
+        this.lobbyApi.setData(lobbyId, data, session);
         xchg.reply({ text: "ok" });
       })
       .on("lobby/lock", (cmd, xchg) => {
         requireRequest(cmd);
         const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        this.lobbyApi.lock(lobbyId, session)
+        this.lobbyApi.lock(lobbyId, session);
         xchg.reply({ text: "ok" });
       })
       .on("lobby/unlock", (cmd, xchg) => {
         const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        this.lobbyApi.unlock(lobbyId, session)
+        this.lobbyApi.unlock(lobbyId, session);
         xchg.reply({ text: "ok" });
       })
       .on("lobby/hide", (cmd, xchg) => {
         const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        this.lobbyApi.hide(lobbyId, session)
+        this.lobbyApi.hide(lobbyId, session);
         xchg.reply({ text: "ok" });
       })
       .on("lobby/publish", (cmd, xchg) => {
         const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");
-        const session = sessionOf(xchg)
+        const session = sessionOf(xchg);
 
-        this.lobbyApi.publish(lobbyId, session)
+        this.lobbyApi.publish(lobbyId, session);
         xchg.reply({ text: "ok" });
       });
   }

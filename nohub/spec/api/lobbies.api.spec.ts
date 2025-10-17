@@ -9,7 +9,7 @@ describe("Lobbies API", () => {
     api = await ApiTest.create();
     Games.insert();
     await api.client().setGame(Games.forestBrawl.id);
-    console.log("Games:", ApiTest.nohub?.gameModule?.gameRepository?.list())
+    console.log("Games:", ApiTest.nohub?.gameModule?.gameRepository?.list());
   });
 
   afterEach(() => {
@@ -253,7 +253,9 @@ describe("Lobbies API", () => {
       }).toThrow();
     });
     test("should succeed on unknown lobby ID", () => {
-      expect(async () => await api.client().deleteLobby("unknown")).not.toThrow();
+      expect(
+        async () => await api.client().deleteLobby("unknown"),
+      ).not.toThrow();
     });
   });
 

@@ -1,21 +1,21 @@
+import type { Exchange } from "@foxssake/trimsock-js";
+import { config } from "@src/config";
+import { LockedError } from "@src/errors";
+import type { NohubEventBus } from "@src/events/nohub.event.bus";
+import type { GameRepository } from "@src/games/game.repository";
+import type { LobbyRepository } from "@src/lobbies/lobby.repository";
+import { rootLogger } from "@src/logger";
+import type { Socket } from "bun";
 import { nanoid } from "nanoid";
 import type { SessionData } from "./session";
-import type { Socket } from "bun";
-import { config } from "@src/config";
-import type { NohubEventBus } from "@src/events/nohub.event.bus";
-import { rootLogger } from "@src/logger";
-import type { Exchange } from "@foxssake/trimsock-js";
-import type { LobbyRepository } from "@src/lobbies/lobby.repository";
-import { LockedError } from "@src/errors";
-import type { GameRepository } from "@src/games/game.repository";
 
 export class SessionApi {
-  private logger = rootLogger.child({ name: "session:api" })
+  private logger = rootLogger.child({ name: "session:api" });
 
   constructor(
     private lobbyRepository: LobbyRepository, // TODO: Lookup
     private gameRepository: GameRepository, // TODO: Lookup
-    private eventBus: NohubEventBus
+    private eventBus: NohubEventBus,
   ) {}
 
   generateSessionId(): string {
@@ -25,19 +25,23 @@ export class SessionApi {
   openSession(socket: Socket<SessionData>): void {
     socket.data = {
       id: this.generateSessionId(),
-      gameId: config.sessions.defaultGameId // TODO: Inject config
-    }
+      gameId: config.sessions.defaultGameId, // TODO: Inject config
+    };
   }
 
   closeSession(socket: Socket<SessionData>): void {
     const sessionId = socket.data.id;
-    this.logger.info("Closing session #%s", sessionId)
+    this.logger.info("Closing session #%s", sessionId);
     this.eventBus.emit("session-close", sessionId);
     this.logger.info("Closed session #%s", sessionId);
   }
 
   setGame(session: SessionData, gameId: string) {
-    this.logger.info({ session, gameId }, "Switching game for session #%s", session.id);
+    this.logger.info(
+      { session, gameId },
+      "Switching game for session #%s",
+      session.id,
+    );
 
     // Check if operation is possible
     if (session.gameId !== undefined)
@@ -48,9 +52,9 @@ export class SessionApi {
 
     // Check if game exists
     // TODO: Config to enable arbitrary game ID's
-    const game = this.gameRepository.require(gameId)
+    const game = this.gameRepository.require(gameId);
 
-    session.gameId = game.id
+    session.gameId = game.id;
     this.logger.info({ session, game }, "Game set for session!");
   }
 }

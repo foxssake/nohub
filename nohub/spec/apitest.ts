@@ -71,7 +71,7 @@ export class ApiTest {
   }
 
   reset(): void {
-    ApiTest.nohub?.lobbyModule.lobbyRepository.clear()
+    ApiTest.nohub?.lobbyModule.lobbyRepository.clear();
   }
 
   private static async ensureHost(): Promise<Nohub> {

@@ -1,13 +1,13 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import { Command, Reactor } from "@foxssake/trimsock-js";
+import { Command } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
-import { SessionModule } from "./sessions/session.module";
-import type { Module } from "./module";
-import { GameModule } from "./games/game.module";
-import type { SessionData } from "./sessions/session";
 import { NohubEventBus } from "./events";
+import { GameModule } from "./games/game.module";
 import { LobbyModule } from "./lobbies/lobby.module";
+import type { Module } from "./module";
+import type { SessionData } from "./sessions/session";
+import { SessionModule } from "./sessions/session.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -17,20 +17,24 @@ export class Nohub {
 
   // TODO: Inject from the other modules
   readonly eventBus = new NohubEventBus();
-  public readonly gameModule = new GameModule()
-  public readonly lobbyModule = new LobbyModule()
-  public readonly sessionModule = new SessionModule(this.lobbyModule.lobbyRepository, this.gameModule.gameRepository, this.eventBus);
+  public readonly gameModule = new GameModule();
+  public readonly lobbyModule = new LobbyModule();
+  public readonly sessionModule = new SessionModule(
+    this.lobbyModule.lobbyRepository,
+    this.gameModule.gameRepository,
+    this.eventBus,
+  );
   public readonly modules: Module[] = [
     this.gameModule,
     this.lobbyModule,
-    this.sessionModule
-  ]
+    this.sessionModule,
+  ];
 
   run(config: AppConfig) {
     rootLogger.info({ config: config }, "Starting with config");
-  
-    this.reactor = new BunSocketReactor<SessionData>()
-      .onError((cmd, exchange, error) => {
+
+    this.reactor = new BunSocketReactor<SessionData>().onError(
+      (cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
             name: "error",
@@ -43,31 +47,36 @@ export class Nohub {
           "Failed processing command: %s",
           Command.serialize(cmd),
         );
-      })
+      },
+    );
 
-    const modules = this.modules
+    const modules = this.modules;
     this.socket = this.reactor.listen({
-        hostname: config.tcp.host,
-        port: config.tcp.port,
-        socket: {
-          open(socket) {
-            modules.forEach(it => { it.openSocket?.call(it, socket) })
-          },
-
-          close(socket) {
-            modules.forEach(it => { it.closeSocket?.call(it, socket) })
-          },
+      hostname: config.tcp.host,
+      port: config.tcp.port,
+      socket: {
+        open(socket) {
+          modules.forEach((it) => {
+            it.openSocket?.call(it, socket);
+          });
         },
-      });
+
+        close(socket) {
+          modules.forEach((it) => {
+            it.closeSocket?.call(it, socket);
+          });
+        },
+      },
+    });
 
     rootLogger.info("Listening on %s:%s", this.host, this.port);
 
-    rootLogger.info("Attaching %d modules...", modules.length)
-    modules.forEach(it => {
-      it.attachTo && it.attachTo(this)
-      this.reactor && it.configure && it.configure(this.reactor)
-    })
-    rootLogger.info("Attached %d modules", modules.length)
+    rootLogger.info("Attaching %d modules...", modules.length);
+    modules.forEach((it) => {
+      it.attachTo?.(this);
+      this.reactor && it.configure && it.configure(this.reactor);
+    });
+    rootLogger.info("Attached %d modules", modules.length);
 
     rootLogger.info("Started in %sms", process.uptime() * 1000.0);
   }

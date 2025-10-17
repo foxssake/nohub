@@ -1,5 +1,5 @@
-import { EventBus } from "@src/events";
 import { describe, expect, mock, test } from "bun:test";
+import { EventBus } from "@src/events";
 
 describe("EventBus", () => {
   test("should call handlers on emit", () => {

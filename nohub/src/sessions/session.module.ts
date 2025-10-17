@@ -1,26 +1,28 @@
+import type { NohubEventBus } from "@src/events";
+import type { GameRepository } from "@src/games/game.repository";
+import type { LobbyRepository } from "@src/lobbies/lobby.repository";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
-import { SessionApi, sessionOf } from "./session.api";
-import type { LobbyRepository } from "@src/lobbies/lobby.repository";
-import type { GameRepository } from "@src/games/game.repository";
-import type { SessionData } from "./session";
 import { requireRequest, requireSingleParam } from "@src/validators";
-import type { NohubEventBus } from "@src/events";
+import type { SessionData } from "./session";
+import { SessionApi, sessionOf } from "./session.api";
 
 export class SessionModule implements Module {
-  readonly sessionApi: SessionApi
+  readonly sessionApi: SessionApi;
 
   constructor(
     private lobbyRepository: LobbyRepository, // TODO: Lookup
     private gameRepository: GameRepository, // TODO: Lookup
-    private eventBus: NohubEventBus
+    private eventBus: NohubEventBus,
   ) {
-    this.sessionApi = new SessionApi(this.lobbyRepository, this.gameRepository, this.eventBus)
+    this.sessionApi = new SessionApi(
+      this.lobbyRepository,
+      this.gameRepository,
+      this.eventBus,
+    );
   }
 
-  attachTo(app: Nohub): void {
-
-  }
+  attachTo(_app: Nohub): void {}
 
   configure(reactor: NohubReactor): void {
     reactor

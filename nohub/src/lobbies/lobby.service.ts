@@ -1,5 +1,6 @@
 import { InvalidCommandError } from "@src/errors";
 import { rootLogger } from "@src/logger";
+import type { SessionData } from "@src/sessions/session";
 import { nanoid } from "nanoid";
 import {
   isLobbyVisibleTo,
@@ -8,7 +9,6 @@ import {
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
-import type { SessionData } from "@src/sessions/session";
 
 export class LobbyService {
   constructor(

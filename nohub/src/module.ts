@@ -1,5 +1,5 @@
 import type { Socket } from "bun";
-import { Nohub, type NohubReactor } from "./nohub";
+import type { Nohub, NohubReactor } from "./nohub";
 import type { SessionData } from "./sessions/session";
 
 export interface Module {

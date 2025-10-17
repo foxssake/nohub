@@ -33,7 +33,10 @@ export const Games = {
 
   all: () => fixturesOf<Game>(Games),
 
-  insert(repository: GameRepository | undefined = ApiTest.nohub?.gameModule.gameRepository) {
+  insert(
+    repository: GameRepository | undefined = ApiTest.nohub?.gameModule
+      .gameRepository,
+  ) {
     Games.all().forEach((it) => {
       repository?.add(it);
     });
@@ -101,8 +104,10 @@ export const Lobbies = {
     return fixturesOf<Lobby>(Lobbies);
   },
 
-  insert(repository: LobbyRepository | undefined = ApiTest.nohub?.lobbyModule.lobbyRepository): void {
-    for (const lobby of this.all()) 
-      repository?.add(lobby);
+  insert(
+    repository: LobbyRepository | undefined = ApiTest.nohub?.lobbyModule
+      .lobbyRepository,
+  ): void {
+    for (const lobby of this.all()) repository?.add(lobby);
   },
 };
