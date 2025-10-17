@@ -1,6 +1,6 @@
 import type { NohubEventBus } from "@src/events";
-import type { GameRepository } from "@src/games/game.repository";
-import type { LobbyRepository } from "@src/lobbies/lobby.repository";
+import type { GameLookup, GameRepository } from "@src/games/game.repository";
+import type { LobbyLookup, LobbyRepository } from "@src/lobbies/lobby.repository";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
@@ -12,14 +12,14 @@ export class SessionModule implements Module {
   readonly sessionApi: SessionApi;
 
   constructor(
-    private lobbyRepository: LobbyRepository, // TODO: Lookup
-    private gameRepository: GameRepository, // TODO: Lookup
+    private lobbyLookup: LobbyLookup,
+    private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
     private config: SessionsConfig
   ) {
     this.sessionApi = new SessionApi(
-      this.lobbyRepository,
-      this.gameRepository,
+      this.lobbyLookup,
+      this.gameLookup,
       this.eventBus,
       this.config,
     );

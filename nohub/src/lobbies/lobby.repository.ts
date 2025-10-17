@@ -1,9 +1,16 @@
 import { DataNotFoundError } from "@src/errors";
-import { Repository } from "@src/repository";
+import { Repository, type Lookup } from "@src/repository";
 import { isLobbyVisibleTo, type Lobby } from "./lobby";
 import type { SessionData } from "@src/sessions/session";
 
-export class LobbyRepository extends Repository<Lobby, string> {
+export interface LobbyLookup extends Lookup<Lobby, string> {
+  findInGame(lobbyId: string, gameId?: string): Lobby | undefined;
+  requireInGame(lobbyId: string, gameId?: string): Lobby;
+  existsBySession(sessionId: string): boolean;
+  listLobbiesFor(session: SessionData): Generator<Lobby>;
+}
+
+export class LobbyRepository extends Repository<Lobby, string> implements LobbyLookup {
   constructor() {
     super((lobby) => lobby.id);
   }

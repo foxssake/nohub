@@ -2,10 +2,12 @@ import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { Nohub } from "@src/nohub";
 import { config, type GamesConfig } from "../config";
-import { GameRepository } from "./game.repository";
+import { GameRepository, type GameLookup } from "./game.repository";
 
 export class GameModule implements Module {
-  readonly gameRepository = new GameRepository(); // TODO: Lookup
+  readonly gameRepository = new GameRepository();
+  readonly gameLookup: GameLookup = this.gameRepository
+
   private logger = rootLogger.child({ name: "mod:games" });
 
   constructor(

@@ -5,11 +5,12 @@ import { requireRequest, requireSingleParam } from "@src/validators";
 import { type LobbiesConfig } from "../config";
 import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
-import { LobbyRepository } from "./lobby.repository";
+import { LobbyRepository, type LobbyLookup } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
 
 export class LobbyModule implements Module {
-  readonly lobbyRepository: LobbyRepository; // TODO: Lookup
+  readonly lobbyRepository: LobbyRepository;
+  readonly lobbyLookup: LobbyLookup;
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
@@ -17,6 +18,7 @@ export class LobbyModule implements Module {
     private config: LobbiesConfig
   ) {
     this.lobbyRepository = new LobbyRepository();
+    this.lobbyLookup = this.lobbyRepository;
     this.lobbyService = new LobbyService(
       this.lobbyRepository,
       this.config.enableGameless,
