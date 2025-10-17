@@ -38,8 +38,8 @@ export class LobbyModule implements Module {
         const data: Map<string, string> = cmd.kvMap ?? new Map();
         const session = sessionOf(xchg);
 
-        const lobbyId = this.lobbyApi.create(address, session, data);
-        xchg.reply({ text: lobbyId });
+        const lobby = this.lobbyApi.create(address, session, data);
+        xchg.reply(lobbyToCommand(lobby));
       })
       .on("lobby/get", (cmd, xchg) => {
         requireRequest(cmd);
