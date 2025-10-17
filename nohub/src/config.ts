@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { enumerated, games, integer } from "./config.parsers";
+import { bool, enumerated, games, integer } from "./config.parsers";
 
 dotenv.config();
 
@@ -26,12 +26,13 @@ export const config = {
 
   lobbies: {
     idLength: integer(process.env.NOHUB_LOBBIES_ID_LENGTH) ?? 8,
-    enableGameless:
-      (process.env.NOHUB_LOBBIES_WITHOUT_GAME ?? "false") === "true",
+    enableGameless: bool(process.env.NOHUB_LOBBIES_WITHOUT_GAME) ?? false,
   },
 
   sessions: {
     idLength: integer(process.env.NOHUB_SESSIONS_ID_LENGTH) ?? 12,
+    arbitraryGameId:
+      bool(process.env.NOHUB_SESSIONS_ARBITRARY_GAME_ID) ?? false,
     defaultGameId: process.env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
   },
 };
