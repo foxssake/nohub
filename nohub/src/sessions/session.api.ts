@@ -1,7 +1,7 @@
 import type { Exchange } from "@foxssake/trimsock-js";
 import type { SessionsConfig } from "@src/config";
 import { LockedError } from "@src/errors";
-import type { NohubEventBus } from "@src/events/nohub.event.bus";
+import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";

@@ -28,12 +28,20 @@ func create_lobby(address: String, data: Dictionary) -> NohubLobby:
 
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()
-	
+
 	if response.is_success():
-		var lobby := NohubLobby.new()
-		lobby.id = response.text
-		lobby.data = data
-		return lobby
+		return _command_to_lobby(response)
+	else:
+		return null
+
+func get_lobby(id: String, properties: Array[String] = []) -> NohubLobby:
+	var request := TrimsockCommand.request("lobby/get")\
+		.with_params([id] + properties)
+	var xchg := _reactor.submit_request(request)
+	var response := await xchg.read()
+
+	if response.is_success():
+		return _command_to_lobby(response)
 	else:
 		return null
 
@@ -48,13 +56,7 @@ func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
 		if not cmd.is_stream_chunk():
 			continue
 
-		var lobby := NohubLobby.new()
-		lobby.id = cmd.params[0]
-		lobby.is_locked = cmd.params.has("locked")
-		lobby.is_visible = not cmd.params.has("hidden")
-		lobby.data = cmd.kv_map
-
-		result.append(lobby)
+		result.append(_command_to_lobby(cmd))
 	
 	return result
 
@@ -115,3 +117,12 @@ func _bool_request(request: TrimsockCommand) -> bool:
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()
 	return response.is_success()
+
+func _command_to_lobby(command: TrimsockCommand) -> NohubLobby:
+	var lobby := NohubLobby.new()
+	lobby.id = command.params[0]
+	lobby.is_locked = command.params.find("locked", 1) >= 0
+	lobby.is_visible = command.params.find("hidden", 1) < 0
+	lobby.data = command.kv_map
+
+	return lobby

@@ -16,12 +16,12 @@ export class LobbyApi {
     address: string,
     session: SessionData,
     data?: Map<string, string>,
-  ): string {
+  ): Lobby {
     this.logger.info({ session }, "Creating lobby");
     const lobby = this.lobbyService.create(address, data ?? new Map(), session);
     this.logger.info({ session, lobby }, "Created lobby #%s", lobby.id);
 
-    return lobby.id;
+    return lobby;
   }
 
   get(id: string, session: SessionData, properties?: string[]): Lobby {

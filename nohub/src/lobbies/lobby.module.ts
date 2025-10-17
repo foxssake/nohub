@@ -38,8 +38,8 @@ export class LobbyModule implements Module {
         const data: Map<string, string> = cmd.kvMap ?? new Map();
         const session = sessionOf(xchg);
 
-        const lobbyId = this.lobbyApi.create(address, session, data);
-        xchg.reply({ text: lobbyId });
+        const lobby = this.lobbyApi.create(address, session, data);
+        xchg.reply(lobbyToCommand(lobby));
       })
       .on("lobby/get", (cmd, xchg) => {
         requireRequest(cmd);
@@ -48,15 +48,7 @@ export class LobbyModule implements Module {
         const session = sessionOf(xchg);
 
         const lobby = this.lobbyApi.get(id, session, properties);
-
-        // TODO: Simplify response to a single response command
-        // Stream first chunk with ID and keywords
-        xchg.stream({ ...lobbyToCommand(lobby), kvParams: undefined });
-
-        // Stream properties
-        for (const entry of lobby.data.entries())
-          xchg.stream({ kvParams: [entry] });
-        xchg.finishStream();
+        xchg.reply(lobbyToCommand(lobby));
       })
       .on("lobby/delete", (cmd, xchg) => {
         requireRequest(cmd);

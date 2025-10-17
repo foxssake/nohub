@@ -63,40 +63,32 @@ describe("Lobbies API", () => {
   describe("get", () => {
     test("should return custom data", async () => {
       // Create lobby
-      const lobbyId = await api.client().createLobby(
-        Addresses.dave,
-        new Map([
-          ["name", "Cool Lobby"],
-          ["player-count", "0"],
-          ["player-capacity", "16"],
-        ]),
-      );
+      const lobbyData = new Map([
+        ["name", "Cool Lobby"],
+        ["player-count", "0"],
+        ["player-capacity", "16"],
+      ]);
+      const createdLobby = await api
+        .client()
+        .createLobby(Addresses.dave, lobbyData);
 
       // Get lobby data
-      const data = await Array.fromAsync(
-        api
-          .client()
-          .send({
-            name: "lobby/get",
-            text: lobbyId,
-            isRequest: true,
-            requestId: "",
-          })
-          .chunks(),
-      );
-      const lines = data.map((it) => it.text);
+      const response = await api
+        .client()
+        .send({
+          name: "lobby/get",
+          text: createdLobby.id,
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
-      expect(lines).toEqual([
-        lobbyId,
-        "name=Cool Lobby",
-        "player-count=0",
-        "player-capacity=16",
-      ]);
+      expect(response.kvMap).toEqual(lobbyData);
     });
 
     test("should return only requested fields", async () => {
       // Create lobby
-      const lobbyId = await api.client().createLobby(
+      const lobby = await api.client().createLobby(
         Addresses.dave,
         new Map([
           ["name", "Cool Lobby"],
@@ -106,25 +98,22 @@ describe("Lobbies API", () => {
       );
 
       // Get lobby data
-      const data = await Array.fromAsync(
-        api
-          .client()
-          .send({
-            name: "lobby/get",
-            params: [lobbyId, "name"],
-            isRequest: true,
-            requestId: "",
-          })
-          .chunks(),
-      );
-      const lines = data.map((it) => it.text);
+      const response = await api
+        .client()
+        .send({
+          name: "lobby/get",
+          params: [lobby.id, "name"],
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
-      expect(lines).toEqual([lobbyId, "name=Cool Lobby"]);
+      expect(response.kvParams).toEqual([["name", "Cool Lobby"]]);
     });
 
     test("should return no fields if none match", async () => {
       // Create lobby
-      const lobbyId = await api.client().createLobby(
+      const lobby = await api.client().createLobby(
         Addresses.dave,
         new Map([
           ["name", "Cool Lobby"],
@@ -134,20 +123,17 @@ describe("Lobbies API", () => {
       );
 
       // Get lobby data
-      const data = await Array.fromAsync(
-        api
-          .client()
-          .send({
-            name: "lobby/get",
-            params: [lobbyId, "gamemode"],
-            isRequest: true,
-            requestId: "",
-          })
-          .chunks(),
-      );
-      const lines = data.map((it) => it.text);
+      const response = await api
+        .client()
+        .send({
+          name: "lobby/get",
+          params: [lobby.id, "gamemode"],
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
 
-      expect(lines).toEqual([lobbyId]);
+      expect(response.kvParams).toBeUndefined();
     });
 
     test("should throw on unknown lobby", async () => {
@@ -168,19 +154,19 @@ describe("Lobbies API", () => {
 
     test("should include locked flag", async () => {
       // Create and lock lobby
-      const lobbyId = await api.client().createLobby(Addresses.eric);
-      await api.client().lockLobby(lobbyId);
+      const lobby = await api.client().createLobby(Addresses.eric);
+      await api.client().lockLobby(lobby.id);
 
       // Query lobby
       const reply = await api
         .client()
         .send({
           name: "lobby/get",
-          params: [lobbyId],
+          params: [lobby.id],
           isRequest: true,
           requestId: "",
         })
-        .onStream();
+        .onReply();
 
       // Lobby should be locked
       expect(reply.params).toContain("locked");
@@ -188,19 +174,19 @@ describe("Lobbies API", () => {
 
     test("should include hidden flag", async () => {
       // Create and lock lobby
-      const lobbyId = await api.client().createLobby(Addresses.eric);
-      await api.client().hideLobby(lobbyId);
+      const lobby = await api.client().createLobby(Addresses.eric);
+      await api.client().hideLobby(lobby.id);
 
       // Query lobby
       const reply = await api
         .client()
         .send({
           name: "lobby/get",
-          text: lobbyId,
+          text: lobby.id,
           isRequest: true,
           requestId: "",
         })
-        .onStream();
+        .onReply();
 
       // Lobby should be hidden
       expect(reply.params).toContain("hidden");
