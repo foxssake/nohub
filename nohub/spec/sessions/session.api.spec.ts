@@ -14,8 +14,6 @@ let config: SessionsConfig;
 let sessionRepository: SessionRepository;
 let sessionApi: SessionApi;
 
-let _session: SessionData;
-
 describe("SessionApi", () => {
   beforeEach(() => {
     sessionRepository = new SessionRepository();
