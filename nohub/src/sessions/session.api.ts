@@ -1,6 +1,6 @@
 import type { Exchange } from "@foxssake/trimsock-js";
 import type { SessionsConfig } from "@src/config";
-import { LockedError } from "@src/errors";
+import { LimitError, LockedError } from "@src/errors";
 import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
@@ -8,11 +8,13 @@ import { rootLogger } from "@src/logger";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
 import type { SessionData } from "./session";
+import type { SessionRepository } from "./session.repository";
 
 export class SessionApi {
   private logger = rootLogger.child({ name: "session:api" });
 
   constructor(
+    private sessionRepository: SessionRepository,
     private lobbyLookup: LobbyLookup,
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
@@ -24,10 +26,20 @@ export class SessionApi {
   }
 
   openSession(socket: Socket<SessionData>): void {
-    socket.data = {
+    const address = socket.remoteAddress;
+
+    this.logger.info("Found %d sessions from %s, %d allowed", this.sessionRepository.countByAddress(address), address, this.config.maxPerAddress);
+    if (this.config.maxPerAddress > 0 && this.sessionRepository.countByAddress(address) >= this.config.maxPerAddress)
+      throw new LimitError(`Can't have more than ${this.config.maxPerAddress} active sessions per address!`)
+
+    const session = {
       id: this.generateSessionId(),
       gameId: this.config.defaultGameId,
+      address
     };
+
+    this.sessionRepository.add(session);
+    socket.data = session;
   }
 
   closeSession(socket: Socket<SessionData>): void {
