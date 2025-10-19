@@ -22,12 +22,10 @@ export class MetricsModule implements Module {
       return
     }
 
-    this.metrics = new Metrics() // TODO: Command labels
     collectDefaultMetrics({ register: this.metricsRegistry });
-    this.metrics?.register(this.metricsRegistry);
   }
 
-  configure(reactor: NohubReactor) {
+  async configure(reactor: NohubReactor) {
     if (!this.config.enabled)
       return
 
@@ -35,13 +33,17 @@ export class MetricsModule implements Module {
     this.serve(this.config.host, this.config.port)
     this.logger.info("Started metrics HTTP server on %s:%d", this.config.host, this.config.port)
 
+    this.metrics = new Metrics()
+    this.metrics?.register(this.metricsRegistry);
+
     reactor.use(async (next, cmd) => {
-      this.metrics?.commands.count.inc();
-      const timer = this.metrics?.commands.duration.startTimer();
+      const labels = { "command": cmd.name }
+      this.metrics?.commands.count.inc(labels);
+      const timer = this.metrics?.commands.duration.startTimer(labels);
       try {
-      await next();
+        await next();
       } catch (err) {
-        this.metrics?.commands.failureCount.inc()
+        this.metrics?.commands.failureCount.inc(labels)
         throw err;
       } finally {
         timer?.call(undefined)

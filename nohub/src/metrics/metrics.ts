@@ -2,11 +2,10 @@ import { Counter, Gauge, Histogram, Registry } from "prom-client";
 
 export class Metrics {
   constructor(
-    commandLabels: string[] = [],
     readonly commands = {
-      count: new Counter({ name: "nohub_exchanges_total", help: "Total number of exchanges processed", labelNames: commandLabels }),
-      failureCount: new Counter({ name: "nohub_exchanges_failed", help: "Number of failed exchanges", labelNames: commandLabels }),
-      duration: new Histogram({ name: "nohub_exchange_duration_seconds", help: "Time it took to process exchanges", labelNames: commandLabels })
+      count: new Counter({ name: "nohub_exchanges_total", help: "Total number of exchanges processed", labelNames: ["command"] }),
+      failureCount: new Counter({ name: "nohub_exchanges_failed", help: "Number of failed exchanges", labelNames: ["command"] }),
+      duration: new Histogram({ name: "nohub_exchange_duration_seconds", help: "Time it took to process exchanges", labelNames: ["command"] })
     },
 
     readonly sessions = {
