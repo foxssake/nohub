@@ -43,7 +43,9 @@ export function readConfig(env: ConfigEnv) {
   }
 }
 
-export const config = readConfig(process.env);
+export function readDefaultConfig() {
+  return readConfig({});
+}
 
 export type AppConfig = ReturnType<typeof readConfig>;
 export type TcpConfig = AppConfig["tcp"];

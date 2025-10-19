@@ -1,4 +1,4 @@
-import { config } from "@src/config";
+import { readConfig } from "@src/config";
 import { Nohub } from "@src/nohub";
 
-new Nohub(config).run();
+new Nohub(readConfig(Bun.env)).run();

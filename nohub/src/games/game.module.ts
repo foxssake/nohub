@@ -1,7 +1,7 @@
 import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { Nohub } from "@src/nohub";
-import { config, type GamesConfig } from "../config";
+import { type GamesConfig } from "../config";
 import { type GameLookup, GameRepository } from "./game.repository";
 
 export class GameModule implements Module {
@@ -17,11 +17,11 @@ export class GameModule implements Module {
   }
 
   importGames() {
-    this.logger.info("Adding %d games from config...", config.games.length);
+    this.logger.info("Adding %d games from config...", this.config.length);
     this.config.forEach((it) => {
       this.logger.info({ game: it }, "Adding game #%s", it.id);
       this.gameRepository.add(it);
     });
-    this.logger.info("Added %d games from config", config.games.length);
+    this.logger.info("Added %d games from config", this.config.length);
   }
 }
