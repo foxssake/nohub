@@ -76,14 +76,42 @@ export class Nohub {
       port: this.config.tcp.port,
       socket: {
         open(socket) {
-          modules.forEach((it) => {
-            it.openSocket?.call(it, socket);
-          });
+          try {
+            modules.forEach((it) => {
+              it.openSocket?.call(it, socket);
+            });
+          } catch (err) {
+            rootLogger.error(
+              { err, address: socket.remoteAddress },
+              "Failed to init socket, disconnecting!",
+            );
+
+            // Send a goodbye message
+            if (err instanceof Error) {
+              socket.write(
+                Command.serialize({
+                  name: "error",
+                  params: [err.name, err.message],
+                }),
+              );
+            }
+
+            // Terminate connection
+            socket.flush();
+            socket.end();
+          }
         },
 
         close(socket) {
           modules.forEach((it) => {
-            it.closeSocket?.call(it, socket);
+            try {
+              it.closeSocket?.call(it, socket);
+            } catch (err) {
+              rootLogger.error(
+                { err, module: it },
+                "closeSocket() callback failed on module!",
+              );
+            }
           });
         },
       },
