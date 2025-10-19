@@ -30,9 +30,12 @@ export class LobbyRepository
     return lobby;
   }
 
-  removeLobbiesOf(sessionId: string): void {
+  *removeLobbiesOf(sessionId: string): Generator<Lobby> {
     for (const lobby of this.list())
-      if (lobby.owner === sessionId) this.removeItem(lobby);
+      if (lobby.owner === sessionId) {
+        this.removeItem(lobby);
+        yield lobby;
+      }
   }
 
   existsBySession(sessionId: string): boolean {

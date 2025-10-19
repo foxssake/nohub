@@ -8,6 +8,7 @@ import {
   UnauthorizedError,
 } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
+import { LobbyEventBus } from "@src/lobbies/lobby.events";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
 
@@ -19,7 +20,11 @@ describe("LobbyService", () => {
   beforeEach(() => {
     config = readDefaultConfig().lobbies;
     lobbyRepository = new LobbyRepository();
-    lobbyService = new LobbyService(lobbyRepository, config);
+    lobbyService = new LobbyService(
+      lobbyRepository,
+      config,
+      new LobbyEventBus(),
+    );
 
     Lobbies.insert(lobbyRepository);
   });

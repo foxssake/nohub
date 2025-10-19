@@ -10,6 +10,12 @@ export function readConfig(env: ConfigEnv) {
       commandBufferSize: byteSize(env.NOHUB_TCP_COMMAND_BUFFER_SIZE) ?? 8192,
     },
 
+    metrics: {
+      enabled: bool(env.NOHUB_METRICS_ENABLED) ?? true,
+      host: env.NOHUB_METRICS_HOST ?? "localhost",
+      port: integer(env.NOHUB_METRICS_PORT) ?? 9981,
+    },
+
     log: {
       level:
         enumerated(env.NOHUB_LOG_LEVEL, [
@@ -49,6 +55,7 @@ export function readDefaultConfig() {
 
 export type AppConfig = ReturnType<typeof readConfig>;
 export type TcpConfig = AppConfig["tcp"];
+export type MetricsConfig = AppConfig["metrics"];
 export type GamesConfig = AppConfig["games"];
 export type LobbiesConfig = AppConfig["lobbies"];
 export type SessionsConfig = AppConfig["sessions"];

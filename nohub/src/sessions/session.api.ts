@@ -5,6 +5,7 @@ import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";
+import { emptyMetrics, type MetricsHolder } from "@src/metrics/metrics";
 import type { Socket } from "bun";
 import { nanoid } from "nanoid";
 import type { SessionData } from "./session";
@@ -19,6 +20,7 @@ export class SessionApi {
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
     private config: SessionsConfig,
+    private metrics: MetricsHolder = emptyMetrics,
   ) {}
 
   generateSessionId(): string {
@@ -51,6 +53,7 @@ export class SessionApi {
     };
 
     this.sessionRepository.add(session);
+    this.metrics()?.sessions.count.inc();
     socket.data = session;
   }
 
@@ -58,6 +61,8 @@ export class SessionApi {
     const sessionId = socket.data.id;
     this.logger.info("Closing session #%s", sessionId);
     this.eventBus.emit("session-close", sessionId);
+    this.sessionRepository.remove(sessionId);
+    this.metrics()?.sessions.count.dec();
     this.logger.info("Closed session #%s", sessionId);
   }
 

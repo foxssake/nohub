@@ -2,6 +2,7 @@ import type { SessionsConfig } from "@src/config";
 import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
+import type { MetricsHolder } from "@src/metrics/metrics";
 import type { Module } from "@src/module";
 import type { NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
@@ -18,6 +19,7 @@ export class SessionModule implements Module {
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
     private config: SessionsConfig,
+    private metrics: MetricsHolder,
   ) {
     this.sessionRepository = new SessionRepository();
 
@@ -27,6 +29,7 @@ export class SessionModule implements Module {
       this.gameLookup,
       this.eventBus,
       this.config,
+      this.metrics,
     );
   }
 
