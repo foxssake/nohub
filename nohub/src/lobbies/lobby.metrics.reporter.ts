@@ -1,10 +1,10 @@
 import type { Metrics } from "@src/metrics/metrics";
-import type { LobbyEvents } from "./lobby.events";
+import type { LobbyEventBus } from "./lobby.events";
 import { lobbyMetricLabels } from "./lobby";
 
 export class LobbyMetricsReporter {
   constructor(
-    eventBus: LobbyEvents,
+    eventBus: LobbyEventBus,
     metrics: () => Metrics | undefined
   ) {
     eventBus.on("lobby-create", lobby => {

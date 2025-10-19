@@ -8,18 +8,18 @@ import { LobbyApi } from "./lobby.api";
 import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
 import type { Metrics, MetricsHolder } from "@src/metrics/metrics";
-import { LobbyEvents } from "./lobby.events";
+import { LobbyEventBus } from "./lobby.events";
 import { LobbyMetricsReporter } from "./lobby.metrics.reporter";
 
 export class LobbyModule implements Module {
-  private readonly eventBus: LobbyEvents;
+  private readonly eventBus: LobbyEventBus;
   readonly lobbyRepository: LobbyRepository;
   readonly lobbyLookup: LobbyLookup;
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
   constructor(private config: LobbiesConfig, private metrics: MetricsHolder) {
-    this.eventBus = new LobbyEvents();
+    this.eventBus = new LobbyEventBus();
     new LobbyMetricsReporter(this.eventBus, metrics);
     this.lobbyRepository = new LobbyRepository();
     this.lobbyLookup = this.lobbyRepository;

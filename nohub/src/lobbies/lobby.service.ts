@@ -9,7 +9,7 @@ import {
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
-import type { LobbyEvents } from "./lobby.events";
+import type { LobbyEventBus } from "./lobby.events";
 
 export class LobbyService {
   private logger = rootLogger.child({ name: "LobbyService" });
@@ -17,7 +17,7 @@ export class LobbyService {
   constructor(
     private repository: LobbyRepository,
     private config: LobbiesConfig,
-    private eventBus: LobbyEvents
+    private eventBus: LobbyEventBus
   ) {}
 
   create(

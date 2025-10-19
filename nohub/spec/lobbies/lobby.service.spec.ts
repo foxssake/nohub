@@ -10,6 +10,7 @@ import {
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
+import { LobbyEventBus } from "@src/lobbies/lobby.events";
 
 let config: LobbiesConfig;
 let lobbyRepository: LobbyRepository;
@@ -19,7 +20,7 @@ describe("LobbyService", () => {
   beforeEach(() => {
     config = readDefaultConfig().lobbies;
     lobbyRepository = new LobbyRepository();
-    lobbyService = new LobbyService(lobbyRepository, config);
+    lobbyService = new LobbyService(lobbyRepository, config, new LobbyEventBus());
 
     Lobbies.insert(lobbyRepository);
   });
