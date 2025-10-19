@@ -1,11 +1,13 @@
-import { Counter, Gauge, Histogram, Registry } from "prom-client";
+import { Counter, exponentialBuckets, Gauge, Histogram, Registry } from "prom-client";
+
+const durationBuckets = [0.001, 0.005, 0.010, 0.025, 0.050, 0.100, 0.250, 0.500, 1.000, 2.500, 5.000, 10.000];
 
 export class Metrics {
   constructor(
     readonly commands = {
       count: new Counter({ name: "nohub_exchanges_total", help: "Total number of exchanges processed", labelNames: ["command"] }),
-      failureCount: new Counter({ name: "nohub_exchanges_failed", help: "Number of failed exchanges", labelNames: ["command"] }),
-      duration: new Histogram({ name: "nohub_exchange_duration_seconds", help: "Time it took to process exchanges", labelNames: ["command"] })
+      failureCount: new Counter({ name: "nohub_exchanges_failed", help: "Number of failed exchanges", labelNames: ["command", "error"] }),
+      duration: new Histogram({ name: "nohub_exchange_duration_seconds", help: "Time it took to process exchanges", labelNames: ["command"], buckets: durationBuckets})
     },
 
     readonly sessions = {

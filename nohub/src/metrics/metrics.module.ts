@@ -43,7 +43,7 @@ export class MetricsModule implements Module {
       try {
         await next();
       } catch (err) {
-        this.metrics?.commands.failureCount.inc(labels)
+        this.metrics?.commands.failureCount.inc({ ...labels, error: (err instanceof Error) ? err.name : "?" })
         throw err;
       } finally {
         timer?.call(undefined)
