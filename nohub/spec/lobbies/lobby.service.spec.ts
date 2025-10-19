@@ -108,6 +108,25 @@ describe("LobbyService", () => {
       for (let i = 0; i < 128; ++i)
         expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
     })
+
+    test("should not exceed data size limit", () => {
+      config.maxDataEntries = 2
+      expect(() => lobbyService.create(Addresses.ingrid, new Map([["name", "Emerald Gang"], ["player-capacity", "8"]]), Sessions.ingrid)).not.toThrow();
+      expect(() => lobbyService.create(Addresses.ingrid, new Map([["name", "Emerald Gang"], ["player-capacity", "8"], ["player-count", "6"]]), Sessions.ingrid)).toThrow(LimitError);
+    })
+
+    test("should ignore data size limit", () => {
+      // Remove limit
+      config.maxDataEntries = 0
+
+      // Add lots of entries
+      const data = new Map()
+      for (let i = 0; i < 128; ++i)
+        data.set(`key${i}`, `value${i}`)
+
+      // Should be fine
+      expect(() => lobbyService.create(Addresses.ingrid, new Map(data), Sessions.ingrid)).not.toThrow();
+    })
   });
 
   describe("delete", () => {

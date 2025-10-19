@@ -36,6 +36,9 @@ export class LobbyService {
     if (this.config.maxPerSession > 0 && this.repository.countBySession(session.id) >= this.config.maxPerSession)
       throw new LimitError(`Session can't have more than ${this.config.maxPerSession} active lobbies!`);
 
+    if (this.config.maxDataEntries > 0 && data.size > this.config.maxDataEntries)
+      throw new LimitError(`Lobbies can't have more than ${this.config.maxDataEntries} data entries!`)
+
     const lobby: Lobby = {
       id: this.generateId(),
       address,
@@ -73,6 +76,9 @@ export class LobbyService {
     session: SessionData,
   ): Lobby {
     requireLobbyModifiableIn(lobby, session);
+
+    if (this.config.maxDataEntries > 0 && data.size > this.config.maxDataEntries)
+      throw new LimitError(`Lobbies can't have more than ${this.config.maxDataEntries} data entries!`)
 
     const updated = { ...lobby, data };
     this.repository.update(updated);
