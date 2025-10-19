@@ -1,7 +1,8 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import { Command } from "@foxssake/trimsock-js";
+import { Command, TrimsockReader } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
+import { UnknownCommandError } from "./errors";
 import { NohubEventBus } from "./events";
 import { GameModule } from "./games/game.module";
 import { LobbyModule } from "./lobbies/lobby.module";
@@ -47,8 +48,11 @@ export class Nohub {
   run() {
     rootLogger.info({ config: this.config }, "Starting with config");
 
-    this.reactor = new BunSocketReactor<SessionData>().onError(
-      (cmd, exchange, error) => {
+    const reader = new TrimsockReader();
+    reader.maxSize = this.config.tcp.commandBufferSize;
+
+    this.reactor = new BunSocketReactor<SessionData>(reader)
+      .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
             name: "error",
@@ -61,8 +65,10 @@ export class Nohub {
           "Failed processing command: %s",
           Command.serialize(cmd),
         );
-      },
-    );
+      })
+      .onUnknown((cmd, _xchg) => {
+        throw new UnknownCommandError(cmd);
+      });
 
     const modules = this.modules.all;
     this.socket = this.reactor.listen({
@@ -70,14 +76,42 @@ export class Nohub {
       port: this.config.tcp.port,
       socket: {
         open(socket) {
-          modules.forEach((it) => {
-            it.openSocket?.call(it, socket);
-          });
+          try {
+            modules.forEach((it) => {
+              it.openSocket?.call(it, socket);
+            });
+          } catch (err) {
+            rootLogger.error(
+              { err, address: socket.remoteAddress },
+              "Failed to init socket, disconnecting!",
+            );
+
+            // Send a goodbye message
+            if (err instanceof Error) {
+              socket.write(
+                Command.serialize({
+                  name: "error",
+                  params: [err.name, err.message],
+                }),
+              );
+            }
+
+            // Terminate connection
+            socket.flush();
+            socket.end();
+          }
         },
 
         close(socket) {
           modules.forEach((it) => {
-            it.closeSocket?.call(it, socket);
+            try {
+              it.closeSocket?.call(it, socket);
+            } catch (err) {
+              rootLogger.error(
+                { err, module: it },
+                "closeSocket() callback failed on module!",
+              );
+            }
           });
         },
       },

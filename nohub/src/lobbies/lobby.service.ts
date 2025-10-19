@@ -1,5 +1,5 @@
 import type { LobbiesConfig } from "@src/config";
-import { InvalidCommandError } from "@src/errors";
+import { InvalidCommandError, LimitError } from "@src/errors";
 import { rootLogger } from "@src/logger";
 import type { SessionData } from "@src/sessions/session";
 import { nanoid } from "nanoid";
@@ -29,6 +29,30 @@ export class LobbyService {
 
     if (session.gameId === undefined && !this.config.enableGameless)
       throw new InvalidCommandError("Can't create lobbies without a game!");
+
+    if (
+      this.config.maxCount > 0 &&
+      this.repository.count() >= this.config.maxCount
+    )
+      throw new LimitError(
+        `Can't host more than ${this.config.maxCount} active lobbies on this instance!`,
+      );
+
+    if (
+      this.config.maxPerSession > 0 &&
+      this.repository.countBySession(session.id) >= this.config.maxPerSession
+    )
+      throw new LimitError(
+        `Session can't have more than ${this.config.maxPerSession} active lobbies!`,
+      );
+
+    if (
+      this.config.maxDataEntries > 0 &&
+      data.size > this.config.maxDataEntries
+    )
+      throw new LimitError(
+        `Lobbies can't have more than ${this.config.maxDataEntries} data entries!`,
+      );
 
     const lobby: Lobby = {
       id: this.generateId(),
@@ -67,6 +91,14 @@ export class LobbyService {
     session: SessionData,
   ): Lobby {
     requireLobbyModifiableIn(lobby, session);
+
+    if (
+      this.config.maxDataEntries > 0 &&
+      data.size > this.config.maxDataEntries
+    )
+      throw new LimitError(
+        `Lobbies can't have more than ${this.config.maxDataEntries} data entries!`,
+      );
 
     const updated = { ...lobby, data };
     this.repository.update(updated);

@@ -1,7 +1,7 @@
 import pino from "pino";
-import { config } from "./config";
+import { readConfig } from "./config";
 
 export const rootLogger = pino({
   name: "nohub",
-  level: config.log.level,
+  level: readConfig(Bun.env).log.level,
 });

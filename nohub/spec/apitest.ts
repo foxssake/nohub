@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
-import { config } from "@src/config";
+import { readDefaultConfig } from "@src/config";
 import { commandToLobby, type Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
@@ -80,10 +80,11 @@ export class ApiTest {
 
     ApiTest.logger.info("Starting local nohub for testing");
     ApiTest.nohub = new Nohub({
-      ...config,
+      ...readDefaultConfig(),
       tcp: {
         host: "localhost",
         port: 0,
+        commandBufferSize: 8192,
       },
       games: Games.all(),
     });

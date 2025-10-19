@@ -7,8 +7,10 @@ import type { NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
+import { SessionRepository } from "./session.repository";
 
 export class SessionModule implements Module {
+  readonly sessionRepository: SessionRepository;
   readonly sessionApi: SessionApi;
 
   constructor(
@@ -17,7 +19,10 @@ export class SessionModule implements Module {
     private eventBus: NohubEventBus,
     private config: SessionsConfig,
   ) {
+    this.sessionRepository = new SessionRepository();
+
     this.sessionApi = new SessionApi(
+      this.sessionRepository,
       this.lobbyLookup,
       this.gameLookup,
       this.eventBus,
