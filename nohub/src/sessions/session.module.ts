@@ -1,3 +1,4 @@
+import { Command } from "@foxssake/trimsock-js";
 import type { SessionsConfig } from "@src/config";
 import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
@@ -59,6 +60,19 @@ export class SessionModule implements Module {
         { err, address: socket.remoteAddress },
         "Failed to init session, disconnecting socket!",
       );
+
+      // Send a goodbye message
+      if (err instanceof Error) {
+        socket.write(
+          Command.serialize({
+            name: "error",
+            params: [err.name, err.message],
+          }),
+        );
+      }
+
+      // Terminate connection
+      socket.flush();
       socket.end();
     }
   }
