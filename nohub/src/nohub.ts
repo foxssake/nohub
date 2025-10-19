@@ -2,13 +2,13 @@ import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command, TrimsockReader } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
+import { UnknownCommandError } from "./errors";
 import { NohubEventBus } from "./events";
 import { GameModule } from "./games/game.module";
 import { LobbyModule } from "./lobbies/lobby.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
-import { UnknownCommandError } from "./errors";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -52,8 +52,7 @@ export class Nohub {
     reader.maxSize = this.config.tcp.commandBufferSize;
 
     this.reactor = new BunSocketReactor<SessionData>(reader)
-      .onError(
-      (cmd, exchange, error) => {
+      .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
             name: "error",
@@ -66,11 +65,10 @@ export class Nohub {
           "Failed processing command: %s",
           Command.serialize(cmd),
         );
-      },
-    )
-    .onUnknown((cmd, _xchg) => {
-      throw new UnknownCommandError(cmd)
-    });
+      })
+      .onUnknown((cmd, _xchg) => {
+        throw new UnknownCommandError(cmd);
+      });
 
     const modules = this.modules.all;
     this.socket = this.reactor.listen({

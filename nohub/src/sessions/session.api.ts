@@ -28,15 +28,26 @@ export class SessionApi {
   openSession(socket: Socket<SessionData>): void {
     const address = socket.remoteAddress;
 
-    if (this.config.maxCount > 0 && this.sessionRepository.count() >= this.config.maxCount)
-      throw new LimitError(`Can't have more than ${this.config.maxCount} active sessions!`)
-    if (this.config.maxPerAddress > 0 && this.sessionRepository.countByAddress(address) >= this.config.maxPerAddress)
-      throw new LimitError(`Can't have more than ${this.config.maxPerAddress} active sessions per address!`)
+    if (
+      this.config.maxCount > 0 &&
+      this.sessionRepository.count() >= this.config.maxCount
+    )
+      throw new LimitError(
+        `Can't have more than ${this.config.maxCount} active sessions!`,
+      );
+    if (
+      this.config.maxPerAddress > 0 &&
+      this.sessionRepository.countByAddress(address) >=
+        this.config.maxPerAddress
+    )
+      throw new LimitError(
+        `Can't have more than ${this.config.maxPerAddress} active sessions per address!`,
+      );
 
     const session = {
       id: this.generateSessionId(),
       gameId: this.config.defaultGameId,
-      address
+      address,
     };
 
     this.sessionRepository.add(session);

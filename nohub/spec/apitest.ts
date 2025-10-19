@@ -1,13 +1,13 @@
 import assert from "node:assert";
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import type { CommandSpec, Exchange, Reactor } from "@foxssake/trimsock-js";
+import { readDefaultConfig } from "@src/config";
 import { commandToLobby, type Lobby } from "@src/lobbies/lobby";
 import { rootLogger } from "@src/logger";
 import { Nohub } from "@src/nohub";
 import { sleep } from "bun";
 import { nanoid } from "nanoid";
 import { Games } from "./fixtures";
-import { readDefaultConfig } from "@src/config";
 
 export class ApiTest {
   static readonly logger = rootLogger.child({ name: "ApiTest" });
@@ -84,7 +84,7 @@ export class ApiTest {
       tcp: {
         host: "localhost",
         port: 0,
-        commandBufferSize: 8192
+        commandBufferSize: 8192,
       },
       games: Games.all(),
     });

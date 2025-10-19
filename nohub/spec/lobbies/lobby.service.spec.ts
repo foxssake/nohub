@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { Addresses, Lobbies, Sessions } from "@spec/fixtures";
+import { type LobbiesConfig, readDefaultConfig } from "@src/config";
 import {
   InvalidCommandError,
   LimitError,
@@ -9,7 +10,6 @@ import {
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
-import { readDefaultConfig, type LobbiesConfig } from "@src/config";
 
 let config: LobbiesConfig;
 let lobbyRepository: LobbyRepository;
@@ -60,73 +60,115 @@ describe("LobbyService", () => {
 
     test("should not exceed per session limit", () => {
       // Limit to 2 lobbies per session
-      config.maxPerSession = 2
+      config.maxPerSession = 2;
 
       // First two should succeed
-      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
-      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+      ).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+      ).not.toThrow();
 
       // Third should fail
-      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).toThrow(LimitError);
+      expect(() =>
+        lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+      ).toThrow(LimitError);
 
       // Different session should be able to create nonetheless
-      expect(() => lobbyService.create(Addresses.dave, new Map(), Sessions.dave)).not.toThrow();
-    })
+      expect(() =>
+        lobbyService.create(Addresses.dave, new Map(), Sessions.dave),
+      ).not.toThrow();
+    });
 
     test("should ignore per session limit", () => {
       // Remove limit
-      config.maxPerSession = 0
+      config.maxPerSession = 0;
 
       // Create lots of lobbies
       for (let i = 0; i < 128; ++i)
-        expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
-    })
+        expect(() =>
+          lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+        ).not.toThrow();
+    });
 
     test("should not exceed global limit", () => {
       // Limit lobbies globally
-      config.maxCount = 4
+      config.maxCount = 4;
 
       // Don't need fixtures in this case
-      lobbyRepository.clear()
+      lobbyRepository.clear();
 
       // First few lobbies should be fine
-      expect(() => lobbyService.create(Addresses.eric, new Map(), Sessions.eric)).not.toThrow();
-      expect(() => lobbyService.create(Addresses.dave, new Map(), Sessions.dave)).not.toThrow();
-      expect(() => lobbyService.create(Addresses.luna, new Map(), Sessions.luna)).not.toThrow();
-      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.eric, new Map(), Sessions.eric),
+      ).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.dave, new Map(), Sessions.dave),
+      ).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.luna, new Map(), Sessions.luna),
+      ).not.toThrow();
+      expect(() =>
+        lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+      ).not.toThrow();
 
       // Should hit limit
-      expect(() => lobbyService.create(Addresses.eric, new Map(), Sessions.eric)).toThrow(LimitError);
-    })
+      expect(() =>
+        lobbyService.create(Addresses.eric, new Map(), Sessions.eric),
+      ).toThrow(LimitError);
+    });
 
     test("should ignore global limit", () => {
       // Remove limits
-      config.maxCount = 0
-      config.maxPerSession = 0
+      config.maxCount = 0;
+      config.maxPerSession = 0;
 
       // Create lots of lobbies
       for (let i = 0; i < 128; ++i)
-        expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
-    })
+        expect(() =>
+          lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid),
+        ).not.toThrow();
+    });
 
     test("should not exceed data size limit", () => {
-      config.maxDataEntries = 2
-      expect(() => lobbyService.create(Addresses.ingrid, new Map([["name", "Emerald Gang"], ["player-capacity", "8"]]), Sessions.ingrid)).not.toThrow();
-      expect(() => lobbyService.create(Addresses.ingrid, new Map([["name", "Emerald Gang"], ["player-capacity", "8"], ["player-count", "6"]]), Sessions.ingrid)).toThrow(LimitError);
-    })
+      config.maxDataEntries = 2;
+      expect(() =>
+        lobbyService.create(
+          Addresses.ingrid,
+          new Map([
+            ["name", "Emerald Gang"],
+            ["player-capacity", "8"],
+          ]),
+          Sessions.ingrid,
+        ),
+      ).not.toThrow();
+      expect(() =>
+        lobbyService.create(
+          Addresses.ingrid,
+          new Map([
+            ["name", "Emerald Gang"],
+            ["player-capacity", "8"],
+            ["player-count", "6"],
+          ]),
+          Sessions.ingrid,
+        ),
+      ).toThrow(LimitError);
+    });
 
     test("should ignore data size limit", () => {
       // Remove limit
-      config.maxDataEntries = 0
+      config.maxDataEntries = 0;
 
       // Add lots of entries
-      const data = new Map()
-      for (let i = 0; i < 128; ++i)
-        data.set(`key${i}`, `value${i}`)
+      const data = new Map();
+      for (let i = 0; i < 128; ++i) data.set(`key${i}`, `value${i}`);
 
       // Should be fine
-      expect(() => lobbyService.create(Addresses.ingrid, new Map(data), Sessions.ingrid)).not.toThrow();
-    })
+      expect(() =>
+        lobbyService.create(Addresses.ingrid, new Map(data), Sessions.ingrid),
+      ).not.toThrow();
+    });
   });
 
   describe("delete", () => {

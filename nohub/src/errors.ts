@@ -21,13 +21,13 @@ export class InvalidCommandError extends Error {
 }
 
 export class UnknownCommandError extends InvalidCommandError {
-  name: string = "UnknownCommandError"
+  name: string = "UnknownCommandError";
 
   constructor(
     readonly command: CommandSpec,
     message?: string,
-    options?: ErrorOptions
+    options?: ErrorOptions,
   ) {
-    super(message ?? "Unknown command: " + command.name, options)
+    super(message ?? `Unknown command: ${command.name}`, options);
   }
 }

@@ -3,8 +3,8 @@ import type { GameRepository } from "@src/games/game.repository";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
 import type { SessionData } from "@src/sessions/session";
-import { ApiTest } from "./apitest";
 import type { SessionRepository } from "@src/sessions/session.repository";
+import { ApiTest } from "./apitest";
 
 // These methods ensure type safety when used in fixture object literals
 function fixture<T>(data: T): T {
@@ -45,18 +45,38 @@ export const Games = {
 };
 
 export const Sessions = {
-  dave: sessionFixture({ id: "94kwM3zUaNCn", gameId: Games.forestBrawl.id, address: "224.103.6.176" }),
-  eric: sessionFixture({ id: "Nd49VE4RWJh0", gameId: Games.forestBrawl.id, address: "128.154.159.94" }),
+  dave: sessionFixture({
+    id: "94kwM3zUaNCn",
+    gameId: Games.forestBrawl.id,
+    address: "224.103.6.176",
+  }),
+  eric: sessionFixture({
+    id: "Nd49VE4RWJh0",
+    gameId: Games.forestBrawl.id,
+    address: "128.154.159.94",
+  }),
   pam: sessionFixture({ id: "DCLyAVxClvO_", address: "81.53.112.234" }),
-  brian: sessionFixture({ id: "0B4bSWlwx065", gameId: "Bojd9jBe", address: "243.24.103.109" }),
-  luna: sessionFixture({ id: "IOx6fARLyowY", gameId: Games.campfire.id, address: "49.8.5.216" }),
-  ingrid: sessionFixture({ id: "B0TyeJgIwpdS", gameId: Games.campfire.id, address: "59.243.185.54" }),
+  brian: sessionFixture({
+    id: "0B4bSWlwx065",
+    gameId: "Bojd9jBe",
+    address: "243.24.103.109",
+  }),
+  luna: sessionFixture({
+    id: "IOx6fARLyowY",
+    gameId: Games.campfire.id,
+    address: "49.8.5.216",
+  }),
+  ingrid: sessionFixture({
+    id: "B0TyeJgIwpdS",
+    gameId: Games.campfire.id,
+    address: "59.243.185.54",
+  }),
 
   all: () => fixturesOf<SessionData>(Sessions),
 
   insert(
-    repository: SessionRepository | undefined = ApiTest.nohub?.modules?.sessionModule
-      .sessionRepository,
+    repository: SessionRepository | undefined = ApiTest.nohub?.modules
+      ?.sessionModule.sessionRepository,
   ) {
     Sessions.all().forEach((it) => {
       repository?.add(it);
@@ -69,7 +89,7 @@ export const Addresses = {
   eric: `enet://${Sessions.eric.address}:51488`,
   pam: `enet://${Sessions.pam.address}:57228`,
   luna: "noray://noray-eu.foxssake.studio/r4L1iEkarSm8",
-  ingrid: "noray://noray-eu.foxssake.studio/sqw20AyDlycW"
+  ingrid: "noray://noray-eu.foxssake.studio/sqw20AyDlycW",
 };
 
 export const Lobbies = {

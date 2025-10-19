@@ -1,7 +1,7 @@
 import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { Nohub } from "@src/nohub";
-import { type GamesConfig } from "../config";
+import type { GamesConfig } from "../config";
 import { type GameLookup, GameRepository } from "./game.repository";
 
 export class GameModule implements Module {

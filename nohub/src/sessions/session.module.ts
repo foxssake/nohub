@@ -2,16 +2,16 @@ import type { SessionsConfig } from "@src/config";
 import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
+import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
 import { SessionRepository } from "./session.repository";
-import { rootLogger } from "@src/logger";
 
 export class SessionModule implements Module {
-  private readonly logger = rootLogger.child({ name: "mod:session" })
+  private readonly logger = rootLogger.child({ name: "mod:session" });
   readonly sessionRepository: SessionRepository;
   readonly sessionApi: SessionApi;
 
@@ -55,7 +55,10 @@ export class SessionModule implements Module {
     try {
       this.sessionApi.openSession(socket);
     } catch (err) {
-      this.logger.error({ err, address: socket.remoteAddress }, "Failed to init session, disconnecting socket!")
+      this.logger.error(
+        { err, address: socket.remoteAddress },
+        "Failed to init session, disconnecting socket!",
+      );
       socket.end();
     }
   }

@@ -41,10 +41,8 @@ export class LobbyRepository
   }
 
   countBySession(sessionId: string): number {
-    let count = 0
-    for (const lobby of this.list())
-      if (lobby.owner === sessionId)
-        ++count;
+    let count = 0;
+    for (const lobby of this.list()) if (lobby.owner === sessionId) ++count;
     return count;
   }
 
