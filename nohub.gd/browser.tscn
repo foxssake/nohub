@@ -1,4 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://4n0eqw25becg"]
+[gd_scene load_steps=6 format=3 uid="uid://4n0eqw25becg"]
+
+[ext_resource type="Texture2D" uid="uid://j2fymrfv4c3r" path="res://resources/icons/lock.svg" id="1_47dd4"]
+[ext_resource type="Texture2D" uid="uid://clqecwtwyaubp" path="res://resources/icons/join.svg" id="1_avfqc"]
+[ext_resource type="Texture2D" uid="uid://6a7vvotwb3rt" path="res://resources/icons/delete.svg" id="1_c5nld"]
+[ext_resource type="Texture2D" uid="uid://bdrspgruqn4ft" path="res://resources/icons/hide.svg" id="1_s7umg"]
 
 [sub_resource type="GDScript" id="GDScript_xkt7l"]
 script/source = "extends Control
@@ -27,6 +32,11 @@ script/source = "extends Control
 @onready var modal_message_label: Label = %\"Message Label\"
 @onready var modal_confirm_button: Button = %\"Confirm Button\"
 
+var lock_icon := preload(\"res://resources/icons/lock.svg\") as Texture2D
+var unlock_icon := preload(\"res://resources/icons/unlock.svg\") as Texture2D
+var hide_icon := preload(\"res://resources/icons/hide.svg\") as Texture2D
+var publish_icon := preload(\"res://resources/icons/publish.svg\") as Texture2D
+
 var list_interval: float = 2.0
 var time: float = 0.0
 
@@ -42,11 +52,16 @@ func set_selected_lobby(lobby: NohubLobby) -> void:
 	if is_instance_valid(lobby):
 		selected_lobby_label.text = lobby.id
 		lock_lobby_button.text = \"Unlock\" if lobby.is_locked else \"Lock\"
+		lock_lobby_button.icon = unlock_icon if lobby.is_locked else lock_icon
+
 		hide_lobby_button.text = \"Hide\" if lobby.is_visible else \"Publish\"
+		hide_lobby_button.icon = hide_icon if lobby.is_visible else publish_icon
 	else:
 		selected_lobby_label.text = \"\"
 		lock_lobby_button.text = \"Lock\"
+		lock_lobby_button.icon = lock_icon
 		hide_lobby_button.text = \"Hide\"
+		hide_lobby_button.icon = hide_icon
 
 func get_selected_lobby() -> NohubLobby:
 	return _selected_lobby
@@ -249,12 +264,12 @@ func _update_list() -> void:
 		lobby_list.add_item(\"Hidden?\", null, false)
 		lobby_list.add_item(\"Data\", null, false)
 
-	# Add lobbies that are not in the list yet
+	# Add lobbies
 	for lobby in lobbies:
 		lobby_list.add_item(lobby.id)
 		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
-		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"Open\")
-		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\")
+		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"Open\", lock_icon if lobby.is_locked else unlock_icon)
+		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\", hide_icon if not lobby.is_visible else publish_icon)
 		lobby_list.add_item(JSON.stringify(lobby.data))
 
 	_lobbies_in_list.assign(lobbies)
@@ -372,9 +387,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 max_text_lines = 4
+auto_height = true
 max_columns = 5
 same_column_width = true
 fixed_column_width = 160
+fixed_icon_size = Vector2i(20, 20)
 
 [node name="Tools" type="HBoxContainer" parent="Browser UI/VBoxContainer"]
 layout_mode = 2
@@ -428,24 +445,32 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Lock"
+icon = ExtResource("1_47dd4")
+expand_icon = true
 
 [node name="Hide Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Hide"
+icon = ExtResource("1_s7umg")
+expand_icon = true
 
 [node name="Join Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Join"
+icon = ExtResource("1_avfqc")
+expand_icon = true
 
 [node name="Delete Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Delete"
+icon = ExtResource("1_c5nld")
+expand_icon = true
 
 [node name="Modal" type="PopupPanel" parent="."]
 unique_name_in_owner = true
