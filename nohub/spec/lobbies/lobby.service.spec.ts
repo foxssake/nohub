@@ -72,6 +72,42 @@ describe("LobbyService", () => {
       // Different session should be able to create nonetheless
       expect(() => lobbyService.create(Addresses.dave, new Map(), Sessions.dave)).not.toThrow();
     })
+
+    test("should ignore per session limit", () => {
+      // Remove limit
+      config.maxPerSession = 0
+
+      // Create lots of lobbies
+      for (let i = 0; i < 128; ++i)
+        expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+    })
+
+    test("should not exceed global limit", () => {
+      // Limit lobbies globally
+      config.maxCount = 4
+
+      // Don't need fixtures in this case
+      lobbyRepository.clear()
+
+      // First few lobbies should be fine
+      expect(() => lobbyService.create(Addresses.eric, new Map(), Sessions.eric)).not.toThrow();
+      expect(() => lobbyService.create(Addresses.dave, new Map(), Sessions.dave)).not.toThrow();
+      expect(() => lobbyService.create(Addresses.luna, new Map(), Sessions.luna)).not.toThrow();
+      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+
+      // Should hit limit
+      expect(() => lobbyService.create(Addresses.eric, new Map(), Sessions.eric)).toThrow(LimitError);
+    })
+
+    test("should ignore global limit", () => {
+      // Remove limits
+      config.maxCount = 0
+      config.maxPerSession = 0
+
+      // Create lots of lobbies
+      for (let i = 0; i < 128; ++i)
+        expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+    })
   });
 
   describe("delete", () => {
