@@ -21,6 +21,7 @@
     "@foxssake/trimsock-bun": "^0.16.0",
     "@foxssake/trimsock-js": "^0.16.0",
     "nanoid": "^5.1.6",
-    "pino": "^9.13.1"
+    "pino": "^9.13.1",
+    "prom-client": "^15.1.3"
   }
 }
