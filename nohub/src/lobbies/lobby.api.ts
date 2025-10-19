@@ -1,8 +1,9 @@
 import { rootLogger } from "@src/logger";
 import type { SessionData } from "@src/sessions/session";
-import type { Lobby } from "./lobby";
+import { lobbyMetricLabels, type Lobby } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
 import type { LobbyService } from "./lobby.service";
+import type { Metrics } from "@src/metrics/metrics";
 
 export class LobbyApi {
   private logger = rootLogger.child({ name: "LobbyApi" });
@@ -10,6 +11,7 @@ export class LobbyApi {
   constructor(
     private lobbyRepository: LobbyRepository,
     private lobbyService: LobbyService,
+    private metrics: () => Metrics | undefined,
   ) {}
 
   create(
@@ -133,7 +135,9 @@ export class LobbyApi {
 
   onSessionClose(sessionId: string): void {
     this.logger.info("Cleaning up lobbies belonging to #%s", sessionId);
-    this.lobbyRepository.removeLobbiesOf(sessionId);
+    for (const lobby of this.lobbyRepository.removeLobbiesOf(sessionId)) {
+      this.metrics()?.lobbies.count.dec(lobbyMetricLabels(lobby))
+    }
     this.logger.info("Removed all lobbies belonging to #%s", sessionId);
   }
 

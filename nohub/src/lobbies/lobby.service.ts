@@ -9,12 +9,15 @@ import {
   requireLobbyModifiableIn,
 } from "./lobby";
 import type { LobbyRepository } from "./lobby.repository";
+import type { LobbyEvents } from "./lobby.events";
 
 export class LobbyService {
+  private logger = rootLogger.child({ name: "LobbyService" });
+
   constructor(
     private repository: LobbyRepository,
     private config: LobbiesConfig,
-    private logger = rootLogger.child({ name: "LobbyService" }),
+    private eventBus: LobbyEvents
   ) {}
 
   create(
@@ -65,6 +68,7 @@ export class LobbyService {
     };
 
     this.repository.add(lobby);
+    this.eventBus.emit("lobby-create", lobby);
 
     this.logger.info(
       { session, lobby },
@@ -78,6 +82,7 @@ export class LobbyService {
   delete(lobby: Lobby, session: SessionData) {
     requireLobbyModifiableIn(lobby, session);
     this.repository.remove(lobby.id);
+    this.eventBus.emit("lobby-delete", lobby);
   }
 
   join(lobby: Lobby, session: SessionData): string {
@@ -110,6 +115,7 @@ export class LobbyService {
 
     const result: Lobby = { ...lobby, isLocked: true };
     this.repository.update(result);
+    this.eventBus.emit("lobby-change", lobby, result);
     return result;
   }
 
@@ -118,6 +124,7 @@ export class LobbyService {
 
     const result: Lobby = { ...lobby, isLocked: false };
     this.repository.update(result);
+    this.eventBus.emit("lobby-change", lobby, result);
     return result;
   }
 
@@ -126,6 +133,7 @@ export class LobbyService {
 
     const result: Lobby = { ...lobby, isVisible: false };
     this.repository.update(result);
+    this.eventBus.emit("lobby-change", lobby, result);
     return result;
   }
 
@@ -134,6 +142,7 @@ export class LobbyService {
 
     const result: Lobby = { ...lobby, isVisible: true };
     this.repository.update(result);
+    this.eventBus.emit("lobby-change", lobby, result);
     return result;
   }
 

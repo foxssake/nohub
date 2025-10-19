@@ -2,11 +2,13 @@ import type { MetricsConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
-import { collectDefaultMetrics, Registry } from "prom-client";
+import { collectDefaultMetrics, Counter, Histogram, Registry } from "prom-client";
+import { Metrics } from "./metrics";
 
 export class MetricsModule implements Module {
   private readonly logger = rootLogger.child({ name: "mod:metrics" })
   public readonly metricsRegistry: Registry = new Registry();
+  public metrics?: Metrics
 
   constructor (
     private readonly config: MetricsConfig
@@ -19,7 +21,9 @@ export class MetricsModule implements Module {
       return
     }
 
+    this.metrics = new Metrics() // TODO: Command labels
     collectDefaultMetrics({ register: this.metricsRegistry });
+    this.metrics?.register(this.metricsRegistry);
   }
 
   configure(reactor: NohubReactor) {
@@ -29,6 +33,19 @@ export class MetricsModule implements Module {
     this.logger.info("Starting metrics HTTP server on %s:%d", this.config.host, this.config.port)
     this.serve(this.config.host, this.config.port)
     this.logger.info("Started metrics HTTP server on %s:%d", this.config.host, this.config.port)
+
+    reactor.use(async (next, cmd) => {
+      this.metrics?.commands.count.inc();
+      const timer = this.metrics?.commands.duration.startTimer();
+      try {
+      await next();
+      } catch (err) {
+        this.metrics?.commands.failureCount.inc()
+        throw err;
+      } finally {
+        timer?.call(undefined)
+      }
+    })
   }
 
   private serve(hostname: string, port: number) {

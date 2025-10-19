@@ -59,3 +59,10 @@ export function commandToLobby(command: CommandSpec): Lobby {
     owner: "",
   };
 }
+
+export function lobbyMetricLabels(lobby: Lobby): Record<string, string> {
+  return {
+    locked: lobby.isLocked ? "locked" : "open",
+    visibility: lobby.isVisible ? "visible" : "hidden"
+  }
+}

@@ -26,7 +26,7 @@ export class NohubModules {
     this.eventBus = new NohubEventBus();
     this.metricsModule = new MetricsModule(this.config.metrics);
     this.gameModule = new GameModule(this.config.games);
-    this.lobbyModule = new LobbyModule(this.config.lobbies);
+    this.lobbyModule = new LobbyModule(this.config.lobbies, () => this.metricsModule.metrics);
     this.sessionModule = new SessionModule(
       this.lobbyModule.lobbyRepository,
       this.gameModule.gameRepository,

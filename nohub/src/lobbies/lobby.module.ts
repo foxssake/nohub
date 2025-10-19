@@ -7,18 +7,24 @@ import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
 import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
+import type { Metrics } from "@src/metrics/metrics";
+import { LobbyEvents } from "./lobby.events";
+import { LobbyMetricsReporter } from "./lobby.metrics.reporter";
 
 export class LobbyModule implements Module {
+  private readonly eventBus: LobbyEvents;
   readonly lobbyRepository: LobbyRepository;
   readonly lobbyLookup: LobbyLookup;
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
-  constructor(private config: LobbiesConfig) {
+  constructor(private config: LobbiesConfig, private metrics: () => Metrics | undefined) {
+    this.eventBus = new LobbyEvents();
+    new LobbyMetricsReporter(this.eventBus, metrics);
     this.lobbyRepository = new LobbyRepository();
     this.lobbyLookup = this.lobbyRepository;
-    this.lobbyService = new LobbyService(this.lobbyRepository, this.config);
-    this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService);
+    this.lobbyService = new LobbyService(this.lobbyRepository, this.config, this.eventBus);
+    this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService, metrics);
   }
 
   attachTo(app: Nohub): void {
