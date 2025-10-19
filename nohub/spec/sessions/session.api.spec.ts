@@ -61,6 +61,34 @@ describe("SessionApi", () => {
       for (let i = 0; i < 128; ++i)
         expect(() => sessionApi.openSession(mockSocket(Sessions.dave.address))).not.toThrow();
     })
+
+    test("should not exceed global limit", () => {
+      // Don't need fixtures
+      sessionRepository.clear();
+
+      // Set limit
+      config.maxCount = 2
+
+      // First two sessions should pass
+      expect(() => sessionApi.openSession(mockSocket(Sessions.dave.address))).not.toThrow();
+      expect(() => sessionApi.openSession(mockSocket(Sessions.eric.address))).not.toThrow();
+
+      // Third should fail
+      expect(() => sessionApi.openSession(mockSocket(Sessions.ingrid.address))).toThrow(LimitError);
+    })
+
+    test("should ignore global limit", () => {
+      // Don't need fixtures
+      sessionRepository.clear();
+
+      // Remove limits
+      config.maxPerAddress = 0;
+      config.maxCount = 0;
+
+      // Open lots of sessions
+      for (let i = 0; i < 128; ++i)
+        expect(() => sessionApi.openSession(mockSocket(Sessions.dave.address))).not.toThrow();
+    })
   })
 
   describe("setGame", () => {

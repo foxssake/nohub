@@ -28,7 +28,8 @@ export class SessionApi {
   openSession(socket: Socket<SessionData>): void {
     const address = socket.remoteAddress;
 
-    this.logger.info("Found %d sessions from %s, %d allowed", this.sessionRepository.countByAddress(address), address, this.config.maxPerAddress);
+    if (this.config.maxCount > 0 && this.sessionRepository.count() >= this.config.maxCount)
+      throw new LimitError(`Can't have more than ${this.config.maxCount} active sessions!`)
     if (this.config.maxPerAddress > 0 && this.sessionRepository.countByAddress(address) >= this.config.maxPerAddress)
       throw new LimitError(`Can't have more than ${this.config.maxPerAddress} active sessions per address!`)
 
