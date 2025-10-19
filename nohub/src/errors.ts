@@ -1,3 +1,5 @@
+import type { CommandSpec } from "@foxssake/trimsock-js";
+
 export class DataNotFoundError extends Error {
   name: string = "DataNotFoundError";
 }
@@ -12,4 +14,16 @@ export class LockedError extends UnauthorizedError {
 
 export class InvalidCommandError extends Error {
   name: string = "InvalidCommandError";
+}
+
+export class UnknownCommandError extends InvalidCommandError {
+  name: string = "UnknownCommandError"
+
+  constructor(
+    readonly command: CommandSpec,
+    message?: string,
+    options?: ErrorOptions
+  ) {
+    super(message ?? "Unknown command: " + command.name, options)
+  }
 }

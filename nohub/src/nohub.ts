@@ -1,5 +1,5 @@
 import { BunSocketReactor } from "@foxssake/trimsock-bun";
-import { Command } from "@foxssake/trimsock-js";
+import { Command, TrimsockReader } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
 import { NohubEventBus } from "./events";
@@ -8,6 +8,7 @@ import { LobbyModule } from "./lobbies/lobby.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
+import { UnknownCommandError } from "./errors";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -47,7 +48,11 @@ export class Nohub {
   run() {
     rootLogger.info({ config: this.config }, "Starting with config");
 
-    this.reactor = new BunSocketReactor<SessionData>().onError(
+    const reader = new TrimsockReader();
+    reader.maxSize = this.config.tcp.commandBufferSize;
+
+    this.reactor = new BunSocketReactor<SessionData>(reader)
+      .onError(
       (cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
@@ -62,7 +67,10 @@ export class Nohub {
           Command.serialize(cmd),
         );
       },
-    );
+    )
+    .onUnknown((cmd, _xchg) => {
+      throw new UnknownCommandError(cmd)
+    });
 
     const modules = this.modules.all;
     this.socket = this.reactor.listen({
