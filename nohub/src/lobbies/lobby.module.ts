@@ -1,3 +1,4 @@
+import type { MetricsHolder } from "@src/metrics/metrics";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
@@ -5,11 +6,10 @@ import { requireRequest, requireSingleParam } from "@src/validators";
 import type { LobbiesConfig } from "../config";
 import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
-import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
-import { LobbyService } from "./lobby.service";
-import type { Metrics, MetricsHolder } from "@src/metrics/metrics";
 import { LobbyEventBus } from "./lobby.events";
 import { LobbyMetricsReporter } from "./lobby.metrics.reporter";
+import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
+import { LobbyService } from "./lobby.service";
 
 export class LobbyModule implements Module {
   private readonly eventBus: LobbyEventBus;
@@ -18,13 +18,24 @@ export class LobbyModule implements Module {
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
-  constructor(private config: LobbiesConfig, private metrics: MetricsHolder) {
+  constructor(
+    private config: LobbiesConfig,
+    metrics: MetricsHolder,
+  ) {
     this.eventBus = new LobbyEventBus();
     new LobbyMetricsReporter(this.eventBus, metrics);
     this.lobbyRepository = new LobbyRepository();
     this.lobbyLookup = this.lobbyRepository;
-    this.lobbyService = new LobbyService(this.lobbyRepository, this.config, this.eventBus);
-    this.lobbyApi = new LobbyApi(this.lobbyRepository, this.lobbyService, metrics);
+    this.lobbyService = new LobbyService(
+      this.lobbyRepository,
+      this.config,
+      this.eventBus,
+    );
+    this.lobbyApi = new LobbyApi(
+      this.lobbyRepository,
+      this.lobbyService,
+      metrics,
+    );
   }
 
   attachTo(app: Nohub): void {

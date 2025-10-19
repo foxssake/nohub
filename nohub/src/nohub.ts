@@ -6,10 +6,10 @@ import { UnknownCommandError } from "./errors";
 import { NohubEventBus } from "./events";
 import { GameModule } from "./games/game.module";
 import { LobbyModule } from "./lobbies/lobby.module";
+import { MetricsModule } from "./metrics/metrics.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
-import { MetricsModule } from "./metrics/metrics.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -26,16 +26,24 @@ export class NohubModules {
     this.eventBus = new NohubEventBus();
     this.metricsModule = new MetricsModule(this.config.metrics);
     this.gameModule = new GameModule(this.config.games);
-    this.lobbyModule = new LobbyModule(this.config.lobbies, this.metricsModule.metricsHolder);
+    this.lobbyModule = new LobbyModule(
+      this.config.lobbies,
+      this.metricsModule.metricsHolder,
+    );
     this.sessionModule = new SessionModule(
       this.lobbyModule.lobbyRepository,
       this.gameModule.gameRepository,
       this.eventBus,
       config.sessions,
-      this.metricsModule.metricsHolder
+      this.metricsModule.metricsHolder,
     );
 
-    this.all = [this.metricsModule, this.gameModule, this.lobbyModule, this.sessionModule];
+    this.all = [
+      this.metricsModule,
+      this.gameModule,
+      this.lobbyModule,
+      this.sessionModule,
+    ];
   }
 }
 

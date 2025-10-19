@@ -2,13 +2,13 @@ import type { SessionsConfig } from "@src/config";
 import type { NohubEventBus } from "@src/events";
 import type { GameLookup } from "@src/games/game.repository";
 import type { LobbyLookup } from "@src/lobbies/lobby.repository";
+import type { MetricsHolder } from "@src/metrics/metrics";
 import type { Module } from "@src/module";
 import type { NohubReactor } from "@src/nohub";
 import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
 import { SessionRepository } from "./session.repository";
-import type { Metrics, MetricsHolder } from "@src/metrics/metrics";
 
 export class SessionModule implements Module {
   readonly sessionRepository: SessionRepository;

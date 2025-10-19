@@ -63,6 +63,6 @@ export function commandToLobby(command: CommandSpec): Lobby {
 export function lobbyMetricLabels(lobby: Lobby): Record<string, string> {
   return {
     locked: lobby.isLocked ? "locked" : "open",
-    visibility: lobby.isVisible ? "visible" : "hidden"
-  }
+    visibility: lobby.isVisible ? "visible" : "hidden",
+  };
 }

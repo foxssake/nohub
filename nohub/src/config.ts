@@ -13,7 +13,7 @@ export function readConfig(env: ConfigEnv) {
     metrics: {
       enabled: bool(env.NOHUB_METRICS_ENABLED) ?? true,
       host: env.NOHUB_METRICS_HOST ?? "localhost",
-      port: integer(env.NOHUB_METRICS_PORT) ?? 9981
+      port: integer(env.NOHUB_METRICS_PORT) ?? 9981,
     },
 
     log: {
