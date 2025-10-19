@@ -12,6 +12,10 @@ export class LockedError extends UnauthorizedError {
   name: string = "LockedError";
 }
 
+export class LimitError extends UnauthorizedError {
+  name: string = "LimitError";
+}
+
 export class InvalidCommandError extends Error {
   name: string = "InvalidCommandError";
 }

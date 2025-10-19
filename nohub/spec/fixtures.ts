@@ -48,6 +48,7 @@ export const Sessions = {
   eric: sessionFixture({ id: "Nd49VE4RWJh0", gameId: Games.forestBrawl.id }),
   pam: sessionFixture({ id: "DCLyAVxClvO_" }),
   luna: sessionFixture({ id: "IOx6fARLyowY", gameId: Games.campfire.id }),
+  ingrid: sessionFixture({ id: "B0TyeJgIwpdS", gameId: Games.campfire.id })
 };
 
 export const Addresses = {
@@ -55,6 +56,7 @@ export const Addresses = {
   eric: "enet://118.154.159.94:51488",
   pam: "enet://81.53.112.234:57228",
   luna: "noray://noray-eu.foxssake.studio/r4L1iEkarSm8",
+  ingrid: "noray://noray-eu.foxssake.studio/sqw20AyDlycW"
 };
 
 export const Lobbies = {

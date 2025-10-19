@@ -40,6 +40,14 @@ export class LobbyRepository
     return false;
   }
 
+  countBySession(sessionId: string): number {
+    let count = 0
+    for (const lobby of this.list())
+      if (lobby.owner === sessionId)
+        ++count;
+    return count;
+  }
+
   *listLobbiesFor(session: SessionData): Generator<Lobby> {
     for (const lobby of this.list())
       if (isLobbyVisibleTo(lobby, session)) yield lobby;

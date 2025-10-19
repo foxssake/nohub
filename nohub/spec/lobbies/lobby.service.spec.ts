@@ -2,23 +2,24 @@ import { beforeEach, describe, expect, test } from "bun:test";
 import { Addresses, Lobbies, Sessions } from "@spec/fixtures";
 import {
   InvalidCommandError,
+  LimitError,
   LockedError,
   UnauthorizedError,
 } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import { LobbyRepository } from "@src/lobbies/lobby.repository";
 import { LobbyService } from "@src/lobbies/lobby.service";
+import { readDefaultConfig, type LobbiesConfig } from "@src/config";
 
+let config: LobbiesConfig;
 let lobbyRepository: LobbyRepository;
 let lobbyService: LobbyService;
 
 describe("LobbyService", () => {
   beforeEach(() => {
+    config = readDefaultConfig().lobbies;
     lobbyRepository = new LobbyRepository();
-    lobbyService = new LobbyService(lobbyRepository, {
-      idLength: 8,
-      enableGameless: false,
-    });
+    lobbyService = new LobbyService(lobbyRepository, config);
 
     Lobbies.insert(lobbyRepository);
   });
@@ -56,6 +57,21 @@ describe("LobbyService", () => {
         lobbyService.create(Addresses.pam, new Map(), Sessions.pam),
       ).toThrow(InvalidCommandError);
     });
+
+    test("should not exceed per session limit", () => {
+      // Limit to 2 lobbies per session
+      config.maxPerSession = 2
+
+      // First two should succeed
+      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).not.toThrow();
+
+      // Third should fail
+      expect(() => lobbyService.create(Addresses.ingrid, new Map(), Sessions.ingrid)).toThrow(LimitError);
+
+      // Different session should be able to create nonetheless
+      expect(() => lobbyService.create(Addresses.dave, new Map(), Sessions.dave)).not.toThrow();
+    })
   });
 
   describe("delete", () => {

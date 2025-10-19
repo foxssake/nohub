@@ -1,5 +1,5 @@
 import type { LobbiesConfig } from "@src/config";
-import { InvalidCommandError } from "@src/errors";
+import { InvalidCommandError, LimitError } from "@src/errors";
 import { rootLogger } from "@src/logger";
 import type { SessionData } from "@src/sessions/session";
 import { nanoid } from "nanoid";
@@ -29,6 +29,9 @@ export class LobbyService {
 
     if (session.gameId === undefined && !this.config.enableGameless)
       throw new InvalidCommandError("Can't create lobbies without a game!");
+
+    if (this.repository.countBySession(session.id) >= this.config.maxPerSession)
+      throw new LimitError(`Session can't have more than ${this.config.maxPerSession} active lobbies!`);
 
     const lobby: Lobby = {
       id: this.generateId(),
