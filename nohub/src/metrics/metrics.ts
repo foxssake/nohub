@@ -24,3 +24,6 @@ export class Metrics {
       .forEach(it => to.registerMetric(it))
   }
 }
+
+export type MetricsHolder = () => Metrics | undefined
+export const emptyMetrics = () => undefined;

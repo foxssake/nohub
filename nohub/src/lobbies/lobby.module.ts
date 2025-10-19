@@ -7,7 +7,7 @@ import { lobbyToCommand } from "./lobby";
 import { LobbyApi } from "./lobby.api";
 import { type LobbyLookup, LobbyRepository } from "./lobby.repository";
 import { LobbyService } from "./lobby.service";
-import type { Metrics } from "@src/metrics/metrics";
+import type { Metrics, MetricsHolder } from "@src/metrics/metrics";
 import { LobbyEvents } from "./lobby.events";
 import { LobbyMetricsReporter } from "./lobby.metrics.reporter";
 
@@ -18,7 +18,7 @@ export class LobbyModule implements Module {
   readonly lobbyService: LobbyService;
   readonly lobbyApi: LobbyApi;
 
-  constructor(private config: LobbiesConfig, private metrics: () => Metrics | undefined) {
+  constructor(private config: LobbiesConfig, private metrics: MetricsHolder) {
     this.eventBus = new LobbyEvents();
     new LobbyMetricsReporter(this.eventBus, metrics);
     this.lobbyRepository = new LobbyRepository();

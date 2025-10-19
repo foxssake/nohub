@@ -8,6 +8,7 @@ import { requireRequest, requireSingleParam } from "@src/validators";
 import type { SessionData } from "./session";
 import { SessionApi, sessionOf } from "./session.api";
 import { SessionRepository } from "./session.repository";
+import type { Metrics, MetricsHolder } from "@src/metrics/metrics";
 
 export class SessionModule implements Module {
   readonly sessionRepository: SessionRepository;
@@ -18,6 +19,7 @@ export class SessionModule implements Module {
     private gameLookup: GameLookup,
     private eventBus: NohubEventBus,
     private config: SessionsConfig,
+    private metrics: MetricsHolder,
   ) {
     this.sessionRepository = new SessionRepository();
 
@@ -27,6 +29,7 @@ export class SessionModule implements Module {
       this.gameLookup,
       this.eventBus,
       this.config,
+      this.metrics,
     );
   }
 

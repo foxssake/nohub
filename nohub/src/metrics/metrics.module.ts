@@ -3,12 +3,13 @@ import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { Nohub, NohubReactor } from "@src/nohub";
 import { collectDefaultMetrics, Counter, Histogram, Registry } from "prom-client";
-import { Metrics } from "./metrics";
+import { Metrics, type MetricsHolder } from "./metrics";
 
 export class MetricsModule implements Module {
   private readonly logger = rootLogger.child({ name: "mod:metrics" })
   public readonly metricsRegistry: Registry = new Registry();
   public metrics?: Metrics
+  public metricsHolder: MetricsHolder = () => this.metrics
 
   constructor (
     private readonly config: MetricsConfig

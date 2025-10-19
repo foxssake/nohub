@@ -26,12 +26,13 @@ export class NohubModules {
     this.eventBus = new NohubEventBus();
     this.metricsModule = new MetricsModule(this.config.metrics);
     this.gameModule = new GameModule(this.config.games);
-    this.lobbyModule = new LobbyModule(this.config.lobbies, () => this.metricsModule.metrics);
+    this.lobbyModule = new LobbyModule(this.config.lobbies, this.metricsModule.metricsHolder);
     this.sessionModule = new SessionModule(
       this.lobbyModule.lobbyRepository,
       this.gameModule.gameRepository,
       this.eventBus,
       config.sessions,
+      this.metricsModule.metricsHolder
     );
 
     this.all = [this.metricsModule, this.gameModule, this.lobbyModule, this.sessionModule];
