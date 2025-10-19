@@ -15,12 +15,12 @@ func _init(connection: StreamPeerTCP):
 func poll() -> void:
 	_reactor.poll()
 
-func set_game(id: String) -> bool:
+func set_game(id: String) -> NohubResult:
 	var request := TrimsockCommand.request("session/set-game")\
 		.with_params([id])
 	return await _bool_request(request)
 
-func create_lobby(address: String, data: Dictionary) -> NohubLobby:
+func create_lobby(address: String, data: Dictionary) -> NohubResult.Lobby:
 	var request := TrimsockCommand.request("lobby/create")\
 		.with_params([address])
 	for key in data:
@@ -30,22 +30,22 @@ func create_lobby(address: String, data: Dictionary) -> NohubLobby:
 	var response := await xchg.read()
 
 	if response.is_success():
-		return _command_to_lobby(response)
+		return NohubResult.Lobby.of_value(_command_to_lobby(response))
 	else:
-		return null
+		return _command_to_error(response)
 
-func get_lobby(id: String, properties: Array[String] = []) -> NohubLobby:
+func get_lobby(id: String, properties: Array[String] = []) -> NohubResult.Lobby:
 	var request := TrimsockCommand.request("lobby/get")\
 		.with_params([id] + properties)
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()
 
 	if response.is_success():
-		return _command_to_lobby(response)
+		return NohubResult.Lobby.of_value(_command_to_lobby(response))
 	else:
-		return null
+		return _command_to_error(response)
 
-func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
+func list_lobbies(fields: Array[String] = []) -> NohubResult.LobbyList:
 	var result := [] as Array[NohubLobby]
 	var request := TrimsockCommand.request("lobby/list")\
 		.with_params(fields)
@@ -53,19 +53,22 @@ func list_lobbies(fields: Array[String] = []) -> Array[NohubLobby]:
 	var xchg := _reactor.submit_request(request)
 	while xchg.is_open():
 		var cmd := await xchg.read()
+
+		if cmd.is_error():
+			return _command_to_error(cmd)
 		if not cmd.is_stream_chunk():
 			continue
 
 		result.append(_command_to_lobby(cmd))
 	
-	return result
+	return NohubResult.LobbyList.of_value(result)
 
-func delete_lobby(lobby_id: String) -> bool:
+func delete_lobby(lobby_id: String) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/delete")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
-func join_lobby(lobby_id: String) -> String:
+func join_lobby(lobby_id: String) -> NohubResult.Address:
 	var request := TrimsockCommand.request("lobby/join")\
 		.with_params([lobby_id])
 
@@ -73,31 +76,31 @@ func join_lobby(lobby_id: String) -> String:
 	var response := await xchg.read()
 	
 	if response.is_success():
-		return response.params[0]
+		return NohubResult.Address.of_value(response.params[0])
 	else:
-		return ""
+		return _command_to_error(response)
 
-func lock_lobby(lobby_id: String) -> bool:
+func lock_lobby(lobby_id: String) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/lock")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
-func unlock_lobby(lobby_id: String) -> bool:
+func unlock_lobby(lobby_id: String) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/unlock")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
-func hide_lobby(lobby_id: String) -> bool:
+func hide_lobby(lobby_id: String) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/hide")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
-func publish_lobby(lobby_id: String) -> bool:
+func publish_lobby(lobby_id: String) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/publish")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
-func set_lobby_data(lobby_id: String, data: Dictionary) -> bool:
+func set_lobby_data(lobby_id: String, data: Dictionary) -> NohubResult:
 	var request := TrimsockCommand.request("lobby/set-data")\
 		.with_params([lobby_id])\
 		.with_kv_map(data)
@@ -113,10 +116,13 @@ func whereami() -> String:
 	else:
 		return ""
 
-func _bool_request(request: TrimsockCommand) -> bool:
+func _bool_request(request: TrimsockCommand) -> NohubResult:
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()
-	return response.is_success()
+	if response.is_success():
+		return NohubResult.of_success()
+	else:
+		return _command_to_error(response)
 
 func _command_to_lobby(command: TrimsockCommand) -> NohubLobby:
 	var lobby := NohubLobby.new()
@@ -126,3 +132,9 @@ func _command_to_lobby(command: TrimsockCommand) -> NohubLobby:
 	lobby.data = command.kv_map
 
 	return lobby
+
+func _command_to_error(command: TrimsockCommand) -> NohubResult:
+	if command.is_error() and command.params.size() >= 2:
+		return NohubResult.of_error(command.params[0], command.params[1])
+	else:
+		return NohubResult.of_error(command.name, "")
