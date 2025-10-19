@@ -20,7 +20,6 @@
     "@biomejs/biome": "^2.2.5",
     "@foxssake/trimsock-bun": "^0.15.3",
     "@foxssake/trimsock-js": "^0.15.3",
-    "dotenv": "^17.2.3",
     "nanoid": "^5.1.6",
     "pino": "^9.13.1"
   }
