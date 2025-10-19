@@ -9,11 +9,13 @@ import { LobbyModule } from "./lobbies/lobby.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
+import { MetricsModule } from "./metrics/metrics.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
 export class NohubModules {
   readonly eventBus: NohubEventBus;
+  readonly metricsModule: MetricsModule;
   readonly gameModule: GameModule;
   readonly lobbyModule: LobbyModule;
   readonly sessionModule: SessionModule;
@@ -22,6 +24,7 @@ export class NohubModules {
 
   constructor(readonly config: AppConfig) {
     this.eventBus = new NohubEventBus();
+    this.metricsModule = new MetricsModule(this.config.metrics);
     this.gameModule = new GameModule(this.config.games);
     this.lobbyModule = new LobbyModule(this.config.lobbies);
     this.sessionModule = new SessionModule(
@@ -31,7 +34,7 @@ export class NohubModules {
       config.sessions,
     );
 
-    this.all = [this.gameModule, this.lobbyModule, this.sessionModule];
+    this.all = [this.metricsModule, this.gameModule, this.lobbyModule, this.sessionModule];
   }
 }
 
