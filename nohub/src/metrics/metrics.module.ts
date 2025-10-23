@@ -41,6 +41,8 @@ export class MetricsModule implements Module {
     this.metrics?.register(this.metricsRegistry);
 
     reactor.use(async (next, cmd) => {
+      this.logger.debug({ command: cmd }, "Received command %s", cmd.name);
+
       const labels = { command: cmd.name };
       this.metrics?.commands.count.inc(labels);
       const timer = this.metrics?.commands.duration.startTimer(labels);

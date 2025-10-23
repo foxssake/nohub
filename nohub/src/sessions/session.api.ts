@@ -29,6 +29,11 @@ export class SessionApi {
 
   openSession(socket: Socket<SessionData>): void {
     const address = socket.remoteAddress;
+    this.logger.info(
+      { address },
+      "Opening new session for connection from %s",
+      address,
+    );
 
     if (
       this.config.maxCount > 0 &&
@@ -55,15 +60,23 @@ export class SessionApi {
     this.sessionRepository.add(session);
     this.metrics()?.sessions.count.inc();
     socket.data = session;
+
+    this.logger.info({ session }, "Created session #%s", session.id);
   }
 
   closeSession(socket: Socket<SessionData>): void {
     const sessionId = socket.data.id;
-    this.logger.info("Closing session #%s", sessionId);
+    this.logger.info(
+      { session: socket.data },
+      "Closing session #%s",
+      sessionId,
+    );
+
     this.eventBus.emit("session-close", sessionId);
     this.sessionRepository.remove(sessionId);
     this.metrics()?.sessions.count.dec();
-    this.logger.info("Closed session #%s", sessionId);
+
+    this.logger.info({ session: socket.data }, "Closed session #%s", sessionId);
   }
 
   setGame(session: SessionData, gameId: string) {
