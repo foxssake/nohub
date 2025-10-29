@@ -86,6 +86,7 @@ export class Nohub {
     this.socket = this.reactor.listen({
       hostname: this.config.tcp.host,
       port: this.config.tcp.port,
+      exclusive: true,
       socket: {
         open(socket) {
           try {
@@ -129,7 +130,7 @@ export class Nohub {
       },
     });
 
-    rootLogger.info("Listening on %s:%s", this.host, this.port);
+    rootLogger.info("Listening exclusively on %s:%s", this.host, this.port);
 
     rootLogger.info("Attaching %d modules...", modules.length);
     modules.forEach((it) => {
