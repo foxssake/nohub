@@ -1,7 +1,7 @@
 # Proposals
 
-This section contains proposals on what *nohub* should be, and how to
-implement it.
+This document contains the original proposals on what *nohub* should be, and
+how to implement it.
 
 ## Vision
 
