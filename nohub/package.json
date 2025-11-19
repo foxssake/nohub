@@ -1,7 +1,7 @@
 {
   "name": "@foxssake/nohub",
   "module": "index.ts",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "type": "module",
   "scripts": {
     "dev": "bun --watch . | pino-pretty",
@@ -23,5 +23,6 @@
     "nanoid": "^5.1.6",
     "pino": "^9.13.1",
     "prom-client": "^15.1.3"
-  }
+  },
+  "license": "MIT"
 }

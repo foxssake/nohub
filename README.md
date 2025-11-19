@@ -84,11 +84,11 @@ Alternatively, join our [Discord server].
 
 ## License
 
-TODO
+*nohub* is licensed under the [MIT License](LICENSE).
 
 
-[Bun]: https://bun.dev/
-[bun]: https://bun.dev/
+[Bun]: https://bun.sh/
+[bun]: https://bun.sh/
 [Trimsock]: https://github.com/foxssake/trimsock
 [Prometheus]: https://prometheus.io/
 [nohub.gd]: ./nohub.gd
