@@ -5,4 +5,5 @@ Understanding nohub
    :maxdepth: 2
 
    concepts.rst
+   practical-examples.rst
    advanced-features.rst
