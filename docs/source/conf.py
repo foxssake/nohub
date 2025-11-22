@@ -26,4 +26,5 @@ exclude_patterns = []
 html_theme = 'breeze'
 html_static_path = ['_static']
 html_css_files = ['tabs.css']
-html_short_title = 'nohub'
+
+html_title = 'nohub'
