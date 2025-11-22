@@ -66,7 +66,7 @@ Example commands for Linux:
 curl -fsSL https://bun.sh/install | bash
 
 # Clone nohub and enter server directory
-https://github.com/foxssake/nohub.git
+git clone https://github.com/foxssake/nohub.git
 cd nohub/nohub
 
 # Install dependencies
