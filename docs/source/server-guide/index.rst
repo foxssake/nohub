@@ -1,4 +1,4 @@
-Server Guide
+Server guide
 ============
 
 .. toctree::
