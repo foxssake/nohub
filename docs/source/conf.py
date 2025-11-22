@@ -13,7 +13,7 @@ author = 'Tamás Gálffy'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ['sphinx_tabs.tabs']
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -25,4 +25,5 @@ exclude_patterns = []
 
 html_theme = 'breeze'
 html_static_path = ['_static']
+html_css_files = ['tabs.css']
 html_short_title = 'nohub'
