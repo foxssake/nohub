@@ -35,7 +35,7 @@ Whenever a client connects to *nohub*, a session is created for them. This
 session is active as long as the connection is live, and is destroyed once the
 connection is terminated.
 
-Sessions may be associated to *Games*.
+Sessions may be associated to :ref:`Concepts/Games`.
 
 .. _Concepts/Lobbies:
 

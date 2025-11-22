@@ -49,6 +49,8 @@ Games
 
       Defaults to an empty list.
 
+.. _`Configuration/Metrics`:
+
 Metrics
 -------
 
@@ -56,6 +58,8 @@ Metrics
 
   ``NOHUB_METRICS_ENABLED``
       Set to ``true`` to enable metrics.
+
+      Defaults to ``true``.
 
   ``NOHUB_METRICS_HOST``
       Metrics are served over HTTP. This setting controls which interfaces to
