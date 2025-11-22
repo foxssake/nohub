@@ -1,4 +1,4 @@
-Joining a Lobby
+Joining a lobby
 ===============
 
 .. tabs::

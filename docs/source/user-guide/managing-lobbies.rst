@@ -1,4 +1,4 @@
-Managing Lobbies
+Managing lobbies
 ================
 
 .. tip::
@@ -48,7 +48,7 @@ unlocked, to allow joining once again.
 Both commands reply with a success response on success, or an error if the
 operation failed.
 
-Updating the Custom Data
+Updating the custom data
 ------------------------
 
 Lobby custom data can be set as-is. To add or remove keys from the custom data,
@@ -67,7 +67,7 @@ modifications, and submitting it in full.
 
 Replies with a success response on success, or an error if the update failed.
 
-Deleting a Lobby
+Deleting a lobby
 ----------------
 
 Lobbies are automatically deleted when their owning session ends, e.g. the
