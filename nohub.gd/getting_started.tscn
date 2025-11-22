@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3 uid="uid://h21flh0y2fhm"]
+
+[sub_resource type="GDScript" id="GDScript_hkj7k"]
+script/source = "extends Control
+
+var connection: StreamPeerTCP
+var client: NohubClient
+
+func _ready():
+	# Establishing a connection
+	# ==========================================================================
+	var host := \"foxssake.studio\"
+	var port := 12980
+
+	# Create connection
+	connection = StreamPeerTCP.new()
+	var err := connection.connect_to_host(host, port)
+	if err != OK:
+		push_error(\"Couldn't connect to nohub at %s:%d - %s\" % [host, port, error_string(err)])
+		return
+
+	# Wait for connection to succeed
+	while connection.get_status() == StreamPeerTCP.STATUS_CONNECTING:
+		await get_tree().process_frame
+
+	if connection.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+		push_error(\"Failed to establish connection to nohub at %s:%d - status: %d\" % [host, port, connection.get_status()])
+		return
+
+	client = NohubClient.new(connection)
+	print(\"Successfully connected to nohub at %s:%d!\" % [host, port])
+	
+	# Creating a lobby
+	# ==========================================================================
+	var result := await client.create_lobby(\"enet://localhost\", { \"cool\": \"true\" })
+	if not result.is_success():
+		push_error(\"Failed creating lobby: %s\" % result.error())
+		return
+	var lobby := result.value()
+
+	print(\"Created lobby #%s!\" % lobby)
+
+func _process(_dt):
+	if is_instance_valid(connection):
+		connection.poll()
+	if is_instance_valid(client):
+		client.poll()
+"
+
+[node name="Getting Started" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_hkj7k")

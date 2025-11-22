@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'nohub'
-copyright = '2025, Tamás Gálffy'
+copyright = '2025, Fox\'s Sake Studio'
 author = 'Tamás Gálffy'
 
 # -- General configuration ---------------------------------------------------
@@ -25,3 +25,4 @@ exclude_patterns = []
 
 html_theme = 'breeze'
 html_static_path = ['_static']
+html_short_title = 'nohub'
