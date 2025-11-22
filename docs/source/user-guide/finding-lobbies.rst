@@ -1,7 +1,7 @@
-Finding Lobbies
+Finding lobbies
 ===============
 
-Listing Lobbies
+Listing lobbies
 ---------------
 
 .. tabs::
@@ -24,7 +24,7 @@ listed.
 
 The result is a list of lobbies.
 
-Querying a Single Lobby
+Querying a single lobby
 -----------------------
 
 .. tabs::

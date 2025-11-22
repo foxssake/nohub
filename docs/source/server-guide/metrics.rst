@@ -1,4 +1,4 @@
-Using Metrics
+Using metrics
 =============
 
 Alongside logging, *nohub* provides various metrics for observability.

@@ -1,4 +1,4 @@
-Configuration Reference
+Configuration reference
 =======================
 
 To configure *nohub*, use environment variables, or place a ``.env`` file in

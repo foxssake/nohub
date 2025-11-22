@@ -1,4 +1,4 @@
-Creating a Lobby
+Creating a lobby
 ================
 
 .. tabs::
