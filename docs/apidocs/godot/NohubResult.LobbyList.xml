@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="NohubResult.LobbyList" inherits="NohubResult" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Stores a list of [NohubLobby] instances on success
+	</brief_description>
+	<description>
+		See [NohubResult] for details.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="of_value" qualifiers="static">
+			<return type="NohubResult.LobbyList" />
+			<param index="0" name="value" type="NohubLobby[]" />
+			<description>
+				Construct a successful result object with the given [param value]
+			</description>
+		</method>
+		<method name="value">
+			<return type="NohubLobby[]" />
+			<description>
+				Get the resulting lobby list
+			</description>
+		</method>
+	</methods>
+</class>

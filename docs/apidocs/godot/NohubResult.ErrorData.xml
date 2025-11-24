@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="NohubResult.ErrorData" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Represents an error as returned by nohub
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="_init">
+			<return type="void" />
+			<param index="0" name="p_name" type="String" />
+			<param index="1" name="p_message" type="String" />
+			<description>
+			</description>
+		</method>
+		<method name="_to_string">
+			<return type="String" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="name" type="String" setter="" getter="">
+			The error's name [br][br]This indicates the error type. Can be checked programmatically to intelligently try and recover from an error.
+		</member>
+		<member name="message" type="String" setter="" getter="">
+			The error message [br][br]This gives a further description of the error itself. Should not be relied on, error messages may change between releases without notice. However, they can be useful to convey the issue to the user.
+		</member>
+	</members>
+</class>

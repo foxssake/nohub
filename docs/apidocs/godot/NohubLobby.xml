@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="NohubLobby" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Describes a lobby
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+		<link title="Lobbies">https://foxssake.github.io/nohub/understanding-nohub/concepts.html#lobbies</link>
+	</tutorials>
+	<methods>
+		<method name="_to_string">
+			<return type="String" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="id" type="String" setter="" getter="" default="&quot;&quot;">
+			The lobby's ID - an arbitrary string unique to it
+		</member>
+		<member name="is_visible" type="bool" setter="" getter="" default="true">
+			True if the lobby is visible [br][br]If this is false, the lobby won't appear when listing lobbies.
+		</member>
+		<member name="is_locked" type="bool" setter="" getter="" default="false">
+			True if the lobby is locked [br][br]When a lobby is locked, other player's won't be able to join.
+		</member>
+		<member name="data" type="Dictionary" setter="" getter="" default="{}">
+			Custom data associated with the lobby [br][br]Note that all keys and values must be strings!
+		</member>
+	</members>
+</class>

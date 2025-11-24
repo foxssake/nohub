@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="NohubClient" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+		Nohub client implementation
+	</brief_description>
+	<description>
+		This class provides access to all the functionality implemented in nohub. This is done via a TCP connection. To use this client, establish a connection to the desired nohub server using [StreamPeerTCP], and instantiate the client. [br][br]Make sure to regularly poll the client using [method poll]. Otherwise, client calls will never return. [br][br]Every operation returns a [NohubResult]. If the operation is successful, the result object contains the data returned by nohub. Otherwise, the result will contain the error. This results in calls like this:
+[codeblock]
+var result := await nohub_client.list_lobbies()
+if result.is_success():
+    var lobbies := result.value()
+    # ...
+else:
+    push_error(result.error())
+[/codeblock]
+	</description>
+	<tutorials>
+		<link title="Getting started">https://foxssake.github.io/nohub/getting-started/using-nohub.html#with-godot</link>
+		<link title="Understanding nohub">https://foxssake.github.io/nohub/understanding-nohub/index.html</link>
+	</tutorials>
+	<methods>
+		<method name="_init">
+			<return type="void" />
+			<param index="0" name="connection" type="StreamPeerTCP" />
+			<description>
+				Construct a client using the specified [param connection]
+			</description>
+		</method>
+		<method name="poll">
+			<return type="void" />
+			<description>
+				Poll the client [br][br]This will poll the underlying connection and process any incoming commands.
+			</description>
+		</method>
+		<method name="set_game">
+			<return type="NohubResult" />
+			<param index="0" name="id" type="String" />
+			<description>
+				Specify the game ID used by this client [br][br]See [url=https://foxssake.github.io/nohub/understanding-nohub/concepts.html#games]Games[/url].
+			</description>
+		</method>
+		<method name="create_lobby">
+			<return type="NohubResult.Lobby" />
+			<param index="0" name="address" type="String" />
+			<param index="1" name="data" type="Dictionary" default="{}" />
+			<description>
+				Create a lobby
+			</description>
+		</method>
+		<method name="get_lobby">
+			<return type="NohubResult.Lobby" />
+			<param index="0" name="id" type="String" />
+			<param index="1" name="properties" type="String[]" default="[]" />
+			<description>
+				Query a lobby by ID [br][br]If [param properties] is specified, only the listed properties will be returned from the lobby's custom data.
+			</description>
+		</method>
+		<method name="list_lobbies">
+			<return type="NohubResult.LobbyList" />
+			<param index="0" name="properties" type="String[]" default="[]" />
+			<description>
+				List lobbies by ID [br][br]If [param properties] is specified, only the listed properties will be returned from the lobby's custom data.
+			</description>
+		</method>
+		<method name="delete_lobby">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Delete a lobby using its ID [br][br]Only the lobby's owner can delete the lobby.
+			</description>
+		</method>
+		<method name="join_lobby">
+			<return type="NohubResult.Address" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Join a lobby using its ID [br][br]The response will contain the lobby's address. This string can be used to connect.
+			</description>
+		</method>
+		<method name="lock_lobby">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Lock the lobby, preventing others from joining [br][br]Only the lobby's owner can lock the lobby.
+			</description>
+		</method>
+		<method name="unlock_lobby">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Unlock the lobby, allowing others to join [br][br]Only the lobby's owner can unlock the lobby. Lobbies are unlocked by default.
+			</description>
+		</method>
+		<method name="hide_lobby">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Hide lobby, making it invisible when listing lobbies [br][br]Only the lobby's owner can hide the lobby.
+			</description>
+		</method>
+		<method name="publish_lobby">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<description>
+				Pulbish lobby, making it visible when listing lobbies [br][br]Only the lobby's owner can hide the lobby. Lobbies are visible by default.
+			</description>
+		</method>
+		<method name="set_lobby_data">
+			<return type="NohubResult" />
+			<param index="0" name="lobby_id" type="String" />
+			<param index="1" name="data" type="Dictionary" />
+			<description>
+				Set the lobby's custom data [br][br]Note that this method updates the data, instead of adding to it. Only the lobby's owner can update the lobby's custom data.
+			</description>
+		</method>
+		<method name="whereami">
+			<return type="String" />
+			<description>
+				Return the client's address, as seen by the nohub server [br][br]This can be used to get the client's public IP address. Note that depending on its configuration, the server might not be able to return a useful address - e.g. when running from Docker using a bridge network.
+			</description>
+		</method>
+		<method name="_bool_request">
+			<return type="NohubResult" />
+			<param index="0" name="request" type="TrimsockCommand" />
+			<description>
+			</description>
+		</method>
+		<method name="_command_to_lobby">
+			<return type="NohubLobby" />
+			<param index="0" name="command" type="TrimsockCommand" />
+			<description>
+			</description>
+		</method>
+		<method name="_command_to_error">
+			<return type="NohubResult" />
+			<param index="0" name="command" type="TrimsockCommand" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="_connection" type="StreamPeerTCP" setter="" getter="">
+		</member>
+		<member name="_reactor" type="TrimsockTCPClientReactor" setter="" getter="">
+		</member>
+	</members>
+</class>

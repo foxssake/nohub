@@ -8,3 +8,4 @@ User guide
    managing-lobbies.rst
    finding-lobbies.rst
    joining-a-lobby.rst
+   gdscript-reference/index.rst
