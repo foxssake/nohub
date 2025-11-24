@@ -35,7 +35,7 @@ class ErrorData:
 
 ## Stores a [NohubLobby] on success
 ##
-## See [NohubResult] for details
+## See [NohubResult] for details.
 class Lobby extends NohubResult:
 	## Construct a successful result object with the given [param value]
 	static func of_value(value: NohubLobby) -> Lobby:
@@ -53,7 +53,7 @@ class Lobby extends NohubResult:
 
 ## Stores a list of [NohubLobby] instances on success
 ##
-## See [NohubResult] for details
+## See [NohubResult] for details.
 class LobbyList extends NohubResult:
 	## Construct a successful result object with the given [param value]
 	static func of_value(value: Array[NohubLobby]) -> LobbyList:
@@ -71,7 +71,7 @@ class LobbyList extends NohubResult:
 
 ## Stores an address string on success
 ##
-## See [NohubResult] for details
+## See [NohubResult] for details.
 class Address extends NohubResult:
 	## Construct a successful result object with the given [param value]
 	static func of_value(value: String) -> Address:

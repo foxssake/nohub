@@ -20,6 +20,8 @@ var is_visible: bool = true
 var is_locked: bool = false
 
 ## Custom data associated with the lobby
+## [br][br]
+## Note that all keys and values must be strings!
 var data: Dictionary = {}
 
 
