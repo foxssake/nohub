@@ -12,11 +12,12 @@ godot --headless --import .
 echo "::endgroup::"
 
 UNTRACKED_FILES="$(git ls-files --others --exclude-standard)"
-if [[ "$UNTRACKED_FILES" ]]; then
-  echo "::error::Missing UIDs detected!"
-  echo "$UNTRACKED_FILES"
-  exit 1
-else
+while read -r file; do
+  gdfile="${file::-4}"
+  echo "::error file=$gdfile::Missing UID"
+done < <(echo "$UNTRACKED_FILES")
+
+if [ -z "$UNTRACKED_FILES" ]; then
   echo "All UIDs are present!"
 fi
 
