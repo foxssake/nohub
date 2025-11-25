@@ -14,10 +14,12 @@ echo "::endgroup::"
 UNTRACKED_FILES="$(git ls-files --others --exclude-standard)"
 while read -r file; do
   gdfile="${file::-4}"
-  echo "::error file=$gdfile::Missing UID"
+  echo "::error file=$gdfile::Missing UID for $gdfile"
 done < <(echo "$UNTRACKED_FILES")
 
 if [ -z "$UNTRACKED_FILES" ]; then
   echo "All UIDs are present!"
+else
+  echo "::error::Missing UIDs found!"
+  exit 1
 fi
-
