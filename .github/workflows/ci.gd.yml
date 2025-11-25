@@ -1,0 +1,24 @@
+name: nohub.gd CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    paths: ["nohub.gd/**/*"]
+  workflow_dispatch:
+
+jobs:
+  uids:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.4.0
+          use-dotnet: false
+          include-templates: false
+      - name: Verify setup
+        run: godot --version
+      - name: Check UIDs
+        run: cd nohub.gd && sh/check-uids.sh
+
