@@ -10,6 +10,7 @@ import { MetricsModule } from "./metrics/metrics.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
+import { NohubReactor } from "./nohub.reactor";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -49,7 +50,7 @@ export class NohubModules {
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
-  private reactor?: BunSocketReactor<SessionData>;
+  private reactor?: NohubReactor<SessionData>;
 
   readonly modules: NohubModules;
 
@@ -63,7 +64,7 @@ export class Nohub {
     const reader = new TrimsockReader();
     reader.maxSize = this.config.tcp.commandBufferSize;
 
-    this.reactor = new BunSocketReactor<SessionData>(reader)
+    this.reactor = new NohubReactor<SessionData>(reader)
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
