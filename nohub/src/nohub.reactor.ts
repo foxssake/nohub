@@ -62,7 +62,7 @@ export class NohubReactor<SocketData = undefined> extends Reactor<
     const buffer = Buffer.from(data, "utf8");
     const written = target.write(buffer);
 
-    logger.trace({ socket: target.remoteAddress, data }, ">>> %s", data)
+    logger.trace({ socket: target.remoteAddress }, ">>> %s", data)
     if (written < buffer.length)
       logger.error({ socket: target.remoteAddress, data, written }, "Partial write!");
   }
@@ -76,6 +76,7 @@ export class NohubReactor<SocketData = undefined> extends Reactor<
       socket: {
         data: (socket, data) => {
           baseHandlers.data?.call(baseHandlers.data, socket, data);
+          logger.trace({ socket: socket.remoteAddress }, "<<< %s", data.toString("utf8"));
           this.ingest(data, socket);
         },
         open: (socket) => {
