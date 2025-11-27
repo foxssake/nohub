@@ -7,7 +7,7 @@
 - 🪄 Doesn't require writing a backend
 - ⚙️ Aims to do a single thing, and do it well - lobbies
 
-![Browser](docs/assets/browser.png)
+![Browser](docs/source/assets/browser.png)
 
 It runs on [bun], using the human-readable [Trimsock] protocol.
 
