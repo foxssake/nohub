@@ -21,13 +21,20 @@ It runs on [bun], using the human-readable [Trimsock] protocol.
 - Manage one or multiple games in a single *nohub* instance
 - Metrics via [Prometheus] - always be aware how your server is doing!
 
+## Documentation
+
+While this README provides instructions to get started, *nohub* has a dedicated
+site for documentation:
+
+[nohub guide](https://foxssake.github.io/nohub/index.html)
+
 ## Getting started
 
 ### Integrating nohub
 
 For Godot, we provide the [nohub.gd] addon.
 
-For other engines or languages, see the guide on custom integrations ( TODO ).
+For other engines or languages, see the guide on [custom integrations].
 
 ### Running nohub
 
@@ -41,7 +48,7 @@ for outside connections:
 
 ```sh
 docker run -p 9980:9980 -p 9981:9981 \
-           -e NOHUB_TCP_HOST=* NOHUB_METRICS_HOST=* \
+           -e NOHUB_TCP_HOST=* -e NOHUB_METRICS_HOST=* \
            ghcr.io/foxssake/nohub:main
 ```
 
@@ -94,6 +101,7 @@ Alternatively, join our [Discord server].
 [Trimsock]: https://github.com/foxssake/trimsock
 [Prometheus]: https://prometheus.io/
 [nohub.gd]: ./nohub.gd
+[custom integrations]: https://foxssake.github.io/nohub/getting-started/using-nohub.html#custom-integrations
 [*nohub* docker image]: https://github.com/foxssake/nohub/pkgs/container/nohub
 [submit an issue]: https://github.com/foxssake/nohub/issues
 [Discord server]: https://discord.gg/nKVFYdDg2y
