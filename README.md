@@ -21,7 +21,7 @@ It runs on [bun], using the human-readable [Trimsock] protocol.
 - Manage one or multiple games in a single *nohub* instance
 - Metrics via [Prometheus] - always be aware how your server is doing!
 
-## Documentation
+## Usage
 
 While this README provides instructions to get started, *nohub* has a dedicated
 site for documentation:
