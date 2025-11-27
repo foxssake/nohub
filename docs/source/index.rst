@@ -1,12 +1,15 @@
 nohub
 ===================
 
-*nohub* is a lobby manager for online games that is:
+*nohub* is a lobby manager for online games that:
 
-- Easy to host
-- Can be used with any engine or game
-- Doesn't require writing a backend
-- Focused - it manages lobbies, nothing more, nothing less
+- 🚀 Is easy to host
+- 🔮 Can be used with any engine or game
+- 🪄 Doesn't require writing a backend
+- ⚙️ Aims to do a single thing, and do it well - lobbies
+
+.. image:: /assets/browser.png
+   :alt: Lobby browser example
 
 .. toctree::
    :maxdepth: 2
