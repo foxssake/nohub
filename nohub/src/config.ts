@@ -5,14 +5,14 @@ type ConfigEnv = { [key: string]: string | undefined };
 export function readConfig(env: ConfigEnv) {
   return {
     tcp: {
-      host: env.NOHUB_TCP_HOST ?? "localhost",
+      host: env.NOHUB_TCP_HOST ?? "*",
       port: integer(env.NOHUB_TCP_PORT) ?? 9980,
       commandBufferSize: byteSize(env.NOHUB_TCP_COMMAND_BUFFER_SIZE) ?? 8192,
     },
 
     metrics: {
       enabled: bool(env.NOHUB_METRICS_ENABLED) ?? true,
-      host: env.NOHUB_METRICS_HOST ?? "localhost",
+      host: env.NOHUB_METRICS_HOST ?? "*",
       port: integer(env.NOHUB_METRICS_PORT) ?? 9981,
     },
 
@@ -33,7 +33,7 @@ export function readConfig(env: ConfigEnv) {
 
     lobbies: {
       idLength: integer(env.NOHUB_LOBBIES_ID_LENGTH) ?? 8,
-      enableGameless: bool(env.NOHUB_LOBBIES_WITHOUT_GAME) ?? false,
+      enableGameless: bool(env.NOHUB_LOBBIES_WITHOUT_GAME) ?? true,
       maxCount: integer(env.NOHUB_LOBBIES_MAX_COUNT) ?? 32768,
       maxPerSession: integer(env.NOHUB_LOBBIES_MAX_PER_SESSION) ?? 4,
       maxDataEntries: integer(env.NOHUB_LOBBIES_MAX_DATA_ENTRIES) ?? 128,
@@ -41,7 +41,7 @@ export function readConfig(env: ConfigEnv) {
 
     sessions: {
       idLength: integer(env.NOHUB_SESSIONS_ID_LENGTH) ?? 12,
-      arbitraryGameId: bool(env.NOHUB_SESSIONS_ARBITRARY_GAME_ID) ?? false,
+      arbitraryGameId: bool(env.NOHUB_SESSIONS_ARBITRARY_GAME_ID) ?? true,
       defaultGameId: env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
       maxCount: integer(env.NOHUB_SESSIONS_MAX_COUNT) ?? 262144,
       maxPerAddress: integer(env.NOHUB_SESSIONS_MAX_PER_ADDRESS) ?? 64,
