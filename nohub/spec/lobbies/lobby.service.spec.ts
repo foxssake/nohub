@@ -19,6 +19,8 @@ let lobbyService: LobbyService;
 describe("LobbyService", () => {
   beforeEach(() => {
     config = readDefaultConfig().lobbies;
+    config.enableGameless = false;
+
     lobbyRepository = new LobbyRepository();
     lobbyService = new LobbyService(
       lobbyRepository,

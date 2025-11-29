@@ -22,6 +22,7 @@ describe("SessionApi", () => {
     Sessions.insert(sessionRepository);
 
     config = readDefaultConfig().sessions;
+    config.arbitraryGameId = false;
 
     sessionApi = new SessionApi(
       sessionRepository,
