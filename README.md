@@ -5,9 +5,9 @@
 - 🚀 Is easy to host
 - 🔮 Can be used with any engine or game
 - 🪄 Doesn't require writing a backend
-- ⚙️ Aims to do a single thing, and do it well - lobbies
+- ⚙️ Focused and lightweight - manages lobbies, no fluff
 
-![Browser](docs/source/assets/browser.png)
+![Browser](docs/source/assets/forest-brawl.png)
 
 It runs on [bun], using the human-readable [Trimsock] protocol.
 
