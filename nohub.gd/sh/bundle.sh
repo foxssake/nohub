@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="$(./sh/version.sh)"
+VERSION="$(sh/version.sh)"
 BUILD_DIR="build"
 BUNDLE_NAME="nohub.gd.v$VERSION"
 BUNDLE_DIR="$BUILD_DIR/$BUNDLE_NAME"
