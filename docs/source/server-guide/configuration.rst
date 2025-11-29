@@ -16,7 +16,7 @@ TCP
       Set to ``*`` to listen on all available interfaces, or to ``0.0.0.0`` to
       only listen over IPv4.
 
-      Defaults to ``localhost``.
+      Defaults to ``*``.
 
   ``NOHUB_TCP_PORT``
       TCP port to listen on. This is the port where clients can connect and send
@@ -66,7 +66,7 @@ Metrics
       listen on for HTTP connections. Set to ``*`` to listen on all interfaces,
       or to ``0.0.0.0`` to only listen over IPv4.
 
-      Defaults to ``localhost``.
+      Defaults to ``*``.
 
   ``NOHUB_METRICS_PORT``
       Metrics are served over HTTP. This setting controls which port to listen on
@@ -90,7 +90,7 @@ Lobbies
   ``NOHUB_LOBBIES_WITHOUT_GAME``
       Set to true to enable lobbies that don't belong to any game.
 
-      Defaults to ``false``.
+      Defaults to ``true``.
 
   ``NOHUB_LOBBIES_MAX_COUNT``
       Maximum number of active lobbies allowed on this instance. 
@@ -135,7 +135,7 @@ Sessions
       enable clients to use any game, not just the ones configured in
       :term:`NOHUB_GAMES`.
 
-      Defaults to ``false``.
+      Defaults to ``true``.
 
   ``NOHUB_SESSIONS_DEFAULT_GAME_ID``
       Assign a game to each new session - this effectively means that nohub will
@@ -170,3 +170,5 @@ Logging
     Logging level.
 
     Known values are ``silent``, ``trace``, ``debug``, ``info``, ``warn``, ``error``, ``fatal``.
+
+    Defaults to ``info``.
