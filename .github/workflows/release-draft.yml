@@ -27,7 +27,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         name: ${{ steps.version.outputs.VERSION }}
-        files: 
-          - nohub.gd/build/*.zip
+        files: nohub.gd/build/*.zip
         draft: true
         prerelease: true
