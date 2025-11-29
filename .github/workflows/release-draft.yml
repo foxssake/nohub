@@ -29,7 +29,7 @@ jobs:
         sphinx-build docs/source _build
     - name: Bundle site
       run: |
-        cd _build && zip -r "nohub.docs.zip" "./*"
+        cd _build && zip -r "nohub.docs.zip" ./*
     - name: Delete draft release(s)
       uses: hugo19941994/delete-draft-releases@v1.0.0
       env:
