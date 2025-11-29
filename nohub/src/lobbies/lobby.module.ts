@@ -58,7 +58,7 @@ export class LobbyModule implements Module {
       .on("lobby/get", (cmd, xchg) => {
         requireRequest(cmd);
         const id = requireSingleParam(cmd, "Missing lobby ID!");
-        const properties = cmd.params?.slice(1);
+        const properties = (cmd.params?.length ?? 0) > 1 ? cmd.params?.slice(1) : undefined;
         const session = sessionOf(xchg);
 
         const lobby = this.lobbyApi.get(id, session, properties);
