@@ -17,6 +17,8 @@ jobs:
     - uses: oven-sh/setup-bun@v2
     - name: Install
       run:  cd nohub && bun install
+    - name: Bundle nohub
+      run: cd nohub && sh/bundle.sh
     - name: Bundle nohub.gd addon
       run: cd nohub.gd && sh/bundle.sh
     - name: Delete draft release(s)
@@ -27,6 +29,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         name: ${{ steps.version.outputs.VERSION }}
-        files: nohub.gd/build/*.zip
+        files: |
+          nohub.gd/build/*.zip
+          nohub/build/*.zip
         draft: true
         prerelease: true
