@@ -120,7 +120,7 @@ nohub
 ^^^^^
 
 With `trimsock`_ available, the only remaining part is implementing the
-commands for *nohub*. Refer to the Command reference (TODO).
+commands for *nohub*. Refer to the :doc:`/server-guide/commands`.
 
 
 .. _`trimsock`: https://github.com/foxssake/trimsock
