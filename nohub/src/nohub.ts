@@ -1,3 +1,4 @@
+import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command, TrimsockReader } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
@@ -9,7 +10,8 @@ import { MetricsModule } from "./metrics/metrics.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
-import { NohubReactor } from "./nohub.reactor";
+
+export type NohubReactor = BunSocketReactor<SessionData>;
 
 export class NohubModules {
   readonly eventBus: NohubEventBus;
@@ -47,7 +49,7 @@ export class NohubModules {
 
 export class Nohub {
   private socket?: Bun.TCPSocketListener<SessionData>;
-  private reactor?: NohubReactor<SessionData>;
+  private reactor?: BunSocketReactor<SessionData>;
 
   readonly modules: NohubModules;
 
@@ -58,13 +60,13 @@ export class Nohub {
   run() {
     rootLogger.info({ config: this.config }, "Starting with config");
 
-    const provideReader = () => {
+    const makeReader = () => {
       const reader = new TrimsockReader();
       reader.maxSize = this.config.tcp.commandBufferSize;
       return reader
     }
 
-    this.reactor = new NohubReactor<SessionData>(provideReader)
+    this.reactor = new BunSocketReactor<SessionData>(makeReader)
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
@@ -79,9 +81,11 @@ export class Nohub {
           Command.serialize(cmd),
         );
       })
-      .onIngestError((e, input) => rootLogger.error({ input: input.toString("utf8"), err: e }, "Received invalid input!", e))
       .onUnknown((cmd, _xchg) => {
         throw new UnknownCommandError(cmd);
+      })
+      .onIngestError((err) => {
+        rootLogger.error(err, "Received invalid command!")
       });
 
     const modules = this.modules.all;
@@ -115,6 +119,10 @@ export class Nohub {
             socket.flush();
             socket.end();
           }
+        },
+
+        error(socket, error) {
+          rootLogger.error({ error, socket: socket.remoteAddress }, "Socket error!")
         },
 
         close(socket) {
