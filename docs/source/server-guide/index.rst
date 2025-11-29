@@ -6,4 +6,5 @@ Server guide
 
    multiple-games.rst
    metrics.rst
+   commands.rst
    configuration.rst

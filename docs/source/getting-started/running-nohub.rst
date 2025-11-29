@@ -17,7 +17,7 @@ To run the *nohub* docker image, expose the necessary ports, and make sure
 .. code::
 
   docker run -p 9980:9980 -p 9981:9981 \
-             -e NOHUB_TCP_HOST=* NOHUB_METRICS_HOST=* \
+             -e NOHUB_TCP_HOST=* -e NOHUB_METRICS_HOST=* \
              ghcr.io/foxssake/nohub:main
 
 The above will:
