@@ -33,8 +33,9 @@ jobs:
         run: |
           sphinx-build docs/source _build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
+          name: 'site'
           path: '_build'
   deploy:
     environment:

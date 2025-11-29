@@ -1,0 +1,46 @@
+name: Release Draft
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release_draft:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - name: Install
+      run:  cd nohub && bun install
+    - name: Bundle nohub
+      run: cd nohub && sh/bundle.sh
+    - name: Bundle nohub.gd addon
+      run: cd nohub.gd && sh/bundle.sh
+    - name: Setup sphinx
+      run: |
+        pip install sphinx sphinx-breeze-theme sphinx-tabs sphinx-design
+    - name: Sphinx build
+      run: |
+        sphinx-build docs/source _build
+    - name: Bundle site
+      run: |
+        cd _build && zip -r "nohub.docs.zip" "./*"
+    - name: Delete draft release(s)
+      uses: hugo19941994/delete-draft-releases@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: ${{ steps.version.outputs.VERSION }}
+        files: |
+          nohub.gd/build/*.zip
+          nohub/build/*.zip
+          _build/*.zip
+        draft: true
+        prerelease: true
