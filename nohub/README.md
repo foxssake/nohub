@@ -1,6 +1,7 @@
-# nohub.gd
+# nohub
 
-Provides a client for [nohub], a lobby manager for online games that:
+This directory contains the implementation of [nohub], a lobby manager for
+online games that:
 
 - 🚀 Is easy to host
 - 🔮 Can be used with any engine or game
@@ -19,7 +20,7 @@ Alternatively, join our [Discord server].
 
 ## License
 
-*nohub.gd* is licensed under the [MIT License](LICENSE).
+*nohub* is licensed under the [MIT License](LICENSE).
 
 
 [nohub]: https://github.com/foxssake/nohub
