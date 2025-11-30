@@ -46,7 +46,7 @@ Example commands for Linux:
   bun install
 
   # Start nohub
-  NOHUB_TCP_HOST=* NOHUB_METRICS_HOST=* bun .
+  bun .
 
 
 .. _`bun`: https://bun.sh/

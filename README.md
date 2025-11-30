@@ -75,7 +75,7 @@ cd nohub/nohub
 bun install
 
 # Start nohub
-NOHUB_TCP_HOST=* NOHUB_METRICS_HOST=* bun .
+bun .
 ```
 
 ## Issues
