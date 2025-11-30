@@ -66,7 +66,10 @@ asks the player for a password if needed. If the player responds with the
 correct password, the validation layer replies with the lobby's address,
 allowing the player to connect.
 
-.. TODO: Consider building this as a core feature
+.. note::
+   This feature is considered in `#67`_
+
+.. _#67: https://github.com/foxssake/nohub/issues/67
 
 Matchmaking
 ^^^^^^^^^^^

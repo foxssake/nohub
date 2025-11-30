@@ -43,21 +43,14 @@ For other engines or languages, see the guide on [custom integrations].
 Docker images are regularly published from the `main` branch. See the [*nohub*
 docker image].
 
-To run using Docker, expose the necessary ports, and make sure *nohub* listens
-for outside connections:
+To run the *nohub* docker image, make sure to expose the necessary ports:
 
 ```sh
-docker run -p 9980:9980 -p 9981:9981 \
-           -e NOHUB_TCP_HOST=* -e NOHUB_METRICS_HOST=* \
-           ghcr.io/foxssake/nohub:main
+docker run -p 9980:9980 -p 9981:9981 ghcr.io/foxssake/nohub:main
 ```
 
-The above will:
-
-- publish port `9980` for the clients
-- publish port `9981` for metrics
-- configure *nohub* to listen on all available interfaces for clients
-- configure *nohub* to listen on all available interfaces for scraping metrics
+This exposes port `9980` for clients to connect on, and port `9981` to
+serve metrics.
 
 #### Using bun
 
