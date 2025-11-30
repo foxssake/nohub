@@ -68,6 +68,31 @@ circumvented easily.
 Specifically with Godot, this can be done with
 `SceneMultiplayer.auth_callback`_ and `SceneMultiplayer.send_auth()`_.
 
+.. note::
+   This feature is considered in `#67`_
+
 
 .. _SceneMultiplayer.auth_callback: https://docs.godotengine.org/en/stable/classes/class_scenemultiplayer.html#class-scenemultiplayer-property-auth-callback
 .. _SceneMultiplayer.send_auth(): https://docs.godotengine.org/en/stable/classes/class_scenemultiplayer.html#class-scenemultiplayer-method-send-auth
+.. _#67: https://github.com/foxssake/nohub/issues/67
+
+Quick play
+----------
+
+Instead of looking for lobbies manually, the player wants to join any suitable
+lobby. The game client should be able to find a lobby and join the game,
+without any user input.
+
+One approach is to flag quick play lobbies using the lobby's custom data. The
+game client can look for lobbies with the flag, and use a selection method
+suitable for the game - available slots, game mode, latency, etc. This approach
+is simple, but care needs to be taken to not show these quick play lobbies if
+the game also has a lobby browser.
+
+Another approach to supporting both quick play and lobby browsing is to reserve
+two game IDs. One ID for the quick play lobbies, and the other for lobbies that
+the player can browse. This way, quick play lobbies won't be visible from the
+lobby browser, since technically they belong to a different game. On the other
+hand, currently switching games is not possible for a session, so the game
+client would need to reconnect when switching between quick play and lobby
+browsing.
