@@ -60,10 +60,13 @@ export class Nohub {
   run() {
     rootLogger.info({ config: this.config }, "Starting with config");
 
-    const reader = new TrimsockReader();
-    reader.maxSize = this.config.tcp.commandBufferSize;
+    const makeReader = () => {
+      const reader = new TrimsockReader();
+      reader.maxSize = this.config.tcp.commandBufferSize;
+      return reader;
+    };
 
-    this.reactor = new BunSocketReactor<SessionData>(reader)
+    this.reactor = new BunSocketReactor<SessionData>(makeReader)
       .onError((cmd, exchange, error) => {
         if (error instanceof Error)
           exchange.failOrSend({
@@ -80,6 +83,9 @@ export class Nohub {
       })
       .onUnknown((cmd, _xchg) => {
         throw new UnknownCommandError(cmd);
+      })
+      .onIngestError((err) => {
+        rootLogger.error(err, "Received invalid command!");
       });
 
     const modules = this.modules.all;
@@ -113,6 +119,13 @@ export class Nohub {
             socket.flush();
             socket.end();
           }
+        },
+
+        error(socket, error) {
+          rootLogger.error(
+            { error, socket: socket.remoteAddress },
+            "Socket error!",
+          );
         },
 
         close(socket) {

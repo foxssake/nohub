@@ -1,7 +1,7 @@
 {
   "name": "@foxssake/nohub",
   "module": "index.ts",
-  "version": "0.16.4",
+  "version": "0.16.5",
   "type": "module",
   "scripts": {
     "dev": "bun --watch . | pino-pretty",
@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@biomejs/biome": "^2.2.5",
-    "@foxssake/trimsock-bun": "^0.17.0",
-    "@foxssake/trimsock-js": "^0.17.0",
+    "@foxssake/trimsock-bun": "^0.19.0",
+    "@foxssake/trimsock-js": "^0.19.0",
     "nanoid": "^5.1.6",
     "pino": "^9.13.1",
     "prom-client": "^15.1.3"
