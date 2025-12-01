@@ -40,12 +40,14 @@ var publish_icon := preload(\"res://resources/icons/publish.svg\") as Texture2D
 var list_interval: float = 2.0
 var time: float = 0.0
 
+
 var _connection: StreamPeerTCP = null
 var _client: NohubClient = null
 var _last_list: float = -1.
 var _lobbies_in_list: Array[NohubLobby] = []
 
 var _selected_lobby: NohubLobby = null
+var _lobby_list_columns = [\"ID\", \"Name\", \"Locked?\", \"Hidden?\", \"Data\"]
 
 func set_selected_lobby(lobby: NohubLobby) -> void:
 	_selected_lobby = lobby
@@ -75,7 +77,9 @@ func _ready():
 	disconnect_button.pressed.connect(_disconnect)
 	create_button.pressed.connect(_create_lobby)
 	set_game_id_button.pressed.connect(_set_game_id)
-	lobby_list.item_selected.connect(_select_lobby)
+	lobby_list.set_select_mode(ItemList.SELECT_MULTI)
+	lobby_list.multi_selected.connect(_select_lobby)
+	lobby_list.max_columns = _lobby_list_columns.size()
 
 	join_lobby_button.pressed.connect(_join_lobby)
 	lock_lobby_button.pressed.connect(_lock_lobby)
@@ -180,7 +184,7 @@ func _set_game_id() -> void:
 
 	_update_list()
 
-func _select_lobby(clicked_idx: int) -> void:
+func _select_lobby(clicked_idx: int, _selected: bool = true) -> void:
 	var row_idx := clicked_idx / lobby_list.max_columns - 1
 	if row_idx < 0:
 		# User clicked header row, do nothing
@@ -188,6 +192,10 @@ func _select_lobby(clicked_idx: int) -> void:
 
 	var lobby := _lobbies_in_list[row_idx]
 	set_selected_lobby(lobby)
+
+	# highlight the whole row using multiselect
+	for i in lobby_list.max_columns:
+		lobby_list.select(((row_idx + 1) * lobby_list.max_columns) + i, false)
 
 func _join_lobby() -> void:
 	if not _client: return
@@ -272,29 +280,28 @@ func _update_list() -> void:
 
 	# Add header
 	if lobby_list.item_count == 0:
-		lobby_list.add_item(\"ID\", null, false)
-		lobby_list.add_item(\"Name\", null, false)
-		lobby_list.add_item(\"Locked?\", null, false)
-		lobby_list.add_item(\"Hidden?\", null, false)
-		lobby_list.add_item(\"Data\", null, false)
+		for lobby_header in _lobby_list_columns:
+			lobby_list.add_item(lobby_header, null, false)
 
 	# Add lobbies
+	var prev_selected_lobby = get_selected_lobby()
+	set_selected_lobby(null)
 	for lobby in lobbies:
 		lobby_list.add_item(lobby.id)
 		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
 		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"Open\", lock_icon if lobby.is_locked else unlock_icon)
 		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\", hide_icon if not lobby.is_visible else publish_icon)
 		lobby_list.add_item(JSON.stringify(lobby.data))
+		_update_list_with_selected_lobby(lobby, prev_selected_lobby, lobby_list.item_count - 1)
 
 	_lobbies_in_list.assign(lobbies)
 
-	# Update selected lobby
-	if get_selected_lobby() != null:
-		var search_id := get_selected_lobby().id
-		set_selected_lobby(null)
-		for lobby in _lobbies_in_list:
-			if lobby.id == search_id:
-				set_selected_lobby(lobby)
+func _update_list_with_selected_lobby(lobby: NohubLobby, prev_selected: NohubLobby, lobby_list_index: int) -> void:
+	if prev_selected != null:
+		var search_id := prev_selected.id
+		if lobby.id == search_id:
+			set_selected_lobby(lobby)
+			_select_lobby(lobby_list_index)
 
 func _get_ip() -> String:
 	if not _client: return _get_ip_local()
@@ -402,7 +409,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 max_text_lines = 4
 auto_height = true
-max_columns = 5
 same_column_width = true
 fixed_column_width = 160
 fixed_icon_size = Vector2i(20, 20)
