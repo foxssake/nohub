@@ -10,6 +10,7 @@ import { MetricsModule } from "./metrics/metrics.module";
 import type { Module } from "./module";
 import type { SessionData } from "./sessions/session";
 import { SessionModule } from "./sessions/session.module";
+import { BroadcastModule } from "./broadcast/broadcast.module";
 
 export type NohubReactor = BunSocketReactor<SessionData>;
 
@@ -19,6 +20,7 @@ export class NohubModules {
   readonly gameModule: GameModule;
   readonly lobbyModule: LobbyModule;
   readonly sessionModule: SessionModule;
+  readonly broadcastModule: BroadcastModule;
 
   readonly all: Module[];
 
@@ -37,12 +39,14 @@ export class NohubModules {
       config.sessions,
       this.metricsModule.metricsHolder,
     );
+    this.broadcastModule = new BroadcastModule(this.sessionModule);
 
     this.all = [
       this.metricsModule,
       this.gameModule,
       this.lobbyModule,
       this.sessionModule,
+      this.broadcastModule
     ];
   }
 }
