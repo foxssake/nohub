@@ -55,6 +55,7 @@ export class SessionApi {
       id: this.generateSessionId(),
       gameId: this.config.defaultGameId,
       address,
+      socket
     };
 
     this.sessionRepository.add(session);
