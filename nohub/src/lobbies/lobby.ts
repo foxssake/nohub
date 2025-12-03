@@ -1,6 +1,6 @@
 import type { CommandSpec } from "@foxssake/trimsock-js";
 import { LockedError, UnauthorizedError } from "@src/errors";
-import type { SessionData } from "@src/sessions/session";
+import type { SessionData, SessionId } from "@src/sessions/session";
 
 export interface Lobby {
   id: string;
@@ -10,6 +10,7 @@ export interface Lobby {
   isVisible: boolean;
   isLocked: boolean;
   data: Map<string, string>;
+  participants: SessionId[];
 }
 
 export function requireLobbyModifiableIn(
@@ -27,7 +28,7 @@ export function requireLobbyModifiableIn(
 export function requireLobbyJoinable(lobby: Lobby, session: SessionData) {
   if (lobby.isLocked)
     throw new LockedError(`Can't join locked lobby#${lobby.id}!`);
-  if (lobby.owner === session.id)
+  if (lobby.owner === session.id || lobby.participants.includes(session.id))
     throw new LockedError("Can't join your own lobby - you're already there!");
 }
 
@@ -57,6 +58,7 @@ export function commandToLobby(command: CommandSpec): Lobby {
     gameId: "",
     address: "",
     owner: "",
+    participants: [],
   };
 }
 
