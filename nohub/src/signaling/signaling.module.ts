@@ -11,15 +11,12 @@ import { requireSingleParam } from "@src/validators";
 // into custom modules and classes
 
 export class SignalingModule implements Module {
-    private readonly broadcastService: BroadcastService;
+  private readonly broadcastService: BroadcastService;
   private readonly lobbyRepository: LobbyRepository;
 
-  constructor(
-    lobbyModule: LobbyModule,
-    broadcastModule: BroadcastModule
-  ) {
-    this.broadcastService = broadcastModule.broadcastService
-    this.lobbyRepository = lobbyModule.lobbyRepository
+  constructor(lobbyModule: LobbyModule, broadcastModule: BroadcastModule) {
+    this.broadcastService = broadcastModule.broadcastService;
+    this.lobbyRepository = lobbyModule.lobbyRepository;
   }
 
   configure(reactor: NohubReactor) {
@@ -29,7 +26,10 @@ export class SignalingModule implements Module {
       const session = sessionOf(xchg);
       const lobby = this.lobbyRepository.requireInGame(lobbyId, session.gameId);
 
-      this.broadcastService.broadcast(lobby, { name: "signaling/greet", text: "Hi!" })
-    })
+      this.broadcastService.broadcast(lobby, {
+        name: "signaling/greet",
+        text: "Hi!",
+      });
+    });
   }
 }
