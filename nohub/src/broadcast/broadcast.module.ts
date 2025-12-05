@@ -9,7 +9,7 @@ export class BroadcastModule implements Module {
 
   constructor(sessionModule: SessionModule) {
     this.broadcastService = new BroadcastService(
-      this.provideReactor,
+      () => this.provideReactor(),
       sessionModule.sessionRepository,
     );
   }
