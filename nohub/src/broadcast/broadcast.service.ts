@@ -15,9 +15,10 @@ export class BroadcastService {
     private sessionRepository: SessionRepository,
   ) {}
 
-  unicast(session: SessionData, command: CommandSpec): Exchange<SessionSocket> {
-    if (!session.socket)
-      throw new DataNotFoundError(`No connection to session#${session.id}!`); // TODO: Probably a more specific exception
+  unicast(sessionId: string, command: CommandSpec): Exchange<SessionSocket> {
+    const session = this.sessionRepository.find(sessionId);
+    if (!session?.socket)
+      throw new DataNotFoundError(`No connection to session#${session?.id}!`); // TODO: Probably a more specific exception
 
     return this.reactor().send(session.socket, command);
   }
@@ -32,7 +33,7 @@ export class BroadcastService {
       const session = this.sessionRepository.find(sessionId);
       if (!session) continue; // Shouldn't happen, unless lobby participants are not cleared up on client disconnect
 
-      result.set(sessionId, this.unicast(session, command));
+      result.set(sessionId, this.unicast(sessionId, command));
     }
 
     return result;
