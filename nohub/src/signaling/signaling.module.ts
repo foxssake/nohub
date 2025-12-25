@@ -52,7 +52,7 @@ export class SignalingModule implements Module {
         payload.set("lobbyId", lobbyId);
         payload.set("players", lobby.participants.join(", "));
 
-        // Sends to all lobby participants, they will begin connections with each id.
+        // Sends to all lobby participants, they will begin WebRTC connections with each peer by sessionId.
         this.broadcastService.broadcast(lobby, {
           name: "signal/start",
           kvParams: [...payload.entries()],
@@ -60,22 +60,21 @@ export class SignalingModule implements Module {
 
         this.logger.info({ lobbyId }, "Starting lobby #%s", lobbyId);
 
-        // TODO: This confirms back to leader we started, but what about tracking all inprogress xchanges kicked off?
+        // Reply back to lobby host that we started.
+        // TODO: Are we able to listen for the results each one of the broadcasts?
         xchg.reply({ text: lobby.participants.join(",") });
       })
       .on("signal/offer", (cmd, xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
+
         this.broadcastService.unicast(sessionId, {
           name: "signal/get/offer",
           kvMap: cmd.kvMap,
         });
 
-        // TODO: xchang reply to garuntee connections? Currently these just blast off, no await either side.
-        // But this process is really a handshake event. Could also throw errors for example: to indicate we need TURN.
-        // TODO: Handle fail cases: Somone drops
-        // TODO: Start some promises await all some how before sending the reply.
-
-        // xchg.reply??
+        // TODO: Sending an offer and getting one back could be something we could use the xchg for
+        // TODO: Handle errors at each step, for example: If STUN is not enough, indicate we need TURN.
+        // xchg.reply
       })
       .on("signal/answer", (cmd, xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
