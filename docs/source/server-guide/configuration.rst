@@ -30,6 +30,35 @@ TCP
       Recognizes simple numbers ( ``1024`` ), or human-readable sizes ( ``100b``,
       ``1kb``, etc. ).
 
+WebSocket
+---------
+
+.. glossary::
+
+  ``NOHUB_WEBSOCKET_ENABLED``
+      Enable or disable the WebSocket proxy service. The WebSocket proxy allows
+      web-based clients (like Godot web exports) to connect to nohub.
+
+      Defaults to ``true``.
+
+  ``NOHUB_WEBSOCKET_HOST``
+      WebSocket host to listen on. Set to ``*`` to listen on all available
+      interfaces, or to ``0.0.0.0`` to only listen over IPv4.
+
+      Defaults to ``*``.
+
+  ``NOHUB_WEBSOCKET_PORT``
+      WebSocket port to listen on. This is where WebSocket clients can connect
+      to access nohub functionality.
+
+      Defaults to ``9982``.
+
+  ``NOHUB_WEBSOCKET_PATH``
+      WebSocket endpoint path. Clients should connect to this path on the
+      WebSocket server.
+
+      Defaults to ``/ws``.
+
 Games
 -----
 

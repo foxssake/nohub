@@ -10,6 +10,13 @@ export function readConfig(env: ConfigEnv) {
       commandBufferSize: byteSize(env.NOHUB_TCP_COMMAND_BUFFER_SIZE) ?? 8192,
     },
 
+    websocket: {
+      enabled: bool(env.NOHUB_WEBSOCKET_ENABLED) ?? true,
+      host: env.NOHUB_WEBSOCKET_HOST ?? "*",
+      port: integer(env.NOHUB_WEBSOCKET_PORT) ?? 9982,
+      path: env.NOHUB_WEBSOCKET_PATH ?? "/ws",
+    },
+
     metrics: {
       enabled: bool(env.NOHUB_METRICS_ENABLED) ?? true,
       host: env.NOHUB_METRICS_HOST ?? "*",
@@ -55,6 +62,7 @@ export function readDefaultConfig() {
 
 export type AppConfig = ReturnType<typeof readConfig>;
 export type TcpConfig = AppConfig["tcp"];
+export type WebSocketConfig = AppConfig["websocket"];
 export type MetricsConfig = AppConfig["metrics"];
 export type GamesConfig = AppConfig["games"];
 export type LobbiesConfig = AppConfig["lobbies"];
