@@ -65,6 +65,7 @@ export class LobbyService {
       isVisible: true,
       isLocked: false,
       data,
+      participants: [session.id],
     };
 
     this.repository.add(lobby);
@@ -87,6 +88,10 @@ export class LobbyService {
 
   join(lobby: Lobby, session: SessionData): string {
     requireLobbyJoinable(lobby, session);
+    lobby.participants.push(session.id);
+    this.repository.update(lobby);
+    // TODO: Leave command
+    // TODO: Listen to session close event to remove session from lobbies
     return lobby.address;
   }
 

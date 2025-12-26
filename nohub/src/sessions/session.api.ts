@@ -1,3 +1,5 @@
+// import { nanoid } from "nanoid";
+import * as crypto from "node:crypto";
 import type { Exchange } from "@foxssake/trimsock-js";
 import type { SessionsConfig } from "@src/config";
 import { LimitError, LockedError } from "@src/errors";
@@ -7,7 +9,6 @@ import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";
 import { emptyMetrics, type MetricsHolder } from "@src/metrics/metrics";
 import type { Socket } from "bun";
-import { nanoid } from "nanoid";
 import type { SessionData } from "./session";
 import type { SessionRepository } from "./session.repository";
 
@@ -23,8 +24,12 @@ export class SessionApi {
     private metrics: MetricsHolder = emptyMetrics,
   ) {}
 
+  // generateSessionId(): string {
+  //   return nanoid(this.config.idLength);
+  // }
+
   generateSessionId(): string {
-    return nanoid(this.config.idLength);
+    return Math.abs(new Int32Array(crypto.randomBytes(4).buffer)[0]).toString();
   }
 
   openSession(socket: Socket<SessionData>): void {
@@ -55,6 +60,7 @@ export class SessionApi {
       id: this.generateSessionId(),
       gameId: this.config.defaultGameId,
       address,
+      socket,
     };
 
     this.sessionRepository.add(session);

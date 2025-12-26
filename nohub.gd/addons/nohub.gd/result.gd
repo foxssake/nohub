@@ -69,6 +69,24 @@ class LobbyList extends NohubResult:
 		else:
 			return []
 
+## Stores a LobbyMessage on success
+##
+## See [NohubResult] for details.
+class LobbyMessage extends NohubResult:
+	## Construct a successful result object with the given [param value]
+	static func of_value(value: String) -> LobbyMessage:
+		var result := LobbyMessage.new()
+		result._is_success = true
+		result._value = value
+		return result
+
+	## Get the resulting string
+	func value() -> String:
+		if _is_success:
+			return _value as String
+		else:
+			return ""
+
 ## Stores an address string on success
 ##
 ## See [NohubResult] for details.
