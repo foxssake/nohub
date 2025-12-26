@@ -33,13 +33,13 @@ Establishing a connection
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Connect to the desired *nohub* server over TCP using `StreamPeerTCP`_. Once the
-connection has finished, create a ``NohubClient`` instance with the connection:
+connection has finished, create a ``NohubTCPClient`` instance with the connection:
 
 .. highlight:: gdscript
 .. code::
 
   var connection: StreamPeerTCP
-  var client: NohubClient
+  var client: NohubTCPClient
 
   func _ready():
     # Use public instance
@@ -62,7 +62,7 @@ connection has finished, create a ``NohubClient`` instance with the connection:
       push_error("Failed to establish connection to nohub at %s:%d - status: %d" % [host, port, connection.get_status()])
       return
 
-    client = NohubClient.new(connection)
+    client = NohubTCPClient.new(connection)
     print("Successfully connected to nohub at %s:%d!" % [host, port])
 
 
@@ -72,7 +72,7 @@ Creating a lobby
 ^^^^^^^^^^^^^^^^
 
 With the client instantiated, all of the supported commands are accessible.
-Let's see how to create a lobby using the ``NohubClient.create_lobby()``
+Let's see how to create a lobby using the ``NohubTCPClient.create_lobby()``
 method:
 
 .. highlight:: gdscript

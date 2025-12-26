@@ -42,7 +42,7 @@ var time: float = 0.0
 
 
 var _connection: StreamPeerTCP = null
-var _client: NohubClient = null
+var _client: NohubTCPClient = null
 var _last_list: float = -1.
 var _lobbies_in_list: Array[NohubLobby] = []
 
@@ -134,7 +134,7 @@ func _connect() -> void:
 		popup(\"Couldn't connect to nohub at %s:%d - %s\" % [host, port, error_string(err)])
 		return
 
-	_client = NohubClient.new(_connection)
+	_client = NohubTCPClient.new(_connection)
 
 func _disconnect() -> void:
 	if _connection == null:
