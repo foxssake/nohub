@@ -1,3 +1,5 @@
+// import { nanoid } from "nanoid";
+import * as crypto from "node:crypto";
 import type { Exchange } from "@foxssake/trimsock-js";
 import type { SessionsConfig } from "@src/config";
 import { LimitError, LockedError } from "@src/errors";
@@ -7,8 +9,6 @@ import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";
 import { emptyMetrics, type MetricsHolder } from "@src/metrics/metrics";
 import type { Socket } from "bun";
-// import { nanoid } from "nanoid";
-import * as crypto from "crypto";
 import type { SessionData } from "./session";
 import type { SessionRepository } from "./session.repository";
 

@@ -1,8 +1,8 @@
-import { rootLogger } from "@src/logger";
 import type { BroadcastModule } from "@src/broadcast/broadcast.module";
 import type { BroadcastService } from "@src/broadcast/broadcast.service";
 import type { LobbyModule } from "@src/lobbies/lobby.module";
 import type { LobbyRepository } from "@src/lobbies/lobby.repository";
+import { rootLogger } from "@src/logger";
 import type { Module } from "@src/module";
 import type { NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
@@ -49,7 +49,7 @@ export class SignalingModule implements Module {
         // TODO: Are we able to listen for the results each one of the broadcasts?
         xchg.reply({ text: lobby.participants.join(",") });
       })
-      .on("webrtc/offer", (cmd, xchg) => {
+      .on("webrtc/offer", (cmd, _xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
 
         this.broadcastService.unicast(sessionId, {
@@ -62,14 +62,14 @@ export class SignalingModule implements Module {
         // TODO: Handle errors, for example: if STUN is not enough, indicate we need TURN.
         // xchg.reply
       })
-      .on("webrtc/answer", (cmd, xchg) => {
+      .on("webrtc/answer", (cmd, _xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
         this.broadcastService.unicast(sessionId, {
           name: "webrtc/get/answer",
           kvMap: cmd.kvMap,
         });
       })
-      .on("webrtc/candidate", (cmd, xchg) => {
+      .on("webrtc/candidate", (cmd, _xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
         this.logger.info(
           { sessionId },

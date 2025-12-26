@@ -2,11 +2,7 @@ import type { CommandSpec, Exchange } from "@foxssake/trimsock-js";
 import { DataNotFoundError } from "@src/errors";
 import type { Lobby } from "@src/lobbies/lobby";
 import type { NohubReactor } from "@src/nohub";
-import type {
-  SessionData,
-  SessionId,
-  SessionSocket,
-} from "@src/sessions/session";
+import type { SessionId, SessionSocket } from "@src/sessions/session";
 import type { SessionRepository } from "@src/sessions/session.repository";
 
 export class BroadcastService {
