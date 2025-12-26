@@ -1,0 +1,703 @@
+[gd_scene load_steps=10 format=3 uid="uid://4n0eqw25becg"]
+
+[ext_resource type="Texture2D" uid="uid://j2fymrfv4c3r" path="res://resources/icons/lock.svg" id="1_47dd4"]
+[ext_resource type="Texture2D" uid="uid://clqecwtwyaubp" path="res://resources/icons/join.svg" id="1_avfqc"]
+[ext_resource type="Texture2D" uid="uid://6a7vvotwb3rt" path="res://resources/icons/delete.svg" id="1_c5nld"]
+[ext_resource type="Texture2D" uid="uid://bdrspgruqn4ft" path="res://resources/icons/hide.svg" id="1_s7umg"]
+
+[sub_resource type="GDScript" id="GDScript_xkt7l"]
+script/source = "extends Control
+
+@onready var host_input: LineEdit = %\"Host Input\"
+@onready var connect_button: Button = %\"Connect Button\"
+@onready var disconnect_button: Button = %\"Disconnect Button\"
+@onready var status_label: Label = %\"Status Label\"
+
+@onready var game_id_input: LineEdit = %\"Game ID Input\"
+@onready var set_game_id_button: Button = %\"Set Game ID Button\"
+
+@onready var lobby_list: ItemList = %\"Lobby List\"
+
+@onready var create_name_input: LineEdit = %\"Lobby Name Input\"
+@onready var create_button: Button = %\"Create Lobby Button\"
+@onready var address_label: Label = %\"Address Label\"
+@onready var selected_lobby_label: Label = %\"Selected Lobby Label\"
+
+@onready var lock_lobby_button: Button = %\"Lock Lobby Button\"
+@onready var hide_lobby_button: Button = %\"Hide Lobby Button\"
+@onready var join_lobby_button: Button = %\"Join Lobby Button\"
+@onready var delete_lobby_button: Button = %\"Delete Lobby Button\"
+@onready var leave_lobby_button: Button = %\"Leave Lobby Button\"
+@onready var start_lobby_button: Button = %\"Start Lobby Button\"
+
+@onready var modal: Popup = %Modal
+@onready var modal_message_label: Label = %\"Message Label\"
+@onready var modal_confirm_button: Button = %\"Confirm Button\"
+
+var lock_icon := preload(\"res://resources/icons/lock.svg\") as Texture2D
+var unlock_icon := preload(\"res://resources/icons/unlock.svg\") as Texture2D
+var hide_icon := preload(\"res://resources/icons/hide.svg\") as Texture2D
+var publish_icon := preload(\"res://resources/icons/publish.svg\") as Texture2D
+
+var list_interval: float = 2.0
+var time: float = 0.0
+
+
+var _connection: StreamPeerTCP = null
+var _client: NohubClient = null
+var _last_list: float = -1.
+var _lobbies_in_list: Array[NohubLobby] = []
+
+var _selected_lobby: NohubLobby = null
+var _lobby_list_columns = [\"ID\", \"Name\", \"Locked?\", \"Hidden?\", \"Data\"]
+
+func set_selected_lobby(lobby: NohubLobby) -> void:
+	_selected_lobby = lobby
+	if is_instance_valid(lobby):
+		selected_lobby_label.text = lobby.id
+		lock_lobby_button.text = \"Unlock\" if lobby.is_locked else \"Lock\"
+		lock_lobby_button.icon = unlock_icon if lobby.is_locked else lock_icon
+
+		hide_lobby_button.text = \"Hide\" if lobby.is_visible else \"Publish\"
+		hide_lobby_button.icon = hide_icon if lobby.is_visible else publish_icon
+	else:
+		selected_lobby_label.text = \"\"
+		lock_lobby_button.text = \"Lock\"
+		lock_lobby_button.icon = lock_icon
+		hide_lobby_button.text = \"Hide\"
+		hide_lobby_button.icon = hide_icon
+
+func get_selected_lobby() -> NohubLobby:
+	return _selected_lobby
+
+func popup(text: String) -> void:
+	modal_message_label.text = text
+	modal.show()
+
+func _ready():
+	connect_button.pressed.connect(_connect)
+	disconnect_button.pressed.connect(_disconnect)
+	create_button.pressed.connect(_create_lobby)
+	set_game_id_button.pressed.connect(_set_game_id)
+	lobby_list.set_select_mode(ItemList.SELECT_MULTI)
+	lobby_list.multi_selected.connect(_select_lobby)
+	lobby_list.max_columns = _lobby_list_columns.size()
+
+	join_lobby_button.pressed.connect(_join_lobby)
+	lock_lobby_button.pressed.connect(_lock_lobby)
+	hide_lobby_button.pressed.connect(_hide_lobby)
+	delete_lobby_button.pressed.connect(_delete_lobby)
+	leave_lobby_button.pressed.connect(_leave_lobby)
+	start_lobby_button.pressed.connect(_start_lobby)
+	
+	modal_confirm_button.pressed.connect(func():
+		modal.hide()
+	)
+
+func _process(dt: float) -> void:
+	time += dt
+	status_label.text = \"None\"
+
+	if _connection != null:
+		match _connection.get_status():
+			StreamPeerTCP.STATUS_NONE: status_label.text = \"None\"
+			StreamPeerTCP.STATUS_CONNECTING: status_label.text = \"Connecting...\"
+			StreamPeerTCP.STATUS_CONNECTED: status_label.text = \"Connected\"
+			StreamPeerTCP.STATUS_ERROR: status_label.text = \"Error\"
+		
+		if _connection.get_status() == StreamPeerTCP.STATUS_CONNECTED and address_label.text == \"\":
+			# Get IP
+			address_label.text = \"...\"
+			var ip := await _get_ip()
+			address_label.text = ip
+		
+		_connection.poll()
+
+	if _client != null:
+		_client.poll()
+
+		if time >= _last_list + list_interval:
+			_update_list()
+			_last_list = time
+			
+		if ws_peer_id == null:
+			_get_session_id()
+
+func _connect() -> void:
+	var input := host_input.text
+	var host := input
+	var port := 9980
+
+	if input.contains(\":\"):
+		var at := input.rfind(\":\")
+		host = input.substr(0, at)
+		port = int(input.substr(at + 1))
+
+	print(\"Connecting to nohub at %s:%d\" % [host, port])
+
+	_connection = StreamPeerTCP.new()
+	var err := _connection.connect_to_host(host, port)
+	if err != OK:
+		popup(\"Couldn't connect to nohub at %s:%d - %s\" % [host, port, error_string(err)])
+		return
+
+	_client = NohubClient.new(_connection)
+
+func _disconnect() -> void:
+	if _connection == null:
+		return
+
+	print(\"Disconnecting from host\")
+	_connection.disconnect_from_host()
+	_connection = null
+	_client = null
+
+	lobby_list.clear()
+	_lobbies_in_list.clear()
+	address_label.text = \"\"
+
+func _create_lobby() -> void:
+	if not _client: return
+
+	var name_text := create_name_input.text
+	var lobby_response := await _client.create_lobby(\"enet://\" + address_label.text, { \"name\": name_text })
+	if not lobby_response.is_success():
+		popup(\"Failed to create lobby!\\n%s\" % [lobby_response])
+		return
+
+	var lobby := lobby_response.value()
+	print(\"Created lobby: %s\" % lobby)
+
+	# We could have submitted data at create, this is to excercise the `set_data()` call
+	var data := lobby.data.duplicate()
+	data.merge({ \"created-at\": Time.get_datetime_string_from_system() })
+	var set_response := await _client.set_lobby_data(lobby.id, data)
+	if not set_response.is_success():
+		print(\"Failed to set lobby data: %s\" % [set_response])
+
+	create_name_input.text = \"\"
+	_update_list()
+
+func _set_game_id() -> void:
+	if not _client: return
+
+	var game_id := game_id_input.text
+	var response := await _client.set_game(game_id)
+	
+	if not response.is_success():
+		popup(\"Failed to set game ID to %s!\\n%s\" % [game_id, response])
+	else:
+		print(\"Game ID set to %s\" % [game_id])
+
+	_update_list()
+
+func _select_lobby(clicked_idx: int, _selected: bool = true) -> void:
+	@warning_ignore(\"integer_division\")
+	var row_idx := clicked_idx / lobby_list.max_columns - 1
+	if row_idx < 0:
+		# User clicked header row, do nothing
+		return
+
+	var lobby := _lobbies_in_list[row_idx]
+	set_selected_lobby(lobby)
+
+	# highlight the whole row using multiselect
+	for i in lobby_list.max_columns:
+		lobby_list.select(((row_idx + 1) * lobby_list.max_columns) + i, false)
+
+func _join_lobby() -> void:
+	if not _client: return
+
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response := await _client.join_lobby(lobby.id)
+	if not response.is_success():
+		popup(\"Failed to join lobby #%s!\\n%s\" % [lobby.id, response])
+		return
+
+	var address := response.value()
+	popup(\"Lobby address: %s\" % [address])
+
+func _lock_lobby():
+	if not _client: return
+
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response: NohubResult
+	if lobby.is_locked:
+		response = await _client.unlock_lobby(lobby.id)
+	else:
+		response = await _client.lock_lobby(lobby.id)
+
+	if not response.is_success():
+		popup(\"Failed to %s lobby!\\n%s\" % [\"unlock\" if lobby.is_locked else \"lock\", response])
+	else:
+		_update_list()
+
+func _hide_lobby():
+	if not _client: return
+
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response: NohubResult
+	if lobby.is_visible:
+		response = await _client.hide_lobby(lobby.id)
+	else:
+		response = await _client.publish_lobby(lobby.id)
+
+	if not response.is_success():
+		popup(\"Failed to %s lobby!\\n%s\" % [\"hide\" if lobby.is_visible else \"publish\", response])
+	else:
+		_update_list()
+
+func _delete_lobby():
+	if not _client: return
+
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response := await _client.delete_lobby(lobby.id)
+	if not response.is_success():
+		popup(\"Failed to delete lobby #%s!\\n%s\" % [lobby.id, response])
+	else:
+		_update_list()
+
+func _update_list() -> void:
+	if _client == null: return
+
+	var response := await _client.list_lobbies()
+	if not response.is_success():
+		push_warning(\"Failed to update lobby list! %s\" % [response])
+		return
+
+	var lobbies := response.value()
+	print(\"Received lobbies: %s\" % [lobbies])
+
+	lobby_list.clear()
+
+	# Add header
+	if lobby_list.item_count == 0:
+		for lobby_header in _lobby_list_columns:
+			lobby_list.add_item(lobby_header, null, false)
+
+	# Add lobbies
+	var prev_selected_lobby = get_selected_lobby()
+	set_selected_lobby(null)
+	for lobby in lobbies:
+		lobby_list.add_item(lobby.id)
+		lobby_list.add_item(lobby.data.get(\"name\", \"\"))
+		lobby_list.add_item(\"Locked\" if lobby.is_locked else \"Open\", lock_icon if lobby.is_locked else unlock_icon)
+		lobby_list.add_item(\"Hidden\" if not lobby.is_visible else \"Public\", hide_icon if not lobby.is_visible else publish_icon)
+		lobby_list.add_item(JSON.stringify(lobby.data))
+		_update_list_with_selected_lobby(lobby, prev_selected_lobby, lobby_list.item_count - 1)
+
+	_lobbies_in_list.assign(lobbies)
+
+func _update_list_with_selected_lobby(lobby: NohubLobby, prev_selected: NohubLobby, lobby_list_index: int) -> void:
+	if prev_selected != null:
+		var search_id := prev_selected.id
+		if lobby.id == search_id:
+			set_selected_lobby(lobby)
+			_select_lobby(lobby_list_index)
+
+func _get_ip() -> String:
+	if not _client: return _get_ip_local()
+
+	var ip := await _client.whereami()
+	if not ip: ip = _get_ip_local()
+
+	return ip
+
+func _get_ip_local() -> String:
+	return IP.get_local_addresses()[0]
+
+#region WebRTCMultiplayerPeer
+
+var web_rtc_peer: WebRTCMultiplayerPeer
+var ws_peer_id = null
+var turn_server_enabled = false
+
+# Patterned [stun:URI, turn:URI], for default to free unlimited STUN
+var STUN_TURN_SERVER_URLS = ['stun:stun.cloudflare.com']
+# This will be overwritten by a SetIceServer event from server if turn is set up in Cloudflare
+var ICE_SERVERS = null
+
+func _get_session_id() -> void:
+	if not _client: return
+
+	var session_id := await _client.get_session()
+	if not session_id: 
+		push_error('Error: No session')
+
+	ws_peer_id = session_id
+	_client.signal_webrtc_create_new_peer_connection.connect(_network_create_new_peer_connection)
+	_client.signal_webrtc_message.connect(_network_process_signal)
+	start_web_rtc(session_id)
+
+func start_web_rtc(id: String):
+	web_rtc_peer = WebRTCMultiplayerPeer.new()
+	web_rtc_peer.create_mesh(int(id))
+	multiplayer.multiplayer_peer = web_rtc_peer
+	prints('HECK:', id)
+	
+	multiplayer.peer_connected.connect(func(id): print(\"Add player: \", id))
+	multiplayer.peer_disconnected.connect(func(id): print(\"Remove player: \", id))
+
+func _start_lobby():
+	if not _client: return
+	
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response := await _client.start_lobby(lobby.id)
+	if not response.is_success():
+		popup(\"Failed to start lobby #%s!\\n%s\" % [lobby.id, response])
+	else:
+		var peer_list := response.value()
+		# CRITICAL: Blocking: this only triggers for the session owner, so they get the list...
+		popup('Staring with players: ' + peer_list)
+		await get_tree().create_timer(1.0).timeout
+		%Modal.hide()
+		_update_list()
+
+func _leave_lobby() -> void:
+	if not _client: return
+
+	var lobby := get_selected_lobby()
+	if not is_instance_valid(lobby):
+		# No lobby selected!
+		return
+
+	var response := await _client.leave_lobby(lobby.id)
+	if not response.is_success():
+		popup(\"Failed to leave lobby #%s!\\n%s\" % [lobby.id, response])
+		return
+
+	var address := response.value()
+	popup(\"Lobby address: %s\" % [address])
+
+func _network_create_new_peer_connection(id: int):
+	if id != int(ws_peer_id):
+		var new_peer_connection: WebRTCPeerConnection = WebRTCPeerConnection.new()
+		
+		# If the SetIceServers event didn't occur, we might need to use the default
+		if ICE_SERVERS == null: 
+			ICE_SERVERS = {\"iceServers\": [ {\"urls\": STUN_TURN_SERVER_URLS}]}
+		
+		new_peer_connection.initialize(ICE_SERVERS)
+		print(\"binding id \" + str(id) + \" my id is \" + str(ws_peer_id))
+
+		new_peer_connection.session_description_created.connect(self._offerCreated.bind(id))
+		new_peer_connection.ice_candidate_created.connect(self._iceCandidateCreated.bind(id))
+		web_rtc_peer.add_peer(new_peer_connection, id)
+		if id < web_rtc_peer.get_unique_id():
+			new_peer_connection.create_offer()
+
+func _network_process_signal(type: NohubClient.WEBRTC_ACTION, message: TrimsockCommand):
+	match type:
+		NohubClient.WEBRTC_ACTION.Offer:
+			web_rtc_peer.get_peer(int(message.kv_map.orgPeer)).connection.set_remote_description(\"offer\", message.kv_map.data)
+		NohubClient.WEBRTC_ACTION.Answer:
+			web_rtc_peer.get_peer(int(message.kv_map.orgPeer)).connection.set_remote_description(\"answer\", message.kv_map.data)
+		NohubClient.WEBRTC_ACTION.Candidate:
+			web_rtc_peer.get_peer(int(message.kv_map.orgPeer)).connection.add_ice_candidate(str(message.kv_map.mid), int(message.kv_map.index), message.kv_map.sdp)
+
+func _offerCreated(type, data, id: int):
+	if !web_rtc_peer.has_peer(id):
+		return
+		
+	web_rtc_peer.get_peer(id).connection.set_local_description(type, data)
+	
+	if type == \"offer\":
+		_sendOffer(id, data)
+	else:
+		_sendAnswer(id, data)
+
+func _sendOffer(id: int, data):
+	var message: Dictionary = {
+		\"peer\": str(id),
+		\"orgPeer\": ws_peer_id,
+		\"data\": data,
+	}
+		
+	_client.send_webrtc_message(_client.ACTION.Offer, str(id), message)
+
+func _sendAnswer(id: int, data):
+	var message = {
+		\"peer\": str(id),
+		\"orgPeer\": ws_peer_id,
+		\"data\": data,
+	}
+	_client.send_webrtc_message(_client.ACTION.Answer, str(id), message)
+
+func _iceCandidateCreated(midName, indexName, sdpName, id: int):
+	var message = {
+		\"peer\": str(id),
+		\"orgPeer\": ws_peer_id,
+		\"mid\": midName,
+		\"index\": str(indexName),
+		\"sdp\": sdpName,
+	}
+	_client.send_webrtc_message(_client.ACTION.Candidate, str(id), message)
+
+#endregion
+"
+
+[sub_resource type="Gradient" id="Gradient_xtbls"]
+offsets = PackedFloat32Array(0.47234, 0.475177)
+colors = PackedColorArray(0.87451, 0.513726, 0, 1, 0.854902, 0.470588, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_831n5"]
+gradient = SubResource("Gradient_xtbls")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_ney1d"]
+offsets = PackedFloat32Array(0.469504, 0.470922)
+colors = PackedColorArray(0, 0.52549, 0, 1, 0, 0.482353, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_d1rvb"]
+gradient = SubResource("Gradient_ney1d")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+
+[node name="BrowserWebRTC" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_xkt7l")
+
+[node name="Browser UI" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Left Panel" type="PanelContainer" parent="Browser UI"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Browser UI/Left Panel"]
+layout_mode = 2
+
+[node name="Host Input" type="LineEdit" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "localhost:9980"
+placeholder_text = "Address"
+
+[node name="Buttons Container" type="HBoxContainer" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Connect Button" type="Button" parent="Browser UI/Left Panel/VBoxContainer/Buttons Container"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Connect"
+
+[node name="Disconnect Button" type="Button" parent="Browser UI/Left Panel/VBoxContainer/Buttons Container"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Disconnect"
+
+[node name="Status Container" type="HBoxContainer" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Status Prefix" type="Label" parent="Browser UI/Left Panel/VBoxContainer/Status Container"]
+layout_mode = 2
+text = "Status:"
+
+[node name="Status Label" type="Label" parent="Browser UI/Left Panel/VBoxContainer/Status Container"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "None"
+
+[node name="HSeparator" type="HSeparator" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Game ID Input" type="LineEdit" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Game ID"
+
+[node name="Set Game ID Button" type="Button" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Set  Game ID"
+
+[node name="HSeparator2" type="HSeparator" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Address Prefix" type="Label" parent="Browser UI/Left Panel/VBoxContainer"]
+layout_mode = 2
+text = "Your address:"
+
+[node name="Address Label" type="Label" parent="Browser UI/Left Panel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Browser UI"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="List Panel" type="ScrollContainer" parent="Browser UI/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Lobby List" type="ItemList" parent="Browser UI/VBoxContainer/List Panel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+max_text_lines = 4
+auto_height = true
+same_column_width = true
+fixed_column_width = 160
+fixed_icon_size = Vector2i(20, 20)
+
+[node name="Tools" type="HBoxContainer" parent="Browser UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Create Container" type="PanelContainer" parent="Browser UI/VBoxContainer/Tools"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Browser UI/VBoxContainer/Tools/Create Container"]
+layout_mode = 2
+
+[node name="Lobby Name Label" type="Label" parent="Browser UI/VBoxContainer/Tools/Create Container/VBoxContainer"]
+layout_mode = 2
+text = "Lobby name: "
+
+[node name="Lobby Name Input" type="LineEdit" parent="Browser UI/VBoxContainer/Tools/Create Container/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Create Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Create Container/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Create Lobby"
+
+[node name="Tools Container" type="PanelContainer" parent="Browser UI/VBoxContainer/Tools"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Rows" type="VBoxContainer" parent="Browser UI/VBoxContainer/Tools/Tools Container"]
+layout_mode = 2
+
+[node name="Selected Lobby Row" type="HBoxContainer" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows"]
+layout_mode = 2
+
+[node name="Selected Lobby Prefix" type="Label" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Selected Lobby Row"]
+layout_mode = 2
+text = "Selected Lobby: "
+
+[node name="Selected Lobby Label" type="Label" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Selected Lobby Row"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Tools Row" type="HBoxContainer" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows"]
+layout_mode = 2
+size_flags_vertical = 10
+
+[node name="Lock Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Lock"
+icon = ExtResource("1_47dd4")
+expand_icon = true
+
+[node name="Hide Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hide"
+icon = ExtResource("1_s7umg")
+expand_icon = true
+
+[node name="Join Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Join"
+icon = ExtResource("1_avfqc")
+expand_icon = true
+
+[node name="Delete Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Delete"
+icon = ExtResource("1_c5nld")
+expand_icon = true
+
+[node name="Leave Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Leave"
+icon = SubResource("GradientTexture2D_831n5")
+expand_icon = true
+
+[node name="Start Lobby Button" type="Button" parent="Browser UI/VBoxContainer/Tools/Tools Container/Rows/Tools Row"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Start"
+icon = SubResource("GradientTexture2D_d1rvb")
+expand_icon = true
+
+[node name="Modal" type="PopupPanel" parent="."]
+unique_name_in_owner = true
+initial_position = 4
+size = Vector2i(248, 168)
+
+[node name="PanelContainer" type="PanelContainer" parent="Modal"]
+custom_minimum_size = Vector2(240, 160)
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 244.0
+offset_bottom = 164.0
+
+[node name="MarginContainer" type="MarginContainer" parent="Modal/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Modal/PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Message Label" type="Label" parent="Modal/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+text = "Message here"
+
+[node name="Confirm Button" type="Button" parent="Modal/PanelContainer/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "OK"

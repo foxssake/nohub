@@ -23,22 +23,7 @@ export class SignalingModule implements Module {
 
   configure(reactor: NohubReactor) {
     reactor
-      .on("signaling/greet/lobby", (cmd, xchg) => {
-        const lobbyId = requireSingleParam(cmd, "Missing lobby id!");
-
-        const session = sessionOf(xchg);
-        const lobby = this.lobbyRepository.requireInGame(
-          lobbyId,
-          session.gameId,
-        );
-
-        this.broadcastService.broadcast(lobby, {
-          name: "signaling/greet",
-          text: "Hi!",
-        });
-      })
-
-      .on("signal/start/lobby", (cmd, xchg) => {
+      .on("webrtc/lobby/start", (cmd, xchg) => {
         const lobbyId = requireSingleParam(cmd, "Missing lobby id!");
 
         const session = sessionOf(xchg);
@@ -54,7 +39,7 @@ export class SignalingModule implements Module {
 
         // Sends to all lobby participants, they will begin WebRTC connections with each peer by sessionId.
         this.broadcastService.broadcast(lobby, {
-          name: "signal/start",
+          name: "webrtc/start",
           kvParams: [...payload.entries()],
         });
 
@@ -64,26 +49,27 @@ export class SignalingModule implements Module {
         // TODO: Are we able to listen for the results each one of the broadcasts?
         xchg.reply({ text: lobby.participants.join(",") });
       })
-      .on("signal/offer", (cmd, xchg) => {
+      .on("webrtc/offer", (cmd, xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
 
         this.broadcastService.unicast(sessionId, {
-          name: "signal/get/offer",
+          name: "webrtc/get/offer",
           kvMap: cmd.kvMap,
         });
 
-        // TODO: Sending an offer and getting one back could be something we could use the xchg for
-        // TODO: Handle errors at each step, for example: If STUN is not enough, indicate we need TURN.
+        // TODO: Sending an offer and getting one back could be something we could use the xchg for?
+        // TODO: Reply? Answer, Offer, Candidate are each "handshake" steps.
+        // TODO: Handle errors, for example: if STUN is not enough, indicate we need TURN.
         // xchg.reply
       })
-      .on("signal/answer", (cmd, xchg) => {
+      .on("webrtc/answer", (cmd, xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
         this.broadcastService.unicast(sessionId, {
-          name: "signal/get/answer",
+          name: "webrtc/get/answer",
           kvMap: cmd.kvMap,
         });
       })
-      .on("signal/candidate", (cmd, xchg) => {
+      .on("webrtc/candidate", (cmd, xchg) => {
         const sessionId = requireSingleParam(cmd, "Missing session id!");
         this.logger.info(
           { sessionId },
@@ -91,7 +77,7 @@ export class SignalingModule implements Module {
           sessionId,
         );
         this.broadcastService.unicast(sessionId, {
-          name: "signal/get/candidate",
+          name: "webrtc/get/candidate",
           kvMap: cmd.kvMap,
         });
       });

@@ -227,11 +227,11 @@ func _setup_webrtc_reactor() -> void:
 		for peer_id in players.split(',', false):
 			signal_webrtc_create_new_peer_connection.emit(int(peer_id.strip_edges()))
 	).on("webrtc/get/offer", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(ACTION.Offer, _cmd)
+		signal_webrtc_message.emit(WEBRTC_ACTION.Offer, _cmd)
 	).on("webrtc/get/answer", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(ACTION.Answer, _cmd)
+		signal_webrtc_message.emit(WEBRTC_ACTION.Answer, _cmd)
 	).on("webrtc/get/candidate", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(ACTION.Candidate, _cmd)
+		signal_webrtc_message.emit(WEBRTC_ACTION.Candidate, _cmd)
 	).on_unknown(func(cmd, xchg: TrimsockExchange):
 		_log("[srv] Unknown command: %s" % cmd)
 		return TrimsockCommand.error_from(cmd, "error", ["Unknown command", cmd.name])
@@ -266,7 +266,7 @@ func _session_id(length: int = 4) -> String:
 ## [br][br]
 ## Only the lobby's owner can start the lobby. 
 func start_lobby(lobby_id: String) -> NohubResult.LobbyMessage:
-	var request := TrimsockCommand.request("signal/start/lobby") \
+	var request := TrimsockCommand.request("webrtc/lobby/start") \
 		.with_params([lobby_id])
 
 	var xchg := _reactor.submit_request(request)
@@ -300,22 +300,22 @@ func get_session() -> String:
 	else:
 		return ""
 
-enum ACTION {
+enum WEBRTC_ACTION {
 	Offer,
 	Answer,
 	Candidate
 }
 
-func send_webrtc_message(type: ACTION, id: String, data: Dictionary = {}) -> NohubResult:
+func send_webrtc_message(type: WEBRTC_ACTION, id: String, data: Dictionary = {}) -> NohubResult:
 	var request
 
 	match type:
-		ACTION.Offer:
-			request = TrimsockCommand.request("signal/offer").with_params([id])
-		ACTION.Answer:
-			request = TrimsockCommand.request("signal/answer").with_params([id])
-		ACTION.Candidate:
-			request = TrimsockCommand.request("signal/candidate").with_params([id])
+		WEBRTC_ACTION.Offer:
+			request = TrimsockCommand.request("webrtc/offer").with_params([id])
+		WEBRTC_ACTION.Answer:
+			request = TrimsockCommand.request("webrtc/answer").with_params([id])
+		WEBRTC_ACTION.Candidate:
+			request = TrimsockCommand.request("webrtc/candidate").with_params([id])
 
 	request.with_kv_map(data)
 
