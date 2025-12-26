@@ -20,6 +20,7 @@ It runs on [bun], using the human-readable [Trimsock] protocol.
   might need!
 - Manage one or multiple games in a single *nohub* instance
 - Metrics via [Prometheus] - always be aware how your server is doing!
+- WebSocket support for web-based games (Godot web exports, browser games)
 
 ## Usage
 
@@ -46,11 +47,8 @@ docker image].
 To run the *nohub* docker image, make sure to expose the necessary ports:
 
 ```sh
-docker run -p 9980:9980 -p 9981:9981 ghcr.io/foxssake/nohub:main
+docker run -p 9980:9980 -p 9981:9981 -p 9982:9982 ghcr.io/foxssake/nohub:main
 ```
-
-This exposes port `9980` for clients to connect on, and port `9981` to
-serve metrics.
 
 #### Using bun
 
