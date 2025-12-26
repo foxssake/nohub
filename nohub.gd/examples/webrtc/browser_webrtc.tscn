@@ -433,7 +433,7 @@ func _sendOffer(id: int, data):
 		\"data\": data,
 	}
 		
-	_client.send_webrtc_message(_client.ACTION.Offer, str(id), message)
+	_client.send_webrtc_message(_client.WEBRTC_ACTION.Offer, str(id), message)
 
 func _sendAnswer(id: int, data):
 	var message = {
@@ -441,7 +441,7 @@ func _sendAnswer(id: int, data):
 		\"orgPeer\": ws_peer_id,
 		\"data\": data,
 	}
-	_client.send_webrtc_message(_client.ACTION.Answer, str(id), message)
+	_client.send_webrtc_message(_client.WEBRTC_ACTION.Answer, str(id), message)
 
 func _iceCandidateCreated(midName, indexName, sdpName, id: int):
 	var message = {
@@ -451,7 +451,7 @@ func _iceCandidateCreated(midName, indexName, sdpName, id: int):
 		\"index\": str(indexName),
 		\"sdp\": sdpName,
 	}
-	_client.send_webrtc_message(_client.ACTION.Candidate, str(id), message)
+	_client.send_webrtc_message(_client.WEBRTC_ACTION.Candidate, str(id), message)
 
 #endregion
 "
