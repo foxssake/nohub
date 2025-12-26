@@ -24,10 +24,7 @@ func set_game(id: String) -> NohubResult:
 		.with_params([id])
 	return await _bool_request(request)
 
-## Query a lobby by ID
-## [br][br]
-## If [param properties] is specified, only the listed properties will be
-## returned from the lobby's custom data.
+## Create a lobby
 func create_lobby(address: String, data: Dictionary = {}) -> NohubResult.Lobby:
 	if not _is_ready():
 		return NohubResult.of_error("NotConnected", "Client is not connected to server")
