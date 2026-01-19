@@ -8,9 +8,6 @@ import type { NohubReactor } from "@src/nohub";
 import { sessionOf } from "@src/sessions/session.api";
 import { requireSingleParam } from "@src/validators";
 
-// This is an example module to demonstrate how to inject the BroadcastService
-// into custom modules and classes
-
 export class SignalingModule implements Module {
   private readonly broadcastService: BroadcastService;
   private readonly lobbyRepository: LobbyRepository;
@@ -46,7 +43,6 @@ export class SignalingModule implements Module {
         this.logger.info({ lobbyId }, "Starting lobby #%s", lobbyId);
 
         // Reply back to lobby host that we started.
-        // TODO: Are we able to listen for the results each one of the broadcasts?
         xchg.reply({ text: lobby.participants.join(",") });
       })
       .on("webrtc/offer", (cmd, _xchg) => {

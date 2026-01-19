@@ -134,7 +134,7 @@ describe("SessionApi", () => {
   });
 });
 
-function mockSocket(address: string): Socket<SessionData> {
+export function mockSocket(address: string): Socket<SessionData> {
   return {
     remoteAddress: address,
     write: (
