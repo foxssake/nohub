@@ -90,9 +90,21 @@ export class LobbyService {
     requireLobbyJoinable(lobby, session);
     lobby.participants.push(session.id);
     this.repository.update(lobby);
-    // TODO: Leave command
-    // TODO: Listen to session close event to remove session from lobbies
+
     return lobby.address;
+  }
+
+  leave(lobby: Lobby, session: SessionData) {
+    if (lobby.owner === session.id)
+      throw new InvalidCommandError("Owner can't leave lobby!");
+
+    const index = lobby.participants.indexOf(session.id);
+    if (index < 0)
+      throw new InvalidCommandError("Session is not in the lobby!");
+
+    lobby.participants.splice(index, 1);
+    this.repository.update(lobby);
+    this.eventBus.emit("lobby-change", lobby, lobby);
   }
 
   setData(

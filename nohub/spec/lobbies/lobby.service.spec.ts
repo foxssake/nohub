@@ -213,6 +213,34 @@ describe("LobbyService", () => {
     });
   });
 
+  describe("leave", () => {
+    test("should leave lobby", () => {
+      const lobby = lobbyService.create(
+        Addresses.dave,
+        new Map(),
+        Sessions.dave,
+      );
+
+      lobbyService.join(lobby, Sessions.eric);
+      expect(lobby.participants).toContain(Sessions.eric.id);
+
+      lobbyService.leave(lobby, Sessions.eric);
+      expect(lobby.participants).not.toContain(Sessions.eric.id);
+    });
+
+    test("should throw if not in lobby", () => {
+      expect(() =>
+        lobbyService.leave(Lobbies.davesLobby, Sessions.eric),
+      ).toThrow(InvalidCommandError);
+    });
+
+    test("should throw if owner tries to leave", () => {
+      expect(() =>
+        lobbyService.leave(Lobbies.davesLobby, Sessions.dave),
+      ).toThrow(InvalidCommandError);
+    });
+  });
+
   describe("setData", () => {
     test("should replace lobby data", () => {
       const newData = Lobbies.coolLobby.data;
