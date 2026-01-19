@@ -1,101 +1,125 @@
-import { describe, expect, test, beforeEach, mock } from "bun:test";
-import { BroadcastService } from "@src/broadcast/broadcast.service";
-import { SessionRepository } from "@src/sessions/session.repository";
-import { SessionApi } from "@src/sessions/session.api";
-import { DataNotFoundError } from "@src/errors";
-import { Sessions, Lobbies, Games } from "@spec/fixtures";
-import type { NohubReactor } from "@src/nohub";
-import { LobbyRepository } from "@src/lobbies/lobby.repository";
-import { GameRepository } from "@src/games/game.repository";
-import { NohubEventBus } from "@src/events";
-import { readDefaultConfig } from "@src/config";
-import type { Socket } from "bun";
-import type { SessionData } from "@src/sessions/session";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import { Games, Lobbies, Sessions } from "@spec/fixtures";
 import { mockSocket } from "@spec/sessions/session.api.spec";
+import { BroadcastService } from "@src/broadcast/broadcast.service";
+import { readDefaultConfig } from "@src/config";
+import { DataNotFoundError } from "@src/errors";
+import { NohubEventBus } from "@src/events";
+import { GameRepository } from "@src/games/game.repository";
+import { LobbyApi } from "@src/lobbies/lobby.api";
+import { LobbyEventBus } from "@src/lobbies/lobby.events";
+import { LobbyRepository } from "@src/lobbies/lobby.repository";
+import { LobbyService } from "@src/lobbies/lobby.service";
+import type { NohubReactor } from "@src/nohub";
+import type { SessionData } from "@src/sessions/session";
+import { SessionApi } from "@src/sessions/session.api";
+import { SessionRepository } from "@src/sessions/session.repository";
+import type { Socket } from "bun";
+
+let reactor: NohubReactor;
+
+let sessionRepository: SessionRepository;
+let sessionApi: SessionApi;
+let lobbyRepository: LobbyRepository;
+let lobbyService: LobbyService;
+let lobbyApi: LobbyApi;
+
+let broadcastService: BroadcastService;
+
+let daveSocket: Socket<SessionData>;
+let ericSocket: Socket<SessionData>;
 
 describe("BroadcastService", () => {
-    let service: BroadcastService;
-    let reactor: NohubReactor;
-    let sessionRepository: SessionRepository;
-    let sessionApi: SessionApi;
+  beforeEach(() => {
+    reactor = {
+      send: mock(() => ({})),
+    } as unknown as NohubReactor;
 
-    let daveSocket: Socket<SessionData>;
-    let ericSocket: Socket<SessionData>;
+    sessionRepository = new SessionRepository();
+    const gameLookup = new GameRepository();
+    Games.insert(gameLookup);
+    Sessions.insert(sessionRepository);
 
-    beforeEach(() => {
-        reactor = {
-            send: mock(() => ({}) as any),
-        } as unknown as NohubReactor;
+    sessionApi = new SessionApi(
+      sessionRepository,
+      new LobbyRepository(),
+      gameLookup,
+      new NohubEventBus(),
+      readDefaultConfig().sessions,
+    );
 
-        sessionRepository = new SessionRepository();
-        const lobbyRepository = new LobbyRepository();
-        const gameRepository = new GameRepository();
-        Games.insert(gameRepository);
+    lobbyRepository = new LobbyRepository();
+    lobbyService = new LobbyService(
+      lobbyRepository,
+      readDefaultConfig().lobbies,
+      new LobbyEventBus(),
+    );
 
-        const config = readDefaultConfig().sessions;
-        config.arbitraryGameId = true; // simplifying for this test
+    lobbyApi = new LobbyApi(lobbyRepository, lobbyService, () => undefined);
 
-        sessionApi = new SessionApi(
-            sessionRepository,
-            lobbyRepository,
-            gameRepository,
-            new NohubEventBus(),
-            config
-        );
+    Lobbies.insert(lobbyRepository);
 
-        // create sessions using API
-        daveSocket = mockSocket(Sessions.dave.address);
-        ericSocket = mockSocket(Sessions.eric.address);
+    // create sessions using API
+    daveSocket = mockSocket(Sessions.dave.address);
+    ericSocket = mockSocket(Sessions.eric.address);
 
-        sessionApi.openSession(daveSocket);
-        sessionApi.openSession(ericSocket);
+    sessionApi.openSession(daveSocket);
+    sessionApi.openSession(ericSocket);
 
-        service = new BroadcastService(() => reactor, sessionRepository);
+    broadcastService = new BroadcastService(() => reactor, sessionRepository);
+  });
+
+  describe("unicast", () => {
+    test("should send command to session", () => {
+      const sessionId = daveSocket.data.id;
+      broadcastService.unicast(sessionId, { name: "command" });
+
+      expect(reactor.send).toHaveBeenCalled();
+      // Verify it was called with the correct socket
+      expect(reactor.send).toHaveBeenCalledWith(daveSocket, {
+        name: "command",
+      });
     });
 
-    describe("unicast", () => {
-        test("should send command to session", () => {
-            const sessionId = daveSocket.data.id;
-            service.unicast(sessionId, { name: "command" });
+    test("should throw if session not found", () => {
+      expect(() =>
+        broadcastService.unicast("unknown", { name: "command" }),
+      ).toThrow(DataNotFoundError);
+    });
+  });
 
-            expect(reactor.send).toHaveBeenCalled();
-            // Verify it was called with the correct socket
-            expect(reactor.send).toHaveBeenCalledWith(daveSocket, { name: "command" });
-        });
+  describe("broadcast", () => {
+    test("should send to all participants", () => {
+      const lobby = lobbyApi.create(Sessions.dave.address, daveSocket.data);
+      lobbyApi.join(lobby.id, ericSocket.data);
 
-        test("should throw if session not found", () => {
-            expect(() => service.unicast("unknown", { name: "command" })).toThrow(DataNotFoundError);
-        });
+      broadcastService.broadcast(lobby, { name: "command" });
+
+      // Should broadcast to both
+      expect(reactor.send).toHaveBeenCalledTimes(2);
+      expect(reactor.send).toHaveBeenCalledWith(daveSocket, {
+        name: "command",
+      });
+      expect(reactor.send).toHaveBeenCalledWith(ericSocket, {
+        name: "command",
+      });
     });
 
-    describe("broadcast", () => {
-        test("should send to all participants", () => {
-            const daveId = daveSocket.data.id;
-            const ericId = ericSocket.data.id;
+    test("should skip missing sessions", () => {
+      const lobby = lobbyApi.create(Sessions.dave.address, daveSocket.data);
 
-            // Create a lobby with participants using the generated IDs
-            const lobby = { ...Lobbies.davesLobby, participants: [daveId, ericId] };
+      // Join
+      lobbyApi.join(lobby.id, ericSocket.data);
+      // Close (leave)
+      sessionApi.closeSession(ericSocket);
 
-            service.broadcast(lobby, { name: "command" });
+      broadcastService.broadcast(lobby, { name: "command" });
 
-            // Should broadcast to both
-            expect(reactor.send).toHaveBeenCalledTimes(2);
-            expect(reactor.send).toHaveBeenCalledWith(daveSocket, { name: "command" });
-            expect(reactor.send).toHaveBeenCalledWith(ericSocket, { name: "command" });
-        });
-
-        test("should skip missing sessions", () => {
-            const daveId = daveSocket.data.id;
-
-            // One participant
-            const lobby = { ...Lobbies.davesLobby, participants: [daveId] };
-
-            service.broadcast(lobby, { name: "command" });
-
-            // Should broadcast to just 1 particpant
-            expect(reactor.send).toHaveBeenCalledTimes(1);
-            expect(reactor.send).toHaveBeenCalledWith(daveSocket, { name: "command" });
-
-        });
+      // Should broadcast to just 1 particpant
+      expect(reactor.send).toHaveBeenCalledTimes(1);
+      expect(reactor.send).toHaveBeenCalledWith(daveSocket, {
+        name: "command",
+      });
     });
+  });
 });

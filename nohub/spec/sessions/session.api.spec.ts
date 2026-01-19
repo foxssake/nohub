@@ -105,7 +105,6 @@ describe("SessionApi", () => {
         ).not.toThrow();
     });
 
-
     test("should create session with number", () => {
       // Don't need fixtures
       sessionRepository.clear();
@@ -117,7 +116,6 @@ describe("SessionApi", () => {
       sessionApi.openSession(mockSocket(Sessions.dave.address));
       expect([...sessionRepository.list()][0].id).toMatch(/^[0-9]+$/);
     });
-
   });
 
   describe("setGame", () => {

@@ -39,5 +39,4 @@ describe("Sessions API", () => {
       expect(reply.text).not.toBeEmpty();
     });
   });
-
 });
