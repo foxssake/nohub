@@ -30,14 +30,13 @@ class_name NohubClient
 var _connection: StreamPeerTCP
 var _reactor: TrimsockTCPClientReactor
 
-
 ## Construct a client using the specified [param connection]
 func _init(connection: StreamPeerTCP):
 	_connection = connection
 	_connection.set_no_delay(true)
 
 	_reactor = TrimsockTCPClientReactor.new(connection)
-	_setup_webrtc_reactor()
+
 
 ## Poll the client
 ## [br][br]
@@ -211,8 +210,9 @@ func _command_to_error(command: TrimsockCommand) -> NohubResult:
 
 #region WebRTC
 
-# TODO: Determine the best place to define these signals. They are used in the browser
+## Emitted during "webrtc/start" to kick off the peer connection
 signal signal_webrtc_create_new_peer_connection(id)
+## Emitted to exchange offers and answers to finish establishing connections
 signal signal_webrtc_message(type, data)
 
 ## Setup the events for negotiating WebRTC connections using the signalling module
@@ -221,7 +221,7 @@ signal signal_webrtc_message(type, data)
 ## these events will emit signals that the clients use to initialize WebRTC peer connections
 ## NOTE: This function is based on the _setup_reactor example in this file:
 ## https://github.com/foxssake/trimsock/blob/main/trimsock.gd/examples/server/server.gd
-func _setup_webrtc_reactor() -> void:
+func setup_webrtc_reactor() -> void:
 	_reactor.on("webrtc/start", func(_cmd: TrimsockCommand, xchg: TrimsockExchange):
 		var players = _cmd.kv_map['players'] as String
 		for peer_id in players.split(',', false):
@@ -237,30 +237,8 @@ func _setup_webrtc_reactor() -> void:
 		return TrimsockCommand.error_from(cmd, "error", ["Unknown command", cmd.name])
 	)
 
-	# TODO: Necessary?
-	_reactor.on_attach.connect(func(src: StreamPeerTCP):
-		var id := _session_id()
-		_log("[srv] New connection: " + id)
-		src.set_no_delay(true)
-
-		_reactor.set_session(src, id)
-		_reactor.send(src, TrimsockCommand.simple("ohai"))
-	)
-
-	_reactor.on_detach.connect(func(src):
-		_log("[srv] Connection closed!")
-	)
-
 func _log(what: String) -> void:
 	prints(what)
-
-func _session_id(length: int = 4) -> String:
-	const charset := "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789"
-	var id := ""
-	for i in length:
-		id += charset[randi() % charset.length()]
-	return id
-
 
 ## Start lobby, kicking off joining
 ## [br][br]

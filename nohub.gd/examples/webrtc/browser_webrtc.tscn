@@ -74,7 +74,7 @@ func popup(text: String) -> void:
 	modal_message_label.text = text
 	modal.show()
 
-func _ready():
+func _ready():	
 	connect_button.pressed.connect(_connect)
 	disconnect_button.pressed.connect(_disconnect)
 	create_button.pressed.connect(_create_lobby)
@@ -142,7 +142,8 @@ func _connect() -> void:
 		return
 
 	_client = NohubClient.new(_connection)
-
+	_client.setup_webrtc_reactor()
+	
 func _disconnect() -> void:
 	if _connection == null:
 		return
@@ -326,12 +327,12 @@ func _get_ip_local() -> String:
 
 var web_rtc_peer: WebRTCMultiplayerPeer
 var ws_peer_id = null
-var turn_server_enabled = false
 
-# Patterned [stun:URI, turn:URI], for default to free unlimited STUN
-var STUN_TURN_SERVER_URLS = ['stun:stun.cloudflare.com']
-# This will be overwritten by a SetIceServer event from server if turn is set up in Cloudflare
-var ICE_SERVERS = null
+# Patterned [stun:URI, turn:URI]. Use cloudflare default for free unlimited STUN
+var STUN_SERVER_URLS = ['stun:stun.cloudflare.com']
+# No TURN. Relay fallback not supported if empty and not included below
+var TURN_SERVER_URLS = []
+var ICE_SERVERS = {\"iceServers\": [ {\"urls\": STUN_SERVER_URLS}]}
 
 func _get_session_id() -> void:
 	if not _client: return
@@ -391,10 +392,6 @@ func _leave_lobby() -> void:
 func _network_create_new_peer_connection(id: int):
 	if id != int(ws_peer_id):
 		var new_peer_connection: WebRTCPeerConnection = WebRTCPeerConnection.new()
-		
-		# If the SetIceServers event didn't occur, we might need to use the default
-		if ICE_SERVERS == null: 
-			ICE_SERVERS = {\"iceServers\": [ {\"urls\": STUN_TURN_SERVER_URLS}]}
 		
 		new_peer_connection.initialize(ICE_SERVERS)
 		print(\"binding id \" + str(id) + \" my id is \" + str(ws_peer_id))
