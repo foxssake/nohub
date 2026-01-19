@@ -46,6 +46,7 @@ describe("LobbyService", () => {
         isVisible: true,
         isLocked: false,
         data: lobbyData,
+        participants: [Sessions.dave.id],
       };
 
       const lobby = lobbyService.create(

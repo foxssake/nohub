@@ -105,6 +105,7 @@ export const Lobbies = {
       ["player-count", "8"],
       ["player-capacity", "12"],
     ]),
+    participants: [],
   }),
 
   coolLobby: lobbyFixture({
@@ -119,6 +120,7 @@ export const Lobbies = {
       ["player-count", "9"],
       ["player-capacity", "16"],
     ]),
+    participants: [],
   }),
 
   mithrilParty: lobbyFixture({
@@ -133,6 +135,7 @@ export const Lobbies = {
       ["player-count", "4"],
       ["player-capacity", "6"],
     ]),
+    participants: [],
   }),
 
   all(): Lobby[] {

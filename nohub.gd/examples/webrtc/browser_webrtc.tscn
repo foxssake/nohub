@@ -349,7 +349,6 @@ func start_web_rtc(id: String):
 	web_rtc_peer = WebRTCMultiplayerPeer.new()
 	web_rtc_peer.create_mesh(int(id))
 	multiplayer.multiplayer_peer = web_rtc_peer
-	prints('HECK:', id)
 	
 	multiplayer.peer_connected.connect(func(id): print(\"Add player: \", id))
 	multiplayer.peer_disconnected.connect(func(id): print(\"Remove player: \", id))
@@ -416,9 +415,6 @@ func _network_process_signal(type: NohubClient.WEBRTC_ACTION, message: TrimsockC
 			web_rtc_peer.get_peer(int(message.kv_map.orgPeer)).connection.add_ice_candidate(str(message.kv_map.mid), int(message.kv_map.index), message.kv_map.sdp)
 
 func _offerCreated(type, data, id: int):
-	if !web_rtc_peer.has_peer(id):
-		return
-		
 	web_rtc_peer.get_peer(id).connection.set_local_description(type, data)
 	
 	if type == \"offer\":
@@ -500,7 +496,7 @@ layout_mode = 2
 [node name="Host Input" type="LineEdit" parent="Browser UI/Left Panel/VBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "localhost:9980"
+text = "0.0.0.0"
 placeholder_text = "Address"
 
 [node name="Buttons Container" type="HBoxContainer" parent="Browser UI/Left Panel/VBoxContainer"]
