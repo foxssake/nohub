@@ -88,6 +88,15 @@ export class LobbyApi {
     return address;
   }
 
+  leave(id: string, session: SessionData): void {
+    this.logger.info({ session, lobbyId: id }, "Leaving lobby");
+
+    const lobby = this.lobbyRepository.requireInGame(id, session.gameId);
+    this.lobbyService.leave(lobby, session);
+
+    this.logger.info({ session, lobby }, "Successfully left lobby");
+  }
+
   setData(id: string, data: Map<string, string>, session: SessionData): void {
     this.logger.info({ lobbyId: id, session, data }, "Updating session data");
 

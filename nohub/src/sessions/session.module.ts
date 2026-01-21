@@ -49,6 +49,9 @@ export class SessionModule implements Module {
           name: "youarehere",
           params: [xchg.source.remoteAddress],
         });
+      })
+      .on("getid", (_cmd, xchg) => {
+        xchg.reply({ text: xchg.source.data.id });
       });
   }
 

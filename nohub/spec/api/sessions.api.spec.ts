@@ -23,4 +23,20 @@ describe("Sessions API", () => {
       expect(reply.text).not.toBeEmpty();
     });
   });
+
+  describe("getid", () => {
+    test("should respond", async () => {
+      const reply = await api
+        .client()
+        .send({
+          name: "getid",
+          isRequest: true,
+          requestId: "",
+        })
+        .onReply();
+
+      expect(reply.isSuccessResponse).toBeTrue();
+      expect(reply.text).not.toBeEmpty();
+    });
+  });
 });

@@ -35,6 +35,12 @@ export class LobbyRepository
       if (lobby.owner === sessionId) {
         this.removeItem(lobby);
         yield lobby;
+      } else {
+        const sessionIndex = lobby.participants.indexOf(sessionId);
+        if (sessionIndex !== -1) {
+          lobby.participants.splice(sessionIndex, 1);
+          this.update(lobby);
+        }
       }
   }
 

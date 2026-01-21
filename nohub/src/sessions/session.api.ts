@@ -7,7 +7,7 @@ import type { LobbyLookup } from "@src/lobbies/lobby.repository";
 import { rootLogger } from "@src/logger";
 import { emptyMetrics, type MetricsHolder } from "@src/metrics/metrics";
 import type { Socket } from "bun";
-import { nanoid } from "nanoid";
+import { customAlphabet, nanoid } from "nanoid";
 import type { SessionData } from "./session";
 import type { SessionRepository } from "./session.repository";
 
@@ -24,6 +24,10 @@ export class SessionApi {
   ) {}
 
   generateSessionId(): string {
+    if (this.config.idUseNumber) {
+      const nanoidNumber = customAlphabet("1234567890");
+      return nanoidNumber(this.config.idLength);
+    }
     return nanoid(this.config.idLength);
   }
 
@@ -55,6 +59,7 @@ export class SessionApi {
       id: this.generateSessionId(),
       gameId: this.config.defaultGameId,
       address,
+      socket,
     };
 
     this.sessionRepository.add(session);

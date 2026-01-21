@@ -92,6 +92,14 @@ export class LobbyModule implements Module {
         const address = this.lobbyApi.join(lobbyId, session);
         xchg.reply({ params: [address] });
       })
+      .on("lobby/leave", (cmd, xchg) => {
+        requireRequest(cmd);
+        const lobbyId = cmd.requireText();
+        const session = sessionOf(xchg);
+
+        this.lobbyApi.leave(lobbyId, session);
+        xchg.reply({ text: "ok" });
+      })
       .on("lobby/set-data", (cmd, xchg) => {
         requireRequest(cmd);
         const lobbyId = requireSingleParam(cmd, "Missing lobby ID!");

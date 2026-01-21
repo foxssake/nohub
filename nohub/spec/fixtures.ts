@@ -105,6 +105,7 @@ export const Lobbies = {
       ["player-count", "8"],
       ["player-capacity", "12"],
     ]),
+    participants: [],
   }),
 
   coolLobby: lobbyFixture({
@@ -119,6 +120,7 @@ export const Lobbies = {
       ["player-count", "9"],
       ["player-capacity", "16"],
     ]),
+    participants: [],
   }),
 
   mithrilParty: lobbyFixture({
@@ -133,6 +135,21 @@ export const Lobbies = {
       ["player-count", "4"],
       ["player-capacity", "6"],
     ]),
+    participants: [],
+  }),
+
+  pamParticipantsLobby: lobbyFixture({
+    id: "GzF2zDhX",
+    owner: Sessions.pam.id,
+    address: Addresses.pam,
+    isVisible: true,
+    isLocked: false,
+    data: new Map([
+      ["name", "Pam's Participants Lobby"],
+      ["player-count", "8"],
+      ["player-capacity", "12"],
+    ]),
+    participants: [Sessions.pam.id, Sessions.ingrid.id],
   }),
 
   all(): Lobby[] {
