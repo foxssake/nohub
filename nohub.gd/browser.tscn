@@ -145,6 +145,7 @@ func _disconnect() -> void:
 	_connection = null
 	_client = null
 
+	set_selected_lobby(null)
 	lobby_list.clear()
 	_lobbies_in_list.clear()
 	address_label.text = \"\"
@@ -190,6 +191,10 @@ func _select_lobby(clicked_idx: int, _selected: bool = true) -> void:
 		# User clicked header row, do nothing
 		return
 
+	if _lobbies_in_list.size() - 1 < row_idx:
+		# Row is not present
+		return
+		
 	var lobby := _lobbies_in_list[row_idx]
 	set_selected_lobby(lobby)
 
