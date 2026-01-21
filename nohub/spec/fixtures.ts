@@ -138,6 +138,20 @@ export const Lobbies = {
     participants: [],
   }),
 
+  pamParticipantsLobby: lobbyFixture({
+    id: "GzF2zDhX",
+    owner: Sessions.pam.id,
+    address: Addresses.pam,
+    isVisible: true,
+    isLocked: false,
+    data: new Map([
+      ["name", "Pam's Participants Lobby"],
+      ["player-count", "8"],
+      ["player-capacity", "12"],
+    ]),
+    participants: [Sessions.pam.id, Sessions.ingrid.id],
+  }),
+
   all(): Lobby[] {
     return fixturesOf<Lobby>(Lobbies);
   },
