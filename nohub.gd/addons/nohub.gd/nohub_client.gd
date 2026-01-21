@@ -30,13 +30,13 @@ class_name NohubClient
 var _connection: StreamPeerTCP
 var _reactor: TrimsockTCPClientReactor
 
+
 ## Construct a client using the specified [param connection]
 func _init(connection: StreamPeerTCP):
 	_connection = connection
 	_connection.set_no_delay(true)
 
 	_reactor = TrimsockTCPClientReactor.new(connection)
-
 
 ## Poll the client
 ## [br][br]
@@ -48,13 +48,13 @@ func poll() -> void:
 ## [br][br]
 ## See [url=https://foxssake.github.io/nohub/understanding-nohub/concepts.html#games]Games[/url].
 func set_game(id: String) -> NohubResult:
-	var request := TrimsockCommand.request("session/set-game") \
+	var request := TrimsockCommand.request("session/set-game")\
 		.with_params([id])
 	return await _bool_request(request)
 
 ## Create a lobby
 func create_lobby(address: String, data: Dictionary = {}) -> NohubResult.Lobby:
-	var request := TrimsockCommand.request("lobby/create") \
+	var request := TrimsockCommand.request("lobby/create")\
 		.with_params([address])
 	for key in data:
 		request.with_kv_pairs([TrimsockCommand.pair_of(key, data[key])])
@@ -72,7 +72,7 @@ func create_lobby(address: String, data: Dictionary = {}) -> NohubResult.Lobby:
 ## If [param properties] is specified, only the listed properties will be
 ## returned from the lobby's custom data.
 func get_lobby(id: String, properties: Array[String] = []) -> NohubResult.Lobby:
-	var request := TrimsockCommand.request("lobby/get") \
+	var request := TrimsockCommand.request("lobby/get")\
 		.with_params([id] + properties)
 	var xchg := _reactor.submit_request(request)
 	var response := await xchg.read()
@@ -88,7 +88,7 @@ func get_lobby(id: String, properties: Array[String] = []) -> NohubResult.Lobby:
 ## returned from the lobby's custom data.
 func list_lobbies(properties: Array[String] = []) -> NohubResult.LobbyList:
 	var result := [] as Array[NohubLobby]
-	var request := TrimsockCommand.request("lobby/list") \
+	var request := TrimsockCommand.request("lobby/list")\
 		.with_params(properties)
 
 	var xchg := _reactor.submit_request(request)
@@ -108,7 +108,7 @@ func list_lobbies(properties: Array[String] = []) -> NohubResult.LobbyList:
 ## [br][br]
 ## Only the lobby's owner can delete the lobby.
 func delete_lobby(lobby_id: String) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/delete") \
+	var request := TrimsockCommand.request("lobby/delete")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
@@ -117,7 +117,7 @@ func delete_lobby(lobby_id: String) -> NohubResult:
 ## The response will contain the lobby's address. This string can be used to
 ## connect.
 func join_lobby(lobby_id: String) -> NohubResult.Address:
-	var request := TrimsockCommand.request("lobby/join") \
+	var request := TrimsockCommand.request("lobby/join")\
 		.with_params([lobby_id])
 
 	var xchg := _reactor.submit_request(request)
@@ -132,7 +132,7 @@ func join_lobby(lobby_id: String) -> NohubResult.Address:
 ## [br][br]
 ## Only the lobby's owner can lock the lobby.
 func lock_lobby(lobby_id: String) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/lock") \
+	var request := TrimsockCommand.request("lobby/lock")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
@@ -140,7 +140,7 @@ func lock_lobby(lobby_id: String) -> NohubResult:
 ## [br][br]
 ## Only the lobby's owner can unlock the lobby. Lobbies are unlocked by default.
 func unlock_lobby(lobby_id: String) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/unlock") \
+	var request := TrimsockCommand.request("lobby/unlock")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
@@ -148,7 +148,7 @@ func unlock_lobby(lobby_id: String) -> NohubResult:
 ## [br][br]
 ## Only the lobby's owner can hide the lobby.
 func hide_lobby(lobby_id: String) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/hide") \
+	var request := TrimsockCommand.request("lobby/hide")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
@@ -156,7 +156,7 @@ func hide_lobby(lobby_id: String) -> NohubResult:
 ## [br][br]
 ## Only the lobby's owner can hide the lobby. Lobbies are visible by default.
 func publish_lobby(lobby_id: String) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/publish") \
+	var request := TrimsockCommand.request("lobby/publish")\
 		.with_params([lobby_id])
 	return await _bool_request(request)
 
@@ -165,8 +165,8 @@ func publish_lobby(lobby_id: String) -> NohubResult:
 ## Note that this method updates the data, instead of adding to it. Only the 
 ## lobby's owner can update the lobby's custom data.
 func set_lobby_data(lobby_id: String, data: Dictionary) -> NohubResult:
-	var request := TrimsockCommand.request("lobby/set-data") \
-		.with_params([lobby_id]) \
+	var request := TrimsockCommand.request("lobby/set-data")\
+		.with_params([lobby_id])\
 		.with_kv_map(data)
 	return await _bool_request(request)
 
@@ -207,102 +207,3 @@ func _command_to_error(command: TrimsockCommand) -> NohubResult:
 		return NohubResult.of_error(command.params[0], command.params[1])
 	else:
 		return NohubResult.of_error(command.name, "")
-
-#region WebRTC
-
-## Emitted during "webrtc/start" to kick off the peer connection
-signal signal_webrtc_create_new_peer_connection(id)
-## Emitted to exchange offers and answers to finish establishing connections
-signal signal_webrtc_message(type, data)
-
-## Setup the events for negotiating WebRTC connections using the signalling module
-## [br][br]
-## When a lobby host starts a lobby (or a peer asks for an offer, answer, or candidate):
-## these events will emit signals that the clients use to initialize WebRTC peer connections
-## NOTE: This function is based on the _setup_reactor example in this file:
-## https://github.com/foxssake/trimsock/blob/main/trimsock.gd/examples/server/server.gd
-func setup_webrtc_reactor() -> void:
-	_reactor.on("webrtc/start", func(_cmd: TrimsockCommand, xchg: TrimsockExchange):
-		var players = _cmd.kv_map['players'] as String
-		for peer_id in players.split(',', false):
-			signal_webrtc_create_new_peer_connection.emit(int(peer_id.strip_edges()))
-	).on("webrtc/get/offer", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(WEBRTC_ACTION.Offer, _cmd)
-	).on("webrtc/get/answer", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(WEBRTC_ACTION.Answer, _cmd)
-	).on("webrtc/get/candidate", func(_cmd, xchg: TrimsockExchange):
-		signal_webrtc_message.emit(WEBRTC_ACTION.Candidate, _cmd)
-	).on_unknown(func(cmd, xchg: TrimsockExchange):
-		_log("[srv] Unknown command: %s" % cmd)
-		return TrimsockCommand.error_from(cmd, "error", ["Unknown command", cmd.name])
-	)
-
-func _log(what: String) -> void:
-	prints(what)
-
-## Start lobby, kicking off joining
-## [br][br]
-## Only the lobby's owner can start the lobby. 
-func start_lobby(lobby_id: String) -> NohubResult.LobbyMessage:
-	var request := TrimsockCommand.request("webrtc/lobby/start") \
-		.with_params([lobby_id])
-
-	var xchg := _reactor.submit_request(request)
-	var response := await xchg.read()
-
-	if response.is_success():
-		return NohubResult.LobbyMessage.of_value(response.params[0])
-	else:
-		return _command_to_error(response)
-
-## Leave the lobby
-## [br][br]
-func leave_lobby(lobby_id: String) -> NohubResult.LobbyMessage:
-	var request := TrimsockCommand.request("lobby/leave") \
-		.with_params([lobby_id])
-
-	var xchg := _reactor.submit_request(request)
-	var response := await xchg.read()
-
-	if response.is_success():
-		return NohubResult.LobbyMessage.of_value(response.params[0])
-	else:
-		return _command_to_error(response)
-
-func get_session() -> String:
-	var request := TrimsockCommand.request("getid")
-	var xchg := _reactor.submit_request(request)
-	var response := await xchg.read()
-	if response.is_success():
-		return response.text
-	else:
-		return ""
-
-enum WEBRTC_ACTION {
-	Offer,
-	Answer,
-	Candidate
-}
-
-func send_webrtc_message(type: WEBRTC_ACTION, id: String, data: Dictionary = {}) -> NohubResult:
-	var request
-
-	match type:
-		WEBRTC_ACTION.Offer:
-			request = TrimsockCommand.request("webrtc/offer").with_params([id])
-		WEBRTC_ACTION.Answer:
-			request = TrimsockCommand.request("webrtc/answer").with_params([id])
-		WEBRTC_ACTION.Candidate:
-			request = TrimsockCommand.request("webrtc/candidate").with_params([id])
-
-	request.with_kv_map(data)
-
-	var xchg := _reactor.submit_request(request)
-	var response := await xchg.read()
-
-	if response.is_success():
-		return NohubResult.LobbyMessage.of_value('send success')
-	else:
-		return _command_to_error(response)
-
-#endregion
