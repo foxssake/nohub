@@ -28,7 +28,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Install dependencies
         run: |
-          pip install sphinx sphinx-breeze-theme sphinx-tabs sphinx-design
+          pip install -r requirements.txt
       - name: Sphinx build
         run: |
           sphinx-build docs/source _build
