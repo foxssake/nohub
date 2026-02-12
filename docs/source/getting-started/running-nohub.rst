@@ -26,8 +26,6 @@ Docker Compose
 It is possible to run *nohub* in conjunction with other services using Docker
 Compose:
 
-.. literalinclude:: /../../docker-compose.yml
-
 Using bun
 ---------
 
