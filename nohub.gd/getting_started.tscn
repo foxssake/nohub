@@ -4,7 +4,7 @@
 script/source = "extends Control
 
 var connection: StreamPeerTCP
-var client: NohubClient
+var client: NohubTCPClient
 
 func _ready():
 	# Establishing a connection
@@ -27,7 +27,7 @@ func _ready():
 		push_error(\"Failed to establish connection to nohub at %s:%d - status: %d\" % [host, port, connection.get_status()])
 		return
 
-	client = NohubClient.new(connection)
+	client = NohubTCPClient.new(connection)
 	print(\"Successfully connected to nohub at %s:%d!\" % [host, port])
 	
 	# Creating a lobby

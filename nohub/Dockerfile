@@ -31,6 +31,6 @@ COPY --from=prerelease /usr/src/foxssake/nohub/src src
 
 # run the app
 USER bun
-EXPOSE 9980/tcp
+EXPOSE 9980/tcp 9981/tcp 9982/tcp
 ENTRYPOINT [ "bun", "." ]
 
