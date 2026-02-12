@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nohub:
     image: ghcr.io/foxssake/nohub:main
@@ -7,8 +5,11 @@ services:
       - "9980:9980"  # TCP port for client connections
       - "9981:9981"  # Metrics port (Prometheus)
     environment:
+      # See the Server guide for more details:
+      # https://foxssake.github.io/nohub/server-guide/configuration.html
+      #
       # TCP Configuration
-      - NOHUB_TCP_HOST=0.0.0.0
+      - NOHUB_TCP_HOST=*
       - NOHUB_TCP_PORT=9980
       
       # Metrics Configuration

@@ -20,6 +20,14 @@ To run the *nohub* docker image, make sure to expose the necessary ports:
 This exposes port ``9980`` for clients to connect on, and port ``9981`` to
 serve metrics.
 
+Docker Compose
+^^^^^^^^^^^^^^
+
+It is possible to run *nohub* in conjunction with other services using Docker
+Compose:
+
+.. literalinclude:: /../../docker-compose.yml
+
 Using bun
 ---------
 
