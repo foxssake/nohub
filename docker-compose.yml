@@ -1,0 +1,31 @@
+services:
+  nohub:
+    image: ghcr.io/foxssake/nohub:main
+    ports:
+      - "9980:9980"  # TCP port for client connections
+      - "9981:9981"  # Metrics port (Prometheus)
+    environment:
+      # See the Server guide for more details:
+      # https://foxssake.github.io/nohub/server-guide/configuration.html
+      #
+      # TCP Configuration
+      - NOHUB_TCP_HOST=*
+      - NOHUB_TCP_PORT=9980
+      
+      # Metrics Configuration
+      - NOHUB_METRICS_ENABLED=true
+      - NOHUB_METRICS_HOST=0.0.0.0
+      - NOHUB_METRICS_PORT=9981
+      
+      # Logging
+      - NOHUB_LOG_LEVEL=info
+      
+      # Lobby Configuration
+      - NOHUB_LOBBIES_MAX_COUNT=32768
+      - NOHUB_LOBBIES_MAX_PER_SESSION=4
+      - NOHUB_LOBBIES_WITHOUT_GAME=true
+      
+      # Session Configuration
+      - NOHUB_SESSIONS_MAX_COUNT=262144
+      - NOHUB_SESSIONS_MAX_PER_ADDRESS=64
+    restart: unless-stopped
