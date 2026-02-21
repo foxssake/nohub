@@ -65,6 +65,7 @@ export class LobbyService {
       isVisible: true,
       isLocked: false,
       data,
+      participants: [session.id],
     };
 
     this.repository.add(lobby);
@@ -87,7 +88,23 @@ export class LobbyService {
 
   join(lobby: Lobby, session: SessionData): string {
     requireLobbyJoinable(lobby, session);
+    lobby.participants.push(session.id);
+    this.repository.update(lobby);
+
     return lobby.address;
+  }
+
+  leave(lobby: Lobby, session: SessionData) {
+    if (lobby.owner === session.id)
+      throw new InvalidCommandError("Owner can't leave lobby!");
+
+    const index = lobby.participants.indexOf(session.id);
+    if (index < 0)
+      throw new InvalidCommandError("Session is not in the lobby!");
+
+    lobby.participants.splice(index, 1);
+    this.repository.update(lobby);
+    this.eventBus.emit("lobby-change", lobby, lobby);
   }
 
   setData(

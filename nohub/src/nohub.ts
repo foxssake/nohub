@@ -2,6 +2,7 @@ import { BunSocketReactor } from "@foxssake/trimsock-bun";
 import { Command, TrimsockReader } from "@foxssake/trimsock-js";
 import type { AppConfig } from "@src/config";
 import { rootLogger } from "@src/logger";
+import { BroadcastModule } from "./broadcast/broadcast.module";
 import { UnknownCommandError } from "./errors";
 import { NohubEventBus } from "./events";
 import { GameModule } from "./games/game.module";
@@ -19,6 +20,7 @@ export class NohubModules {
   readonly gameModule: GameModule;
   readonly lobbyModule: LobbyModule;
   readonly sessionModule: SessionModule;
+  readonly broadcastModule: BroadcastModule;
 
   readonly all: Module[];
 
@@ -37,12 +39,14 @@ export class NohubModules {
       config.sessions,
       this.metricsModule.metricsHolder,
     );
+    this.broadcastModule = new BroadcastModule(this.sessionModule);
 
     this.all = [
       this.metricsModule,
       this.gameModule,
       this.lobbyModule,
       this.sessionModule,
+      this.broadcastModule,
     ];
   }
 }
@@ -147,6 +151,7 @@ export class Nohub {
 
     rootLogger.info("Attaching %d modules...", modules.length);
     modules.forEach((it) => {
+      rootLogger.info("Attaching module %s...", it.constructor?.name);
       it.attachTo?.(this);
       this.reactor && it.configure && it.configure(this.reactor);
     });

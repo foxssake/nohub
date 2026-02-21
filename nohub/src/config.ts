@@ -45,6 +45,7 @@ export function readConfig(env: ConfigEnv) {
       defaultGameId: env.NOHUB_LOBBIES_DEFAULT_GAME_ID,
       maxCount: integer(env.NOHUB_SESSIONS_MAX_COUNT) ?? 262144,
       maxPerAddress: integer(env.NOHUB_SESSIONS_MAX_PER_ADDRESS) ?? 64,
+      idUseNumber: bool(env.NOHUB_SESSIONS_ID_USE_NUMBER) ?? false,
     },
   };
 }

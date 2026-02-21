@@ -46,6 +46,7 @@ describe("LobbyService", () => {
         isVisible: true,
         isLocked: false,
         data: lobbyData,
+        participants: [Sessions.dave.id],
       };
 
       const lobby = lobbyService.create(
@@ -209,6 +210,34 @@ describe("LobbyService", () => {
       expect(() => lobbyService.join(Lobbies.coolLobby, Sessions.eric)).toThrow(
         LockedError,
       );
+    });
+  });
+
+  describe("leave", () => {
+    test("should leave lobby", () => {
+      const lobby = lobbyService.create(
+        Addresses.dave,
+        new Map(),
+        Sessions.dave,
+      );
+
+      lobbyService.join(lobby, Sessions.eric);
+      expect(lobby.participants).toContain(Sessions.eric.id);
+
+      lobbyService.leave(lobby, Sessions.eric);
+      expect(lobby.participants).not.toContain(Sessions.eric.id);
+    });
+
+    test("should throw if not in lobby", () => {
+      expect(() =>
+        lobbyService.leave(Lobbies.davesLobby, Sessions.eric),
+      ).toThrow(InvalidCommandError);
+    });
+
+    test("should throw if owner tries to leave", () => {
+      expect(() =>
+        lobbyService.leave(Lobbies.davesLobby, Sessions.dave),
+      ).toThrow(InvalidCommandError);
     });
   });
 

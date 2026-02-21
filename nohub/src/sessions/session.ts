@@ -1,5 +1,13 @@
+import type { Socket } from "bun";
+
+export type SessionSocket = Socket<SessionData>;
+
+export type SessionId = string;
+
 export interface SessionData {
-  id: string;
+  id: SessionId;
   gameId?: string;
   address: string;
+
+  socket?: SessionSocket;
 }
